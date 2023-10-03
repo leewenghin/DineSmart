@@ -7,11 +7,9 @@ export default {
   theme: {
     extend: {
       colors: {
-<<<<<<< HEAD
         primaryColor, orangeColor: "#EDA345",
-        secondaryColor: "#FF5C00"
+        secondaryColor: "#FF5C00",
         lightOrangeColor: "#F2DEC3",
->>>>>>> 67d1ad9f97639c58cb9b81c4a1354c63ececdd34
       },
       Image: {
         "beef-bliss": "url('./src/assets/img/beef-bliss.jpg')"
