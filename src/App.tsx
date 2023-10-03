@@ -1,11 +1,13 @@
-import ListGroup from "./components/ListGroup";
+import { ReactDOM } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/menu";
 
-function App() {
+import "./App.css";
+
+export default function App() {
   return (
-    <>
-      <h1>HelloWorld</h1>
-    </>
+    <BrowserRouter>
+      <Routes>{/* Define routes */}</Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;
