@@ -1,6 +1,6 @@
 import { ReactDOM } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/menu";
+import product_detail from "./pages/product_detail";
 
 import "./App.css";
 
