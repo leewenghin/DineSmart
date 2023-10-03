@@ -6,3 +6,9 @@
   width: 100%;
   background-image: url(".src/assets/img/beef-bliss.jpg");
 }
+
+/* Remove boostrap styling */
+.accordion-button {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}

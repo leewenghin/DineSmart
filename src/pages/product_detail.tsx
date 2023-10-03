@@ -4,8 +4,15 @@ import {
   faUserGroup,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import Accordion from "react-bootstrap/Accordion";
+
 import "./product_detail.css";
+
+const quantity = ["None", "1", "2", "3", "4", "5"];
+
+interface Quantity {
+  quantity: string[];
+}
 
 function product_detail() {
   return (
@@ -19,9 +26,9 @@ function product_detail() {
               Ultimate Beef Bliss Burger
             </div>
 
-            <div className="quantity flex items-center flex-1 justify-end">
+            <div className="quantity flex flex-1 items-center justify-end">
               <FontAwesomeIcon icon={faMinus} />
-              <div className="border-solid flex items-center border-2 rounded-full h-9 text-center mx-3 px-3 m-auto">
+              <div className="border-solid flex justify-center items-center border-2 rounded-full w-2 h-9 mx-3 px-3 m-auto">
                 1
               </div>
 
@@ -29,7 +36,33 @@ function product_detail() {
             </div>
           </div>
 
-          <div>Remove from Ultimate Beef Bliss</div>
+          <div className="bg-primaryColor font-medium py-1 ps-2">
+            Change from Ultimate Beef Bliss
+          </div>
+
+          <Accordion defaultActiveKey="0">
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>Beef Bliss Sauce</Accordion.Header>
+              <Accordion.Body>
+                <div className="grid grid-cols-5 gap-4">
+                  {quantity.map((name, index) => (
+                    <button key={index}>{name}</button>
+                  ))}
+                </div>
+              </Accordion.Body>
+            </Accordion.Item>
+            <Accordion.Item eventKey="1">
+              <Accordion.Header>Lettuce</Accordion.Header>
+              <Accordion.Body>
+                <div className="grid grid-cols-5 gap-4">
+                  <button>None</button>
+                  <button>1</button>
+                  <button>2</button>
+                  <button>3</button>
+                </div>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
         </div>
       </div>
     </>
