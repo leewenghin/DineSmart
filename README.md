@@ -3,11 +3,9 @@
 - run "npm -i"
 - ng serve
 
-## Multi People Git Condition
-# Stash your changes
+# Multi People Git Condition - Stash your changes
 If you're not ready to commit your changes but want to temporarily save them, you can stash your changes. Stashing allows you to save your changes and apply them later. Here's how you can do it:
-
-## Using CMD / Powershell
+**Using CMD / Powershell**
 1. **Stash your changes:**
 - git stash
 
