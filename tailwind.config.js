@@ -6,10 +6,14 @@ export default {
   ],
   theme: {
     extend: {
+      width: {
+        'vw-21': '21vw'
+      },
       colors: {
         primaryColor: "#EDA345",
         secondaryColor: "#FF5C00",
         lightOrangeColor: "#F2DEC3",
+        greyColor: '#C4C4C4'
       },
       Image: {
         "beef-bliss": "url('./src/assets/img/beef-bliss.jpg')"
