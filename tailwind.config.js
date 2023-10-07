@@ -13,6 +13,7 @@ export default {
         primaryColor: "#EDA345",
         secondaryColor: "#FF5C00",
         lightOrangeColor: "#F2DEC3",
+        bgPrimaryColor: "#F2F2F2",
         greyColor: '#C4C4C4'
       },
       Image: {
@@ -33,11 +34,13 @@ export default {
         '4xl': '2.441rem',
         '5xl': '3.052rem',
       },
+
+
       theme: {
         width: {
           '600': '600px'
         }
-      }
+      },
     },
   },
   plugins: [],

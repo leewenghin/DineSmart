@@ -7,21 +7,21 @@ import "./App.css";
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Menu />}></Route>
-        {
+    <Routes>
+      <Route path='/' element={< Menu />}></Route>
+      {
           /* Define routes */ <Route
             path="/menu"
             element={<Menu />} // Components must start with capital letter
           />
         }
-        {
+      {
           /* Define routes */ <Route
             path="/product"
             element={<Product />} // Components must start with capital letter
           />
         }
-      </Routes>
+        </Routes>
     </BrowserRouter>
   );
 }
