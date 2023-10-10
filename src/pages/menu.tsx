@@ -24,7 +24,9 @@ function menu() {
     <>
       <div className="bg-bgPrimaryColor mx-1440">
         <div className="max-w-screen-lg mx-auto">
-          <h1 className="py-2 container md:container mx-auto font-semibold">DineSmart</h1>
+          <h1 className="py-2 container md:container mx-auto font-semibold">
+            DineSmart
+          </h1>
           <div className="flex mx-auto container ">
             <div className="w-2/3">
               <ul className=" bg-white px-2 py-2 ">
@@ -45,34 +47,58 @@ function menu() {
                 </div>
               </ul>
               <div className="p-3 bg-white mt-2">
-                <p >Appetizer</p>
+                <p>Appetizer</p>
               </div>
               <div className=" bg-white mt-2 flex ">
-                <img src="../src/assets/img/potato.png" alt="" className="w-2/6 "/>
+                <img
+                  src="../src/assets/img/potato.png"
+                  alt=""
+                  className="w-2/6 "
+                />
                 <div className="flex flex-column justify-between p-3 w-full truncate ">
-                      <p className="truncate line-clamp-2 whitespace-normal" style={{WebkitLineClamp: 2}}>
-                        Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes  Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed PotatoesMashed Potatoes Mashed Potatoes Mashed Potatoes</p>
-                      <div className="flex justify-end items-center">
-                          <p className="me-2 text-md">RM 5.99</p>
-                          <button className="bg-primaryColor hover:bg-lightOrangeColor text-white hover:text-dark font-bold py-1 px-3 rounded">
-                            Order
-                          </button>
-                      </div>
+                  <p
+                    className="truncate line-clamp-2 whitespace-normal"
+                    style={{ WebkitLineClamp: 2 }}
+                  >
+                    Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed
+                    Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes
+                    Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed
+                    Potatoes Mashed Potatoes Mashed Potatoes Mashed
+                    PotatoesMashed Potatoes Mashed Potatoes Mashed Potatoes
+                  </p>
+                  <div className="flex justify-end items-center">
+                    <p className="me-2 text-md">RM 5.99</p>
+                    <button className="bg-primaryColor hover:bg-lightOrangeColor text-white hover:text-dark font-bold py-1 px-3 rounded">
+                      Order
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className=" bg-white mt-2 flex ">
-                <img src="../src/assets/img/potato.png" alt="" className="w-2/6 "/>
+                <img
+                  src="../src/assets/img/potato.png"
+                  alt=""
+                  className="w-2/6 "
+                />
                 <div className="flex flex-column justify-between p-3 w-full truncate ">
-                      <p className="truncate line-clamp-2 whitespace-normal" style={{WebkitLineClamp: 2}}>
-                        Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes  Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed PotatoesMashed Potatoes Mashed Potatoes Mashed Potatoes</p>
-                      <div className="flex justify-end items-center group ">
-                          <p className="me-2 text-md">RM 5.99</p>
-                          <button className="bg-primaryColor rounded">
-                            <p className="  text-white  font-bold hover:bg-black/[.10] py-1 px-3 rounded">
-                            Order
-                              </p>
-                          </button>
-                      </div>
+                  <p
+                    className="truncate line-clamp-2 whitespace-normal"
+                    style={{ WebkitLineClamp: 2 }}
+                  >
+                    Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed
+                    Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes
+                    Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed
+                    Potatoes Mashed Potatoes Mashed Potatoes Mashed
+                    PotatoesMashed Potatoes Mashed Potatoes Mashed Potatoes
+                  </p>
+                  <div className="flex justify-end items-center group ">
+                    <p className="me-2 text-md">RM 5.99</p>
+                    <button className="bg-primaryColor rounded">
+                      <p className="  text-white  font-bold hover:bg-black/[.10] py-1 px-3 rounded">
+                        Order
+                      </p>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -110,7 +136,6 @@ function menu() {
                   <div className="flex justify-between">
                     <p className="font-medium">Subtotal</p>
                     <p className="font-medium">RM 20.99</p>
-                    
                   </div>
                 </div>
               </div>

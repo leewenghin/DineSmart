@@ -13,8 +13,11 @@ export default {
         primaryColor: "#EDA345",
         secondaryColor: "#FF5C00",
         lightOrangeColor: "#F2DEC3",
-        bgPrimaryColor: "#F2F2F2",
-        greyColor: '#C4C4C4'
+        darkGreyColor: '#C4C4C4',
+        lightGreyColor: '#F2F2F2'
+      },
+      spacing: {
+        '142': '42rem'
       },
       Image: {
         "beef-bliss": "url('./src/assets/img/beef-bliss.jpg')"
