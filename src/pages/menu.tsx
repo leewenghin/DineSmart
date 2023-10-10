@@ -1,10 +1,14 @@
 import {
+  faAnglesRight,
+  faCartShopping,
   faMinus,
   faPlus,
   faUserGroup,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
+import Order_modal from "../components/order_modal";
 
 const categories = [
   "Appetizers",
@@ -13,6 +17,25 @@ const categories = [
   "Sandwiches",
   "Dessets",
 ];
+
+const dataArray: any[] = [
+  {
+    imageSrc: "../src/assets/img/potato.png",
+    foodTitle:
+      "Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes",
+    price: "5.99",
+  },
+  {
+    imageSrc: "../src/assets/img/potato.png",
+    foodTitle: "Mashed Potatoes",
+    price: "10.99",
+  },
+  {
+    imageSrc: "../src/assets/img/potato.png",
+    foodTitle: " Potatoes",
+    price: "11.99",
+  },
+];
 function menu() {
   const [activeCategory, setActiveCategory] = useState<number>(0);
 
@@ -20,19 +43,25 @@ function menu() {
     setActiveCategory(index);
   };
 
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <>
-      <div className="bg-bgPrimaryColor mx-1440">
-        <div className="max-w-screen-lg mx-auto">
-          <h1 className="py-2 container md:container mx-auto font-semibold">DineSmart</h1>
-          <div className="flex mx-auto container ">
-            <div className="w-2/3">
-              <ul className=" bg-white px-2 py-2 ">
-                <div className="flex justify-between overflow-x-auto overflow-hidden">
+      <div className=" mx-1440">
+        <div className="max-w-screen-lg mx-auto mb-16">
+          <h1 className="py-2 container mx-auto font-semibold">DineSmart</h1>
+          <div className="flex mx-auto md:container">
+            <div className=" md:w-2/3 w-full">
+              <ul className=" bg-white px-2 py-2">
+                <div className="flex justify-between overflow-x-auto overflow-hidden ">
                   {categories.map((category, index) => (
                     <li
                       key={index}
-                      className={`cursor-pointer w-28 h-10 px-2 mx-1 flex font-semibold justify-center items-center text-center whitespace-normal min-w-fit ${
+                      className={`cursor-pointer w-28 h-10 px-2 mx-1 flex font-semibold justify-center items-center text-center sm:text-lg text-sm whitespace-normal min-w-fit ${
                         activeCategory === index
                           ? "bg-primaryColor"
                           : "bg-lightOrangeColor"
@@ -45,39 +74,64 @@ function menu() {
                 </div>
               </ul>
               <div className="p-3 bg-white mt-2">
-                <p >Appetizer</p>
+                <p>Appetizer</p>
               </div>
-              <div className=" bg-white mt-2 flex ">
-                <img src="../src/assets/img/potato.png" alt="" className="w-2/6 "/>
-                <div className="flex flex-column justify-between p-3 w-full truncate ">
-                      <p className="truncate line-clamp-2 whitespace-normal" style={{WebkitLineClamp: 2}}>
-                        Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes  Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed PotatoesMashed Potatoes Mashed Potatoes Mashed Potatoes</p>
-                      <div className="flex justify-end items-center">
-                          <p className="me-2 text-md">RM 5.99</p>
-                          <button className="bg-primaryColor hover:bg-lightOrangeColor text-white hover:text-dark font-bold py-1 px-3 rounded">
-                            Order
-                          </button>
-                      </div>
-                </div>
+              <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 m-2">
+                {dataArray.map((item, index) => (
+                  <div key={index} className="bg-white p-2 rounded shadow-md ">
+                    <img
+                      src={item.imageSrc}
+                      alt=""
+                      className="w-full  object-cover mb-2"
+                    />
+                    <p className="truncate line-clamp-2 mb-2 h-[2.5rem] whitespace-normal sm:text-md text-sm">
+                      {item.foodTitle}
+                    </p>{" "}
+                    <div className="flex justify-between items-center ">
+                      <p className="sm:text-md text-sm font-bold">
+                        RM {item.price}
+                      </p>
+                      <button className="bg-primaryColor rounded ">
+                        <p className="text-white sm:text-md text-sm font-bold hover:bg-black/[.10] py-1 px-2 rounded">
+                          Order
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
+
               <div className=" bg-white mt-2 flex ">
-                <img src="../src/assets/img/potato.png" alt="" className="w-2/6 "/>
+                <img
+                  src="../src/assets/img/potato.png"
+                  alt=""
+                  className="w-2/6 "
+                />
                 <div className="flex flex-column justify-between p-3 w-full truncate ">
-                      <p className="truncate line-clamp-2 whitespace-normal" style={{WebkitLineClamp: 2}}>
-                        Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes  Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed PotatoesMashed Potatoes Mashed Potatoes Mashed Potatoes</p>
-                      <div className="flex justify-end items-center group ">
-                          <p className="me-2 text-md">RM 5.99</p>
-                          <button className="bg-primaryColor rounded">
-                            <p className="  text-white  font-bold hover:bg-black/[.10] py-1 px-3 rounded">
-                            Order
-                              </p>
-                          </button>
-                      </div>
+                  <p
+                    className="truncate line-clamp-2 whitespace-normal"
+                    style={{ WebkitLineClamp: 2 }}
+                  >
+                    Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed
+                    Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes
+                    Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed
+                    Potatoes Mashed Potatoes Mashed Potatoes Mashed
+                    PotatoesMashed Potatoes Mashed Potatoes Mashed Potatoes
+                  </p>
+                  <div className="flex justify-end items-center group ">
+                    <p className="me-2 text-md">RM 5.99</p>
+                    <button className="bg-primaryColor rounded">
+                      <p className="  text-white  font-bold hover:bg-black/[.10] py-1 px-3 rounded">
+                        Order
+                      </p>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className=" ms-0 md:!ms-5 bg-white w-1/3">
-              <div className="flex flex-column p-3">
+            {/* Show Customer Order Cart When table screen size*/}
+            <div className=" ms-1 md:!ms-5 w-1/3 hidden md:block">
+              <div className="flex flex-column p-3 bg-white">
                 <p className="font-medium text-lg ">Table 1</p>
                 <div className="my-1 border-b-2 pb-2">
                   <FontAwesomeIcon
@@ -110,14 +164,102 @@ function menu() {
                   <div className="flex justify-between">
                     <p className="font-medium">Subtotal</p>
                     <p className="font-medium">RM 20.99</p>
-                    
                   </div>
+                </div>
+                <div className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2">
+                  <p className="text-white font-medium text-lg">Check Out</p>
+                  <FontAwesomeIcon
+                    icon={faAnglesRight}
+                    size="lg"
+                    className=" text-white"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
+        {/* Show Customer Order Cart When table screen size*/}
+        <div className="fixed bottom-0 w-full flex md:hidden block ">
+          <button
+            className="bg-lightOrangeColor sm:px-4 sm:py-3 px-2 py-1 basis-1/2 sm:basis-2/3 flex items-center justify-start"
+            onClick={toggleModal}
+          >
+            <FontAwesomeIcon icon={faCartShopping} className="sm:fa-2x pe-2" />
+            <p className="xs:text-lg text-sm font-medium ">RM 20.99</p>
+          </button>
+
+          <div className="bg-primaryColor basis-1/2 sm:basis-1/3 px-4 py-3 flex items-center justify-between">
+            <p className="text-white md:text-lg text-sm">Create Order</p>
+            <FontAwesomeIcon
+              icon={faAnglesRight}
+              className="sm:fa-2x text-white"
+            />
+            <Order_modal isOpen={isOpen} onClose={toggleModal}>
+              <div className=" bg-white rounded">
+                <div className="flex flex-column">
+                  <div className="my-1 border-b-2 px-4 py-2 flex items-center justify-between ">
+                    <div className=" flex items-center">
+                      <p className="font-medium text-lg ">Table 1</p>
+                      <FontAwesomeIcon
+                        icon={faUserGroup}
+                        style={{ color: "#eda345" }}
+                        className="mx-2"
+                      />
+                      3 pax
+                    </div>
+                    <div
+                      className="flex cursor-pointer  "
+                      onClick={toggleModal}
+                    >
+                      <FontAwesomeIcon icon={faXmark} className=" " />
+                    </div>
+                  </div>
+                  <div
+                    className="border-b-2 scroll-container px-4 py-2"
+                    style={{ maxHeight: "300px", overflowY: "auto" }}
+                  >
+                    <div className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <p>Ultimate Beef Biss Burger </p>
+                        <p className="whitespace-nowrap">RM 123,234</p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p>{}</p>
+                        <div className="quantity flex flex-1 items-center justify-end">
+                          <FontAwesomeIcon icon={faMinus} />
+                          <div className="border-solid flex justify-center items-center border-2 rounded-full w-2 h-9 mx-3 px-3 m-auto">
+                            1
+                          </div>
+                          <FontAwesomeIcon
+                            icon={faPlus}
+                            style={{ color: "#eda345" }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="px-4 py-2">
+                    <div className="flex justify-between">
+                      <p className="font-medium">Subtotal</p>
+                      <p className="font-medium">RM 20.99</p>
+                    </div>
+                  </div>
+                  <div className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2 mx-4 mb-4">
+                    <p className="text-white font-medium text-lg">Check Out</p>
+                    <FontAwesomeIcon
+                      icon={faAnglesRight}
+                      size="lg"
+                      className=" text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Order_modal>
+          </div>
+        </div>
       </div>
+
       {/* <div className="flex container px-3 py-4 border-b-2 items-center justify-center relative">
         <div className="flex-none absolute left-5">
           <div className="flex items-center ">
