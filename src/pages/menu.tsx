@@ -32,6 +32,7 @@ const dataArray: any[] = [
   },
 
 ];
+
 function menu() {
   const [activeCategory, setActiveCategory] = useState<number>(0);
 
@@ -53,7 +54,7 @@ function menu() {
           <div className="flex mx-auto md:container">
             <div className=" md:w-2/3 w-full">
               <ul className=" bg-white px-2 py-2">
-                <div className="flex justify-between overflow-x-auto overflow-hidden ">
+                <div className="flex justify-between overflow-x-auto  ">
                   {categories.map((category, index) => (
                     <li
                       key={index}
@@ -99,33 +100,7 @@ function menu() {
                 ))}
               </div>
 
-              {/* <div className=" bg-white mt-2 flex ">
-                <img
-                  src="../src/assets/img/potato.png"
-                  alt=""
-                  className="w-2/6 "
-                />
-                <div className="flex flex-column justify-between p-3 w-full truncate ">
-                  <p
-                    className="truncate line-clamp-2 whitespace-normal"
-                    style={{ WebkitLineClamp: 2 }}
-                  >
-                    Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed
-                    Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes
-                    Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed
-                    Potatoes Mashed Potatoes Mashed Potatoes Mashed
-                    PotatoesMashed Potatoes Mashed Potatoes Mashed Potatoes
-                  </p>
-                  <div className="flex justify-end items-center group ">
-                    <p className="me-2 text-base">RM 5.99</p>
-                    <button className="bg-primaryColor rounded">
-                      <p className="  text-white  font-bold hover:bg-black/[.10] py-1 px-3 rounded">
-                        Order
-                      </p>
-                    </button>
-                  </div>
-                </div>
-              </div> */}
+
             </div>
             {/* Show Customer Order Cart When table screen size*/}
             <div className=" ms-1 md:!ms-5 w-1/3 hidden md:block">
