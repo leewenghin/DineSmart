@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       width: {
-        'vw-21': '21vw'
+        'vw-21': '21vw',
+        'vw-16': '16vw'
       },
       colors: {
         primaryColor: "#EDA345",
@@ -38,7 +39,7 @@ export default {
         '5xl': '3.052rem',
       },
 
-      screens:{
+      screens: {
         xs: "576px",
       },
       theme: {

@@ -1,4 +1,5 @@
 import {
+  faAnglesRight,
   faCreditCard,
   faMinus,
   faPlus,
@@ -34,9 +35,9 @@ function product_detail() {
   return (
     <>
       <div className="full-content flex flex-col">
-        <div className="bg-white flex items-center justify-between py-3 shadow-md pe-4">
-          <div></div>
-          <div className="flex items-center justify-center py-2 pe-5">
+        <div className="bg-white flex items-center justify-between py-3 shadow-md px-4">
+          <div className="hidden md:block"></div>
+          <div className="flex items-center justify-center py-2 lg:pe-5">
             {/* Order Section */}
             <span
               className={`${numClass(
@@ -53,39 +54,43 @@ function product_detail() {
             <div
               className={`${lineClass(
                 paymentStep
-              )} horizontal-line flex w-vw-21 bg-primaryColor mx-4`}
+              )} horizontal-line hidden md:flex md:w-vw-16 lg:w-vw-21 mx-4`}
             ></div>
 
             {/* Payment Section */}
             <span
               className={`${numClass(
                 paymentStep
-              )} step_num border-2 rounded-full flex w-7 h-7 justify-center`}
+              )} step_num border-2 mx-4 rounded-full flex w-7 h-7 justify-center`}
             >
               2
             </span>
             <p
               className={`${textClass(
                 paymentStep
-              )} ps-3 text-xl text-greyColor`}
+              )} ps-3 text-xl text-greyColor hidden md:block`}
             >
               Payment
             </p>
             <div
               className={`${lineClass(
                 doneStep
-              )} horizontal-line flex w-vw-21 bg-primaryColor mx-4`}
+              )} horizontal-line hidden md:flex md:w-vw-16 lg:w-vw-21 mx-4`}
             ></div>
 
             {/* Done Section */}
             <span
               className={`${numClass(
                 doneStep
-              )} border-2 rounded-full flex w-7 h-7 justify-center`}
+              )} border-2 mx-1 rounded-full flex w-7 h-7 justify-center`}
             >
               3
             </span>
-            <p className={`${textClass(doneStep)} ps-3 text-xl text-greyColor`}>
+            <p
+              className={`${textClass(
+                doneStep
+              )} ps-3 text-xl text-greyColor hidden md:block`}
+            >
               Done
             </p>
           </div>
@@ -94,11 +99,10 @@ function product_detail() {
             <FontAwesomeIcon icon={faX} style={{ color: "#505153" }} />{" "}
           </a>
         </div>
-
         {/* Payment Section */}
-        <div className="container-xl">
-          <div className="flex justify-between py-4">
-            <div className="bg-white col-span-8 px-9 py-3 w-142">
+        <div className="container-fluid md:container my-1 flex lg:block justify-center items">
+          <div className="lg:flex justify-between w-full md:w-auto py-4 xl:mx-12 2xl:mx-44">
+            <div className="bg-white col-span-8 px-3 md:px-9 py-3 md:w-142">
               <div>
                 <p className="title-label mb-2 font-medium">Payment</p>
                 {/* Payment Method */}
@@ -114,7 +118,7 @@ function product_detail() {
                       />
                       <label htmlFor="bank-card">
                         <div className="flex items-center justify-between font-medium">
-                          Debit / Credit Card
+                          <p>Debit / Credit Card</p>
                           <img
                             className="w-7 h-7 ml-2"
                             src="./src/assets/img/card-payment.png"
@@ -152,7 +156,7 @@ function product_detail() {
                   </div>
                 </section>
               </div>
-              <div className="flex justify-between py-5">
+              <div className="md:flex justify-between py-5">
                 <div>
                   <p className="title-label font-medium">Order Type</p>
                   <div className="radio-item pt-2">
@@ -177,8 +181,8 @@ function product_detail() {
                 </div>
               </div>
             </div>
-            <div className=" ms-0 md:!ms-5 bg-white w-1/3 me-28">
-              <div className="flex flex-column p-3">
+            <div className="lg:!ms-5 w-full md:w-142 lg:w-1/3 mt-4 lg:!mt-0 md:block">
+              <div className="flex flex-column pt-3 pb-5 px-3 md:px-9 md:py-3 lg:p-3 bg-white">
                 <p className="font-medium text-lg ">Table 1</p>
                 <div className="my-1 border-b-2 pb-2">
                   <FontAwesomeIcon
@@ -213,8 +217,26 @@ function product_detail() {
                     <p className="font-medium">RM 20.99</p>
                   </div>
                 </div>
+                <div className="bg-primaryColor md:flex hidden items-center justify-between mt-12 px-2 py-2">
+                  <p className="text-white font-medium text-lg">Create order</p>
+                  <FontAwesomeIcon
+                    icon={faAnglesRight}
+                    size="lg"
+                    className=" text-white"
+                  />
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+        <div className="bg-white fixed md:hidden bottom-0 w-full p-3">
+          <div className="bg-primaryColor flex items-center justify-between w-full px-3 py-2 mt-2">
+            <p className="text-white font-medium text-lg">Create order</p>
+            <FontAwesomeIcon
+              icon={faAnglesRight}
+              size="lg"
+              className=" text-white"
+            />
           </div>
         </div>
       </div>
