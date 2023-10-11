@@ -120,7 +120,7 @@ function menu() {
             </div>
           </div>
         </div>
-        <div className="md:px-20 px-3 py-4 bg-white max-w-screen-lg mx-auto w-full">
+        <div className="lg:!px-20 px-3 py-4 bg-white max-w-screen-lg mx-auto w-full">
             <div className=" flex items-center ">
               <p className="font-medium text-lg ">Table 1</p>
               <FontAwesomeIcon
@@ -131,7 +131,7 @@ function menu() {
               3 pax
             </div>
             <div className=" md:flex block justify-between gap-4">
-              <div>
+              <div className="md:w-1/2">
                 <table className="w-full">
                   <tbody>
                     <tr className="">
@@ -164,8 +164,8 @@ function menu() {
                   <p>RM 25.21</p>
                 </div>
               </div>
-              <div>
-                <div className="grid grid-cols-2 gap-4 py-3">
+              <div className="md:w-1/2">
+                <div className="grid grid-cols-2 gap-4 py-3 ">
                   <div>
                     <p>Order ID</p>
                     <p>Order Type</p>
