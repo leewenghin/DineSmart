@@ -14,7 +14,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="modal-overlay absolute inset-0 bg-black opacity-50"></div>
-      <div className="modal-container bg-white w-96 mx-auto rounded shadow-lg z-50">
+      <div className="modal-container bg-white w-96 mx-auto  rounded shadow-lg z-50">
         {children}
       </div>
     </div>
