@@ -4,8 +4,12 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  
   theme: {
     extend: {
+      screens: {
+        'xs':'450px',
+      },
       width: {
         'vw-21': '21vw'
       },
@@ -38,9 +42,7 @@ export default {
         '5xl': '3.052rem',
       },
 
-      screens:{
-        xs: "576px",
-      },
+
       theme: {
         width: {
           '600': '600px'

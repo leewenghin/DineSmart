@@ -26,15 +26,11 @@ const dataArray: any[] = [
     price: "5.99",
   },
   {
-    imageSrc: "../src/assets/img/potato.png",
-    foodTitle: "Mashed Potatoes",
-    price: "10.99",
+    imageSrc: "../src/assets/img/beef-bliss.jpg",
+    foodTitle: "Ultimate Beef Bliss Burger",
+    price: "17.99",
   },
-  {
-    imageSrc: "../src/assets/img/potato.png",
-    foodTitle: " Potatoes",
-    price: "11.99",
-  },
+
 ];
 function menu() {
   const [activeCategory, setActiveCategory] = useState<number>(0);
@@ -61,7 +57,7 @@ function menu() {
                   {categories.map((category, index) => (
                     <li
                       key={index}
-                      className={`cursor-pointer w-28 h-10 px-2 mx-1 flex font-semibold justify-center items-center text-center sm:text-lg text-sm whitespace-normal min-w-fit ${
+                      className={`cursor-pointer w-28 h-10 px-2 mx-1 flex font-semibold justify-center items-center text-center sm:text-base text-sm whitespace-normal min-w-fit ${
                         activeCategory === index
                           ? "bg-primaryColor"
                           : "bg-lightOrangeColor"
@@ -73,35 +69,37 @@ function menu() {
                   ))}
                 </div>
               </ul>
-              <div className="p-3 bg-white mt-2">
+              <div className="p-3 bg-white mt-2 sm:flex block">
                 <p>Appetizer</p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 m-2">
+              <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:!mx-0 m-2">
                 {dataArray.map((item, index) => (
-                  <div key={index} className="bg-white p-2 rounded shadow-md ">
+                  <div key={index} className="bg-white sm:!p-0 p-2 sm:!rounded-none rounded shadow-md sm:flex block">
                     <img
                       src={item.imageSrc}
                       alt=""
-                      className="w-full  object-cover mb-2"
+                      className="  sm:w-1/3 object-cover sm:!mb-0 mb-2  sm:w-44 sm:!h-auto w-full xs:h-40 h-28"
                     />
-                    <p className="truncate line-clamp-2 mb-2 h-[2.5rem] whitespace-normal sm:text-md text-sm">
+                    <div className="sm:flex flex-column sm:block justify-between sm:!p-4 p-1 w-full truncate ">
+                    <p className="truncate line-clamp-2 mb-2 sm:h-auto h-[2.5rem] whitespace-normal sm:!text-base text-sm">
                       {item.foodTitle}
                     </p>{" "}
-                    <div className="flex justify-between items-center ">
-                      <p className="sm:text-md text-sm font-bold">
+                    <div className="flex sm:justify-end justify-between items-center ">
+                      <p className=" sm:!text-base text-sm font-bold sm:!pe-2 pe-0">
                         RM {item.price}
                       </p>
                       <button className="bg-primaryColor rounded ">
-                        <p className="text-white sm:text-md text-sm font-bold hover:bg-black/[.10] py-1 px-2 rounded">
+                        <p className="text-white sm:!text-base text-sm font-bold hover:bg-black/[.10] py-1 sm:!px-4 px-2 rounded">
                           Order
                         </p>
                       </button>
+                    </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className=" bg-white mt-2 flex ">
+              {/* <div className=" bg-white mt-2 flex ">
                 <img
                   src="../src/assets/img/potato.png"
                   alt=""
@@ -119,7 +117,7 @@ function menu() {
                     PotatoesMashed Potatoes Mashed Potatoes Mashed Potatoes
                   </p>
                   <div className="flex justify-end items-center group ">
-                    <p className="me-2 text-md">RM 5.99</p>
+                    <p className="me-2 text-base">RM 5.99</p>
                     <button className="bg-primaryColor rounded">
                       <p className="  text-white  font-bold hover:bg-black/[.10] py-1 px-3 rounded">
                         Order
@@ -127,7 +125,7 @@ function menu() {
                     </button>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
             {/* Show Customer Order Cart When table screen size*/}
             <div className=" ms-1 md:!ms-5 w-1/3 hidden md:block">
@@ -185,7 +183,7 @@ function menu() {
             onClick={toggleModal}
           >
             <FontAwesomeIcon icon={faCartShopping} className="sm:fa-2x pe-2" />
-            <p className="xs:text-lg text-sm font-medium ">RM 20.99</p>
+            <p className="md:text-lg text-sm font-medium ">RM 20.99</p>
           </button>
 
           <div className="bg-primaryColor basis-1/2 sm:basis-1/3 px-4 py-3 flex items-center justify-between">
