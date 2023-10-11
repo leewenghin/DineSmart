@@ -101,8 +101,8 @@ function product_detail() {
         </div>
         {/* Payment Section */}
         <div className="container-fluid md:container my-1 flex lg:block justify-center items">
-          <div className="lg:flex justify-between w-full md:w-auto py-4 xl:mx-12 2xl:mx-44">
-            <div className="bg-white col-span-8 px-3 md:px-9 py-3 md:w-142">
+          <div className="lg:flex justify-between w-full md:w-auto pt-4 pb-28 xl:mx-12 2xl:mx-44">
+            <div className="bg-white col-span-8 px-3 md:!px-8 py-3 md:w-142">
               <div>
                 <p className="title-label mb-2 font-medium">Payment</p>
                 {/* Payment Method */}
@@ -156,25 +156,30 @@ function product_detail() {
                   </div>
                 </section>
               </div>
-              <div className="md:flex justify-between py-5">
-                <div>
+              <div className="md:flex justify-between md:py-5">
+                <div className="py-3 md:!py-0">
                   <p className="title-label font-medium">Order Type</p>
                   <div className="radio-item pt-2">
-                    <input type="radio" name="radio" id="table-order" />
+                    <input
+                      type="radio"
+                      name="table-order"
+                      id="table-order"
+                      defaultChecked
+                    />
                     <label htmlFor="table-order">
                       <div className="flex items-center justify-between font-medium">
-                        Table Order
+                        Table order
                       </div>
                     </label>
                   </div>
                 </div>
-                <div>
+                <div className="pb-3 lg:pb-0">
                   <p className="title-label font-medium">When</p>
                   <div className="radio-item pt-2">
-                    <input type="radio" name="radio" id="soon" />
+                    <input type="radio" name="time" id="soon" defaultChecked />
                     <label htmlFor="soon">
                       <div className="flex items-center justify-between font-medium">
-                        As Soon As Possible
+                        As soon as possible
                       </div>
                     </label>
                   </div>
@@ -182,7 +187,7 @@ function product_detail() {
               </div>
             </div>
             <div className="lg:!ms-5 w-full md:w-142 lg:w-1/3 mt-4 lg:!mt-0 md:block">
-              <div className="flex flex-column pt-3 pb-5 px-3 md:px-9 md:py-3 lg:p-3 bg-white">
+              <div className="flex flex-column pt-3 pb-5 px-3 md:!px-8 md:py-3 lg:p-3 bg-white">
                 <p className="font-medium text-lg ">Table 1</p>
                 <div className="my-1 border-b-2 pb-2">
                   <FontAwesomeIcon

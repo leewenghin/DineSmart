@@ -46,7 +46,7 @@ ul {
 
 .radio-item label {
   display: block;
-  padding: 15px 20px 15px 60px;
+  padding: 19px 20px 19px 60px;
   /* background: #1d1d42; */
   border: 2px solid #c4c4c4;
   border-radius: 6px;
@@ -104,7 +104,7 @@ ul {
   font-size: 18px;
 }
 
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 365px) {
   .radio-item label {
     min-width: 256px;
   }
