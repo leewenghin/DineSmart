@@ -2,12 +2,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Product from "./pages/product_detail";
 import Menu from "./pages/menu";
 import "./App.css";
+import Payment_detail from "./pages/payment_detail";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Menu />}></Route>
+        <Route path="/paymentdetail" element={<Payment_detail />}></Route>
         {
           /* Define routes */ <Route
             path="/menu"
