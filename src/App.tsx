@@ -3,6 +3,7 @@ import Product from "./pages/product_detail";
 import Menu from "./pages/menu";
 import "./App.css";
 import Payment_detail from "./pages/payment_detail";
+import Card_payment from "./pages/card_payment";
 
 function App() {
   return (
@@ -20,6 +21,12 @@ function App() {
           /* Define routes */ <Route
             path="/product"
             element={<Product />} // Components must start with capital letter
+          />
+        }
+        {
+          /* Define routes */ <Route
+            path="/card_payment"
+            element={<Card_payment />} // Components must start with capital letter
           />
         }
       </Routes>
