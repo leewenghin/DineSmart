@@ -30,7 +30,6 @@ const dataArray: any[] = [
     foodTitle: "Ultimate Beef Bliss Burger",
     price: "17.99",
   },
-
 ];
 
 function menu() {
@@ -73,35 +72,38 @@ function menu() {
               <div className="p-3 bg-white mt-2 sm:flex block">
                 <p>Appetizer</p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:!mx-0 m-2">
+              <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2">
                 {dataArray.map((item, index) => (
-                  <div key={index} className="bg-white sm:!p-0 p-2 sm:!rounded-none rounded shadow-md sm:flex block">
+                  <div
+                    key={index}
+                    className="bg-white sm:!p-2 p-0 sm:!rounded rounded-none  shadow-md flex sm:block"
+                  >
                     <img
                       src={item.imageSrc}
                       alt=""
-                      className="  sm:w-1/3 object-cover sm:!mb-0 mb-2  sm:w-44 sm:!h-auto w-full xs:h-40 h-28"
+                      className="  sm:w-full w-1/3 object-cover sm:!mb-2 mb-0 w-44 sm:!h-40 w-full xs:h-28 h-auto"
                     />
-                    <div className="sm:flex flex-column sm:block justify-between sm:!p-4 p-1 w-full truncate ">
-                    <p className="truncate line-clamp-2 mb-2 sm:h-auto h-[2.5rem] whitespace-normal sm:!text-base text-sm">
-                      {item.foodTitle}
-                    </p>{" "}
-                    <div className="flex sm:justify-end justify-between items-center ">
-                      <p className=" sm:!text-base text-sm font-bold sm:!pe-2 pe-0">
-                        RM {item.price}
-                      </p>
-                      <button className="bg-primaryColor rounded ">
-                        <p className="text-white sm:!text-base text-sm font-bold hover:bg-black/[.10] py-1 sm:!px-4 px-2 rounded">
-                          Order
+                    <div className="sm:!p-1 p-4 w-full truncate ">
+                      <p className="truncate line-clamp-2 mb-2 h-[2.8rem] whitespace-normal sm:!text-base text-sm">
+                        {item.foodTitle}
+                      </p>{" "}
+                      <div className="flex justify-end sm:justify-between items-center ">
+                        <p className=" sm:!text-base text-sm font-bold sm:!pe-0 pe-2">
+                          RM {item.price}
                         </p>
-                      </button>
-                    </div>
+                        <button className="bg-primaryColor rounded ">
+                          <p className="text-white sm:!text-base text-sm font-bold hover:bg-black/[.10] py-1 sm:!px-2 px-4 rounded">
+                            Order
+                          </p>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-
-
             </div>
+
+
             {/* Show Customer Order Cart When table screen size*/}
             <div className=" ms-1 md:!ms-5 w-1/3 hidden md:block">
               <div className="flex flex-column p-3 bg-white">
