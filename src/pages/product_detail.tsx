@@ -49,9 +49,9 @@ function product_detail() {
         <div className="container-fluid md:container my-1 flex lg:block justify-center items">
           <div className="lg:flex justify-between w-full md:w-auto pt-4 pb-28 xl:mx-12 2xl:mx-44">
             <div className="progress-title"></div>
-            <div className="bg-white col-span-8 px-2 sm:!px-3 md:!px-8 py-3 md:w-142">
+            <div className="bg-white col-span-8 px-2 sm:!px-3 md:!px-8 py-3 md:w-142 overflow-hidden shadow-sm">
               <div>
-                <p className="title-label mb-2">Payment Method</p>
+                <p className="text-lg font-medium my-2">Payment Method</p>
                 {/* Payment Method */}
                 <section className="radio-section">
                   <div className="radio-list w-full">
@@ -105,7 +105,7 @@ function product_detail() {
               </div>
               <div className="md:flex justify-between md:py-5">
                 <div className="py-3 md:!py-0">
-                  <p className="title-label">Order Type</p>
+                  <p className="text-lg font-medium">Order Type</p>
                   <div className="radio-item pt-2">
                     <input
                       type="radio"
@@ -121,7 +121,7 @@ function product_detail() {
                   </div>
                 </div>
                 <div className="pb-3 lg:pb-0">
-                  <p className="title-label">Order Time</p>
+                  <p className="text-lg font-medium">Order Time</p>
                   <div className="radio-item pt-2">
                     <input type="radio" name="time" id="soon" defaultChecked />
                     <label htmlFor="soon">
@@ -134,8 +134,8 @@ function product_detail() {
               </div>
             </div>
             <div className="lg:!ms-5 w-full md:w-142 lg:w-1/3 mt-4 lg:!mt-0 md:block">
-              <div className="flex flex-column pt-3 pb-5 px-3 md:!px-8 md:py-3 lg:p-3 bg-white">
-                <p className="text-lg ">Table 1</p>
+              <div className="flex flex-column pt-3 pb-5 px-3 md:!px-8 md:py-3 lg:p-3 bg-white overflow-hidden shadow-sm">
+                <p className="text-lg font-medium">Table 1</p>
                 <div className="my-1 border-b-2 pb-2">
                   <FontAwesomeIcon
                     icon={faUserGroup}

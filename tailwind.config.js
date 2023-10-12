@@ -4,9 +4,8 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-
   plugins: [
-    require('@tailwindcss/forms')
+    require('@tailwindcss/forms'),
   ],
 
   theme: {
@@ -22,6 +21,7 @@ export default {
         primaryColor: "#EDA345",
         secondaryColor: "#FF5C00",
         lightOrangeColor: "#F2DEC3",
+        darkOrangeColor: "#b87e35",
         darkGreyColor: '#C4C4C4',
         lightGreyColor: '#F2F2F2'
       },

@@ -4,6 +4,7 @@ import Menu from "./pages/menu";
 import "./App.css";
 import Payment_detail from "./pages/payment_detail";
 import Card_payment from "./pages/card_payment";
+import Cash_payment from "./pages/cash_payment";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Menu />}></Route>
         <Route path="/paymentdetail" element={<Payment_detail />}></Route>
+        <Route path="/cashpayment" element={<Cash_payment />}></Route>
         {
           /* Define routes */ <Route
             path="/menu"

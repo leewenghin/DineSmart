@@ -1,21 +1,9 @@
-import {
-  faAngleRight,
-  faUserGroup,
-  faX,
-} from "@fortawesome/free-solid-svg-icons";
-
+import { faUserGroup, faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import "../assets/css/card_payment.css";
+import { items } from "./card_payment";
 
-const items = [
-  { label: "Subtotal", amount: "RM 20.99" },
-  { label: "Service Charge 10%", amount: "RM 0.01" },
-  { label: "Processing Fee 3%", amount: "RM 0.63" },
-  { label: "Rounding Adj", amount: "RM 0.01" },
-];
-
-function card_payment() {
+export function card_payment() {
   return (
     <>
       <div className="full-content">
@@ -46,7 +34,7 @@ function card_payment() {
         <div className="container-fluid md:container my-1 flex lg:block justify-center items">
           <div className="lg:flex justify-between w-full md:w-auto pt-4 pb-28 xl:mx-12 2xl:mx-44">
             <div className="progress-title"></div>
-            <div className="bg-white col-span-8 px-2 sm:!px-3 md:!px-8 py-3 md:w-142 rounded overflow-hidden shadow-sm">
+            <div className="bg-white col-span-8 px-2 sm:!px-3 md:!px-8 py-3 md:w-142">
               <form>
                 <p className="py-2 font-medium text-lg">Payment Information</p>
                 <div className="mb-3">
@@ -106,7 +94,7 @@ function card_payment() {
                       type="email"
                       className="form-control text-sm"
                       id="exampleFormControlInput1"
-                      placeholder="Lee Mui Ju"
+                      placeholder="name@example.com"
                     />
                   </div>
                   <div className="w-full sm:w-1/3">
@@ -128,27 +116,15 @@ function card_payment() {
                   </div>
                 </div>
               </form>
-              <div className="flex justify-end lg:pt-20 xl:pt-5">
-                <button
-                  type="submit"
-                  className="flex items-center bg-primaryColor hover:bg-darkOrangeColor px-3 py-2.5 text-sm leading-5 rounded-md font-semibold text-white"
-                >
-                  <p>Pay</p>
-                  <div className="ps-2">
-                    <img
-                      className="w-4 h-4"
-                      src="./src/assets/img/pay.png"
-                      alt=""
-                    />
-                  </div>
-                  <div className="ps-4">
-                    <FontAwesomeIcon icon={faAngleRight} />
-                  </div>
+
+              <div class="mt-6 flex items-center justify-end gap-x-6">
+                <button className="bg-sky-500 hover:bg-sky-700 px-5 py-2.5 text-sm leading-5 rounded-md font-semibold text-white">
+                  Save changes
                 </button>
               </div>
             </div>
             <div className="lg:!ms-5 w-full md:w-142 lg:w-1/3 mt-4 lg:!mt-0 md:block">
-              <div className="bg-white px-2 sm:!px-3 md:!px-8 py-3 overflow-hidden shadow-sm">
+              <div className="bg-white px-2 sm:!px-3 md:!px-8 py-3">
                 <div className=" flex items-center ">
                   <p className="font-medium text-lg ">Table 1</p>
                   <FontAwesomeIcon
@@ -199,5 +175,3 @@ function card_payment() {
     </>
   );
 }
-
-export default card_payment;
