@@ -9,6 +9,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import Order_modal from "../components/order_modal";
+import "./menu.css";
 
 const categories = [
   "Appetizers",
@@ -22,7 +23,7 @@ const dataArray: any[] = [
   {
     imageSrc: "../src/assets/img/potato.png",
     foodTitle:
-      "Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes",
+      "Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes  Mashed Potatoes Mashed Potatoes Mashed Potatoes",
     price: "5.99",
   },
   {
@@ -30,9 +31,15 @@ const dataArray: any[] = [
     foodTitle: "Ultimate Beef Bliss Burger",
     price: "17.99",
   },
+  {
+    imageSrc: "../src/assets/img/beef-bliss.jpg",
+    foodTitle: "Ultimate Beef Bliss Burger",
+    price: "17.99",
+  },  
 ];
 
 function menu() {
+  const isSmallScreen = window.innerWidth < 640;
   const [activeCategory, setActiveCategory] = useState<number>(0);
 
   const handleCategoryClick = (index: number) => {
@@ -48,8 +55,8 @@ function menu() {
   return (
     <>
       <div className=" mx-1440">
-        <div className="max-w-screen-lg mx-auto mb-16">
-          <h1 className="py-2 container mx-auto font-semibold">DineSmart</h1>
+        <div className=" max-w-screen-lg mx-auto mb-16">
+          <h1 className="py-2 container font-semibold">DineSmart</h1>
           <div className="flex mx-auto md:container">
             <div className=" md:w-2/3 w-full">
               <ul className=" bg-white px-2 py-2">
@@ -72,27 +79,27 @@ function menu() {
               <div className="p-3 bg-white mt-2 sm:flex block">
                 <p>Appetizer</p>
               </div>
-              <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2">
+              <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2 ">
                 {dataArray.map((item, index) => (
                   <div
                     key={index}
-                    className="bg-white sm:!p-2 p-0 sm:!rounded rounded-none  shadow-md flex sm:block"
+                    className="bg-white sm:!p-2 p-0 sm:!rounded rounded-none  shadow-md flex sm:flex-col "
                   >
                     <img
                       src={item.imageSrc}
                       alt=""
-                      className="  sm:w-full w-1/3 object-cover sm:!mb-2 mb-0 w-44 sm:!h-40 w-full xs:h-28 h-auto"
+                      className="  sm:w-full xs:w-1/3 w-2/5 object-cover sm:!mb-2 mb-0 sm:!h-40 xs:h-28 h-auto food-item-container"
                     />
-                    <div className="sm:!p-1 p-4 w-full truncate ">
-                      <p className="truncate line-clamp-2 mb-2 h-[2.8rem] whitespace-normal sm:!text-base text-sm">
+                    <div className="sm:!p-1 p-4 sm:w-full truncate xs:w-2/3 w-3/5  flex flex-col justify-between food-item-container">
+                      <p className="truncate line-clamp-4 mb-2  whitespace-normal  sm:!text-base xs:!text-sm text-xs ">
                         {item.foodTitle}
                       </p>{" "}
                       <div className="flex justify-end sm:justify-between items-center ">
-                        <p className=" sm:!text-base text-sm font-bold sm:!pe-0 pe-2">
+                        <p className=" sm:!text-base xs:text-sm text-xs font-bold sm:!pe-0 pe-2 h-">
                           RM {item.price}
                         </p>
                         <button className="bg-primaryColor rounded ">
-                          <p className="text-white sm:!text-base text-sm font-bold hover:bg-black/[.10] py-1 sm:!px-2 px-4 rounded">
+                          <p className="text-white sm:!text-base xs:text-sm text-xs font-bold hover:bg-black/[.10] py-1 xs:!px-4 px-2 rounded">
                             Order
                           </p>
                         </button>
@@ -142,7 +149,7 @@ function menu() {
                   </div>
                 </div>
                 <div className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2">
-                  <p className="text-white font-medium text-lg">Check Out</p>
+                  <p className="text-white font-medium sm:!text-lg xs:text-base text-sm">Check Out</p>
                   <FontAwesomeIcon
                     icon={faAnglesRight}
                     size="lg"
@@ -194,7 +201,7 @@ function menu() {
                     style={{ maxHeight: "300px", overflowY: "auto" }}
                   >
                     <div className="pb-2">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between sm:text-base text-sm">
                         <p>Ultimate Beef Biss Burger </p>
                         <p className="whitespace-nowrap">RM 123,234</p>
                       </div>
@@ -202,8 +209,8 @@ function menu() {
                         <p>{}</p>
                         <div className="quantity flex flex-1 items-center justify-end">
                           <FontAwesomeIcon icon={faMinus} />
-                          <div className="border-solid flex justify-center items-center border-2 rounded-full w-2 h-9 mx-3 px-3 m-auto">
-                            1
+                          <div className="border-solid flex justify-center items-center border-2 rounded-full sm:!w-9 sm:!h-9 w-6 h-6 sm:!mx-3 sm:!px-3 mx-2 px-2 m-auto">
+                           <p className="sm:text-base text-sm">1</p>
                           </div>
                           <FontAwesomeIcon
                             icon={faPlus}
@@ -215,13 +222,13 @@ function menu() {
                   </div>
 
                   <div className="px-4 py-2">
-                    <div className="flex justify-between">
-                      <p className="font-medium">Subtotal</p>
-                      <p className="font-medium">RM 20.99</p>
+                    <div className="flex justify-between ">
+                      <p className="font-medium xs:!text-base text-sm">Subtotal</p>
+                      <p className="font-medium xs:!text-base text-sm">RM 20.99</p>
                     </div>
                   </div>
                   <div className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2 mx-4 mb-4">
-                    <p className="text-white font-medium text-lg">Check Out</p>
+                    <p className="text-white font-medium sm:!text-lg xs:!text-base text-sm">Check Out</p>
                     <FontAwesomeIcon
                       icon={faAnglesRight}
                       size="lg"

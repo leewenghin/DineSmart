@@ -1,0 +1,9 @@
+.food-item-container {
+    height: -webkit-fill-available;
+  }
+
+@media (max-width: 640px) {
+    .food-item-container {
+      height: auto;
+    }
+  }
