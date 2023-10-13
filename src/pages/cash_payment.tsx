@@ -8,7 +8,7 @@ import {
   faX,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
-import "../assets/css/product_detail.css";
+import "../assets/css/order_detail.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 const items = [

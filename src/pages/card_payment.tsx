@@ -73,7 +73,7 @@ function card_payment() {
                   </label>
                   <input
                     type="email"
-                    className="form-control text-sm"
+                    className="form-control text-sm mb-1"
                     id="exampleFormControlInput1"
                     placeholder="1234 1234 1234 1234"
                   />

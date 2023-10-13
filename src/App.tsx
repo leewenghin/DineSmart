@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Product from "./pages/product_detail";
+import Order_detail from "./pages/order_detail";
 import Menu from "./pages/menu";
 import "./App.css";
 import Payment_detail from "./pages/payment_detail";
@@ -21,8 +21,8 @@ function App() {
         }
         {
           /* Define routes */ <Route
-            path="/product"
-            element={<Product />} // Components must start with capital letter
+            path="/order_detail"
+            element={<Order_detail />} // Components must start with capital letter
           />
         }
         {
