@@ -23,6 +23,7 @@ export default {
       colors: {
         primaryColor: "#EDA345",
         secondaryColor: "#FF5C00",
+        goldColor:"#FFA500",
         lightOrangeColor: "#F2DEC3",
         darkOrangeColor: "#b87e35",
         lightGreyColor: '#F2F2F2',

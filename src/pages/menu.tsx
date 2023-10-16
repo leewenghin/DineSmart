@@ -1,6 +1,10 @@
 import {
   faAnglesRight,
   faCartShopping,
+  faEllipsisVertical,
+  faGrip,
+  faGripVertical,
+  faList,
   faMinus,
   faPlus,
   faUserGroup,
@@ -10,7 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import Order_modal from "../components/order_modal";
 import "./menu.css";
-
+import { Link } from "react-router-dom";
 const categories = [
   "Appetizers",
   "Main Course",
@@ -21,24 +25,37 @@ const categories = [
 
 const dataArray: any[] = [
   {
-    imageSrc: "../src/assets/img/potato.png",
-    foodTitle:
-      "Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes Mashed Potatoes  Mashed Potatoes Mashed Potatoes Mashed Potatoes",
-    price: "5.99",
+    Appetizer: [
+      {
+        categories: "Appetizer",
+        imageSrc: "../src/assets/img/potato.png",
+        foodTitle: "Mashed Potatoes",
+        description:
+          "Mashed potatoes are potatoes that have been boiled and crushed into a soft mass, often with butter and milk.",
+        price: "5.99",
+      },
+    ],
+    Main_Course: [
+      {
+        categories: "Main Course",
+        imageSrc: "../src/assets/img/beef-bliss.jpg",
+        foodTitle: "Ultimate Beef Bliss Burger",
+        description: "Description for the Ultimate Beef Bliss Burger",
+        price: "17.99",
+      },
+      {
+        categories: "Main Course",
+        imageSrc: "../src/assets/img/fishstew.png",
+        foodTitle:
+          "Fish Stew Fish Stew Fish Stew Fish Stew Fish Stew Fish Stew Fish Stew Fish StewFish Stew",
+        description: "Description for the Fish Stew",
+        price: "12.99",
+      },
+    ],
   },
-  {
-    imageSrc: "../src/assets/img/beef-bliss.jpg",
-    foodTitle: "Ultimate Beef Bliss Burger",
-    price: "17.99",
-  },
-  {
-    imageSrc: "../src/assets/img/beef-bliss.jpg",
-    foodTitle: "Ultimate Beef Bliss Burger",
-    price: "17.99",
-  },  
 ];
 
-function menu() {
+const menu = () => {
   const isSmallScreen = window.innerWidth < 640;
   const [activeCategory, setActiveCategory] = useState<number>(0);
 
@@ -52,11 +69,30 @@ function menu() {
     setIsOpen(!isOpen);
   };
 
+  const [isLayoutChanged, setIsLayoutChanged] = useState(false);
+
+  const handleButtonClick = () => {
+    setIsLayoutChanged(!isLayoutChanged);
+  };
+
   return (
     <>
       <div className=" mx-1440">
         <div className=" max-w-screen-lg mx-auto mb-16">
-          <h1 className="py-2 container font-semibold">DineSmart</h1>
+          <div className="flex justify-between items-center">
+            <h1 className="py-2 container font-semibold">DineSmart</h1>
+            {/* <div className="flex ">
+            <span className="material-symbols-outlined">
+apps
+</span>
+              <button className="bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5] w-8 rounded">
+              <FontAwesomeIcon icon={faGrip} className="text-white"/>
+              </button>
+              <button>
+                <FontAwesomeIcon icon={faList} />
+              </button>
+            </div> */}
+          </div>
           <div className="flex mx-auto md:container">
             <div className=" md:w-2/3 w-full">
               <ul className=" bg-white px-2 py-2">
@@ -76,40 +112,89 @@ function menu() {
                   ))}
                 </div>
               </ul>
-              <div className="p-3 bg-white mt-2 sm:flex block">
-                <p>Appetizer</p>
-              </div>
-              <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2 ">
-                {dataArray.map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-white sm:!p-2 p-0 sm:!rounded rounded-none  shadow-md flex sm:flex-col "
-                  >
-                    <img
-                      src={item.imageSrc}
-                      alt=""
-                      className="  sm:w-full xs:w-1/3 w-2/5 object-cover sm:!mb-2 mb-0 sm:!h-40 xs:h-28 h-auto food-item-container"
-                    />
-                    <div className="sm:!p-1 p-4 sm:w-full truncate xs:w-2/3 w-3/5  flex flex-col justify-between food-item-container">
-                      <p className="truncate line-clamp-4 mb-2  whitespace-normal  sm:!text-base xs:!text-sm text-xs ">
-                        {item.foodTitle}
-                      </p>{" "}
-                      <div className="flex justify-end sm:justify-between items-center ">
-                        <p className=" sm:!text-base xs:text-sm text-xs font-bold sm:!pe-0 pe-2 h-">
-                          RM {item.price}
-                        </p>
-                        <button className="bg-primaryColor rounded ">
-                          <p className="text-white sm:!text-base xs:text-sm text-xs font-bold hover:bg-black/[.10] py-1 xs:!px-4 px-2 rounded">
-                            Order
-                          </p>
-                        </button>
-                      </div>
-                    </div>
+              {/* Grid layout  */}
+              {Object.keys(dataArray[0]).map((category) => (
+                <div key={category}>
+                  <div className="p-3 bg-white mt-2 sm:flex block">
+                    <p>{category.replace(/_/g, " ")}</p>
                   </div>
-                ))}
-              </div>
+                  <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2 ">
+                    {dataArray[0][category].map((item: any, index: any) => (
+                      <div
+                        key={index}
+                        className="bg-white sm:!p-2 p-0 sm:!rounded rounded-none shadow-md flex sm:flex-col  "
+                      >
+                        <div className="sm:!w-full xs:!w-1/3 w-2/5  sm:h-auto h-28  my-auto">
+                          <img
+                            src={item.imageSrc}
+                            alt=""
+                            className="w-full sm:!mb-2 mb-0 sm:!h-40  h-full object-cover"
+                          />
+                        </div>
+                        <div className="sm:!p-1 xs:p-4 p-3 sm:!w-full truncate xs:w-2/3 w-3/5  flex flex-col justify-between food-item-container ">
+                          <p className="truncate line-clamp-4 mb-2  whitespace-normal sm:!leading-none leading-none sm:!text-lg xs:!text-base text-sm  food-item-container">
+                            {item.foodTitle}
+                            <br />
+                            <div className="xs:text-sm text-xs">
+                              {item.description}
+                            </div>
+                          </p>
+                          <div className="flex justify-end sm:justify-between items-center ">
+                            <p className=" sm:!text-base xs:text-sm text-xs font-bold sm:!pe-0 pe-2 ">
+                              RM {item.price}
+                            </p>
+                            <button className="bg-primaryColor rounded ">
+                              <p className="text-white sm:!text-base xs:text-sm text-xs font-bold hover:bg-black/[.10] py-1 xs:!px-4 px-2 rounded">
+                                Order
+                              </p>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {/* horizontal layout */}
+              {/* {Object.keys(dataArray[0]).map((category) => (
+                <div key={category}>
+                  <div className="p-3 bg-white mt-2 sm:flex block">
+                    <p>{category.replace(/_/g, " ")}</p>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:!mx-0 m-2">
+                    {dataArray[0][category].map((item: any, index: any) => (
+                      <div
+                        key={index}
+                        className="bg-white sm:!p-0 p-2 sm:!rounded-none rounded shadow-md sm:flex block"
+                      >
+                        <div className="sm:w-1/3">
+                          <img
+                            src={item.imageSrc}
+                            alt=""
+                            className="w-full object-cover sm:!mb-0 mb-2 sm:!h-50 xs:h-40 h-28"
+                          />
+                        </div>
+                        <div className="sm:flex flex-column sm:block justify-between sm:!p-4 p-1 w-full truncate ">
+                          <p className="truncate line-clamp-2 mb-2 sm:h-auto h-[2.5rem] whitespace-normal sm:!text-base text-sm">
+                            {item.foodTitle}
+                          </p>{" "}
+                          <div className="flex sm:justify-end justify-between items-center ">
+                            <p className=" sm:!text-base text-sm font-bold sm:!pe-2 pe-0">
+                              RM {item.price}
+                            </p>
+                            <button className="bg-primaryColor rounded ">
+                              <p className="text-white sm:!text-base text-sm font-bold hover:bg-black/[.10] py-1 sm:!px-4 px-2 rounded">
+                                Order
+                              </p>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))} */}
             </div>
-
 
             {/* Show Customer Order Cart When table screen size*/}
             <div className=" ms-1 md:!ms-5 w-1/3 hidden md:block">
@@ -148,14 +233,19 @@ function menu() {
                     <p className="font-medium">RM 20.99</p>
                   </div>
                 </div>
-                <div className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2">
-                  <p className="text-white font-medium sm:!text-lg xs:text-base text-sm">Check Out</p>
-                  <FontAwesomeIcon
-                    icon={faAnglesRight}
-                    size="lg"
-                    className=" text-white"
-                  />
-                </div>
+
+                <Link to="/order_detail">
+                  <button className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2 w-full">
+                    <p className="text-white font-medium sm:!text-lg xs:text-base text-sm">
+                      Check Out
+                    </p>
+                    <FontAwesomeIcon
+                      icon={faAnglesRight}
+                      size="lg"
+                      className=" text-white"
+                    />
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -169,77 +259,79 @@ function menu() {
             <FontAwesomeIcon icon={faCartShopping} className="sm:fa-2x pe-2" />
             <p className="md:text-lg text-sm font-medium ">RM 20.99</p>
           </button>
-
-          <div className="bg-primaryColor basis-1/2 sm:basis-1/3 px-4 py-3 flex items-center justify-between">
-            <p className="text-white md:text-lg text-sm">Create Order</p>
-            <FontAwesomeIcon
-              icon={faAnglesRight}
-              className="sm:fa-2x text-white"
-            />
-            <Order_modal isOpen={isOpen} onClose={toggleModal}>
-              <div className=" bg-white rounded">
-                <div className="flex flex-column">
-                  <div className="my-1 border-b-2 px-4 py-2 flex items-center justify-between ">
-                    <div className=" flex items-center">
-                      <p className="font-medium text-lg ">Table 1</p>
+          <Link to="/order_detail" className="basis-1/2 sm:basis-1/3">
+            <button className="bg-primaryColor px-4 py-3 flex items-center justify-between w-full">
+              <p className="text-white md:text-lg text-sm">Create Order</p>
+              <FontAwesomeIcon
+                icon={faAnglesRight}
+                className="sm:fa-2x text-white"
+              />
+            </button>
+          </Link>
+        </div>
+        <Order_modal isOpen={isOpen} onClose={toggleModal}>
+          <div className=" bg-white rounded">
+            <div className="flex flex-column">
+              <div className="my-1 border-b-2 px-4 py-2 flex items-center justify-between ">
+                <div className=" flex items-center">
+                  <p className="font-medium text-lg ">Table 1</p>
+                  <FontAwesomeIcon
+                    icon={faUserGroup}
+                    style={{ color: "#eda345" }}
+                    className="mx-2"
+                  />
+                  3 pax
+                </div>
+                <div className="flex cursor-pointer  " onClick={toggleModal}>
+                  <FontAwesomeIcon icon={faXmark} className=" " />
+                </div>
+              </div>
+              <div
+                className="border-b-2 scroll-container px-4 py-2"
+                style={{ maxHeight: "300px", overflowY: "auto" }}
+              >
+                <div className="pb-2">
+                  <div className="flex items-center justify-between sm:text-base text-sm">
+                    <p>Ultimate Beef Biss Burger </p>
+                    <p className="whitespace-nowrap">RM 123,234</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p>{}</p>
+                    <div className="quantity flex flex-1 items-center justify-end">
+                      <FontAwesomeIcon icon={faMinus} />
+                      <div className="border-solid flex justify-center items-center border-2 rounded-full sm:!w-9 sm:!h-9 w-6 h-6 sm:!mx-3 sm:!px-3 mx-2 px-2 m-auto">
+                        <p className="sm:text-base text-sm">1</p>
+                      </div>
                       <FontAwesomeIcon
-                        icon={faUserGroup}
+                        icon={faPlus}
                         style={{ color: "#eda345" }}
-                        className="mx-2"
                       />
-                      3 pax
                     </div>
-                    <div
-                      className="flex cursor-pointer  "
-                      onClick={toggleModal}
-                    >
-                      <FontAwesomeIcon icon={faXmark} className=" " />
-                    </div>
-                  </div>
-                  <div
-                    className="border-b-2 scroll-container px-4 py-2"
-                    style={{ maxHeight: "300px", overflowY: "auto" }}
-                  >
-                    <div className="pb-2">
-                      <div className="flex items-center justify-between sm:text-base text-sm">
-                        <p>Ultimate Beef Biss Burger </p>
-                        <p className="whitespace-nowrap">RM 123,234</p>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p>{}</p>
-                        <div className="quantity flex flex-1 items-center justify-end">
-                          <FontAwesomeIcon icon={faMinus} />
-                          <div className="border-solid flex justify-center items-center border-2 rounded-full sm:!w-9 sm:!h-9 w-6 h-6 sm:!mx-3 sm:!px-3 mx-2 px-2 m-auto">
-                           <p className="sm:text-base text-sm">1</p>
-                          </div>
-                          <FontAwesomeIcon
-                            icon={faPlus}
-                            style={{ color: "#eda345" }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="px-4 py-2">
-                    <div className="flex justify-between ">
-                      <p className="font-medium xs:!text-base text-sm">Subtotal</p>
-                      <p className="font-medium xs:!text-base text-sm">RM 20.99</p>
-                    </div>
-                  </div>
-                  <div className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2 mx-4 mb-4">
-                    <p className="text-white font-medium sm:!text-lg xs:!text-base text-sm">Check Out</p>
-                    <FontAwesomeIcon
-                      icon={faAnglesRight}
-                      size="lg"
-                      className=" text-white"
-                    />
                   </div>
                 </div>
               </div>
-            </Order_modal>
+
+              <div className="px-4 py-2">
+                <div className="flex justify-between ">
+                  <p className="font-medium xs:!text-base text-sm">Subtotal</p>
+                  <p className="font-medium xs:!text-base text-sm">RM 20.99</p>
+                </div>
+              </div>
+              <Link to="/order_detail" className="mx-4  mb-4">
+                <button className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2 w-full rounded">
+                  <p className="text-white font-medium sm:!text-lg xs:!text-base text-sm">
+                    Check Out
+                  </p>
+                  <FontAwesomeIcon
+                    icon={faAnglesRight}
+                    size="lg"
+                    className=" text-white"
+                  />
+                </button>
+              </Link>
+            </div>
           </div>
-        </div>
+        </Order_modal>
       </div>
 
       {/* <div className="flex container px-3 py-4 border-b-2 items-center justify-center relative">
@@ -299,6 +391,6 @@ function menu() {
       </div> */}
     </>
   );
-}
+};
 
 export default menu;

@@ -96,7 +96,7 @@ function product_detail() {
             />
             <p className="text-white font-medium sm:text-lg text-basic p-4 h-1/3 sm:!text-start text-center">
               Thanks for ordering. Please pay at the counter to complete your
-              order.{" "}
+              order.
             </p>
           </div>
         </div>
