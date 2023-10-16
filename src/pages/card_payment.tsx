@@ -5,7 +5,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import React, { useState } from "react";
 import "../assets/css/card_payment.css";
 
 const items = [
@@ -15,7 +15,7 @@ const items = [
   { label: "Rounding Adj", amount: "RM 0.01" },
 ];
 
-function card_payment() {
+const card_payment = () => {
   return (
     <>
       <div className="full-content">
@@ -198,6 +198,6 @@ function card_payment() {
       </div>
     </>
   );
-}
+};
 
 export default card_payment;

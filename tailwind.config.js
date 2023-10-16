@@ -14,16 +14,24 @@ export default {
         'xs': '450px',
       },
       width: {
-        'vw-21': '21vw',
-        'vw-16': '16vw'
+        'vw-16': '16vw',
+        'vw-21': '21vw'
+      },
+      minWidth: {
+        '60': '60px',
       },
       colors: {
         primaryColor: "#EDA345",
         secondaryColor: "#FF5C00",
         lightOrangeColor: "#F2DEC3",
         darkOrangeColor: "#b87e35",
+        lightGreyColor: '#F2F2F2',
         darkGreyColor: '#C4C4C4',
-        lightGreyColor: '#F2F2F2'
+
+        // Admin
+        bodyColor: "#FFEADB",
+        sidebarColor: "#fff",
+        sidebarTextColor: "#7d8da1"
       },
       spacing: {
         '142': '42rem'
@@ -45,12 +53,6 @@ export default {
         '3xl': '1.953rem',
         '4xl': '2.441rem',
         '5xl': '3.052rem',
-      },
-
-      theme: {
-        width: {
-          '600': '600px'
-        }
       },
     },
   },

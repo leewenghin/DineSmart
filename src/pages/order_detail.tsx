@@ -7,8 +7,10 @@ import {
   faX,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
-import "../assets/css/order_detail.css";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { RadioGroup, Radio } from "../components/radio_button";
+import "../assets/css/order_detail.css";
 
 const data = [
   {
@@ -50,86 +52,51 @@ function product_detail() {
           <div className="lg:flex justify-between w-full md:w-auto pt-4 pb-28 xl:mx-12 2xl:mx-44">
             <div className="progress-title"></div>
             <div className="bg-white col-span-8 px-2 sm:!px-3 md:!px-8 py-3 md:w-142 overflow-hidden shadow-sm">
-              <div>
-                <p className="text-lg font-medium my-2">Payment Method</p>
+              <div className="sm:mb-3">
+                <h2 className="text-lg font-medium my-2">Payment Method</h2>
                 {/* Payment Method */}
-                <section className="radio-section">
-                  <div className="radio-list w-full">
-                    {/* Radio */}
-                    <div className="radio-item">
-                      <input
-                        type="radio"
-                        name="radio"
-                        id="bank-card"
-                        defaultChecked
+                <div className="payment-method">
+                  <RadioGroup>
+                    <Radio id="basic" name="radio" defaultChecked>
+                      <img
+                        className="card-payment w-12 h-12"
+                        src="../src/assets/img/card-payment.png"
                       />
-                      <label htmlFor="bank-card">
-                        <div className="flex items-center justify-between">
-                          <p>Debit / Credit Card</p>
-                          <img
-                            className="w-7 h-7 ml-2"
-                            src="./src/assets/img/card-payment.png"
-                            alt=""
-                          />
-                        </div>
-                      </label>
-                    </div>
-                    <div className="radio-item">
-                      <input type="radio" name="radio" id="cash" />
-                      <label htmlFor="cash">
-                        <div className="flex items-center justify-between">
-                          Cash
-                          <img
-                            className="w-7 h-7 ml-2"
-                            src="./src/assets/img/online-banking.png"
-                            alt=""
-                          />
-                        </div>
-                      </label>
-                    </div>
-                    <div className="radio-item">
-                      <input type="radio" name="radio" id="online-banking" />
-                      <label htmlFor="online-banking">
-                        <div className="flex items-center justify-between">
-                          Online Banking
-                          <img
-                            className="w-7 h-7 ml-2"
-                            src="./src/assets/img/cash-payment.png"
-                            alt=""
-                          />
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                </section>
-              </div>
-              <div className="md:flex justify-between md:py-5">
-                <div className="py-3 md:!py-0">
-                  <p className="text-lg font-medium">Order Type</p>
-                  <div className="radio-item pt-2">
-                    <input
-                      type="radio"
-                      name="table-order"
-                      id="table-order"
-                      defaultChecked
-                    />
-                    <label htmlFor="table-order">
-                      <div className="flex items-center justify-between">
-                        Table order
-                      </div>
-                    </label>
-                  </div>
+                      <h3>Debit / Credit Card</h3>
+                    </Radio>
+                    <Radio id="advanced" name="radio" defaultChecked={false}>
+                      <img
+                        className="online-payment w-12 h-12"
+                        src="../src/assets/img/online-payment.png"
+                      />
+                      <h3>Online Banking</h3>
+                    </Radio>
+                    <Radio id="nice" name="radio" defaultChecked={false}>
+                      <img
+                        className="cash-payment w-12 h-12"
+                        src="../src/assets/img/cash-payment.png"
+                      />
+                      <h3>Cash</h3>
+                    </Radio>
+                  </RadioGroup>
                 </div>
-                <div className="pb-3 lg:pb-0">
+              </div>
+              <div className="order md:flex justify-between md:py-5">
+                <div className="py-3 md:!py-0 w-full md:me-2.5">
+                  <p className="text-lg font-medium">Order Type</p>
+                  <RadioGroup>
+                    <Radio id="table-order" name="order-type" defaultChecked>
+                      <h3>Table Order</h3>
+                    </Radio>
+                  </RadioGroup>
+                </div>
+                <div className="pb-3 lg:pb-0 w-full md:ms-2.5">
                   <p className="text-lg font-medium">Order Time</p>
-                  <div className="radio-item pt-2">
-                    <input type="radio" name="time" id="soon" defaultChecked />
-                    <label htmlFor="soon">
-                      <div className="flex items-center justify-between">
-                        As soon as possible
-                      </div>
-                    </label>
-                  </div>
+                  <RadioGroup>
+                    <Radio id="soon" name="order-time" defaultChecked>
+                      <h3>As soon as possible</h3>
+                    </Radio>
+                  </RadioGroup>
                 </div>
               </div>
             </div>

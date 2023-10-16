@@ -1,0 +1,114 @@
+:root {
+  /* Admin Interface */
+  --primary-color: #eda345;
+  --body-color: #ffeadb;
+  --active-line-color: #eda345;
+  --active-bg-color: #ffeadb;
+  --sidebar-color: #fff;
+  --text-color: ;
+}
+
+#admin-panel {
+  height: 100vh;
+  background-color: var(--body-color);
+  transition: var(--tran-02);
+}
+
+.text .name,
+.text p {
+  color: var(--text-color);
+}
+
+.sidebar {
+  width: 250px;
+  background-color: var(--sidebar-color);
+  transition: var(--trans-03);
+}
+
+.sidebar.close {
+  width: 88px;
+}
+
+.sidebar .text {
+  transition: var(--trans-03);
+  white-space: nowrap;
+  opacity: 1;
+}
+
+.sidebar.close .text {
+  opacity: 0;
+}
+
+.sidebar.close .nav-link a.active .material-symbols-outlined {
+  margin-left: 1rem !important;
+}
+
+.sidebar.close .nav-link a:hover {
+  margin-left: 0.3rem;
+}
+
+.nav-link a.active {
+  background-color: var(--body-color);
+}
+
+.nav-link a.active {
+  margin-left: 0 !important;
+}
+
+.nav-link a.active .material-symbols-outlined {
+  margin-left: 0.62rem !important;
+}
+
+.nav-link a.active::before {
+  content: "";
+  width: 6px;
+  height: 100%;
+  background-color: var(--primary-color);
+}
+
+.nav-link a:hover {
+  transition: var(--trans-03);
+}
+
+.nav-link a:hover {
+  margin-left: 1rem;
+}
+
+.toggle {
+  cursor: pointer;
+  background-color: var(--primary-color);
+}
+
+.theme-toggler {
+  cursor: pointer;
+}
+
+.theme-toggler span.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.dark-theme-variables {
+  --body-color: #18191a;
+  --sidebar-color: #242526;
+  --primary-color: #3a383c;
+  --toggle-color: #fff;
+  --text-color: #edeffd;
+}
+
+.testing {
+  --body-color: #18191a;
+  --sidebar-color: #242526;
+  --primary-color: #3a383c;
+  --toggle-color: #fff;
+  --text-color: #ccc;
+}
+
+.testing {
+  --color-background: #181a1e;
+  --color-white: #202528;
+  --color-dark: #edeffd;
+  --color-dark-variant: #a3bdcc;
+  --color-light: rgba(0, 0, 0, 0.4);
+  --box-shadow: 0 2rem 3rem var(--color-light);
+}
