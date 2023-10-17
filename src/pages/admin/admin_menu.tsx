@@ -33,8 +33,9 @@ const admin_menu = () => {
   };
 
   const toggleNav = () => {
+    
     setIsClose((prevIsClose) => !prevIsClose); // Use the previous state
-
+    
     sidebar?.classList.toggle("close");
   };
 

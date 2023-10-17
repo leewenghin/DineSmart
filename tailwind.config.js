@@ -3,11 +3,12 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/flowbite/**/*.js"
   ],
   plugins: [
     require('@tailwindcss/forms'),
+    require('flowbite/plugin')
   ],
-
   theme: {
     extend: {
       screens: {
@@ -57,5 +58,4 @@ export default {
       },
     },
   },
-  plugins: [],
 }
