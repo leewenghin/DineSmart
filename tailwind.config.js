@@ -9,7 +9,6 @@ export default {
     require('@tailwindcss/forms'),
     require('flowbite/plugin')
   ],
-
   theme: {
     extend: {
       screens: {
@@ -59,5 +58,4 @@ export default {
       },
     },
   },
-  plugins: [],
 }
