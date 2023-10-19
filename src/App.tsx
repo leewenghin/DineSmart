@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 // ===== Customer Site =====
-import Order_detail from "./pages/order_detail";
+import OrderDetailPage from "./pages/order_detail";
 import Menu from "./pages/menu";
 import "./App.css";
 import Payment_detail from "./pages/payment_detail";
@@ -21,7 +21,7 @@ function App() {
         <Route path="/paymentdetail" element={<Payment_detail />}></Route>
         <Route path="/cashpayment" element={<Cash_payment />}></Route>
         <Route path="/menu" element={<Menu />}></Route>
-        <Route path="/order_detail" element={<Order_detail />}></Route>
+        <Route path="/order_detail/id/quantity" element={<OrderDetailPage />} />
         <Route path="/card_payment" element={<Card_payment />}></Route>
         <Route path="/admin_panel" element={<Admin_panel />}>
           <Route path="method" element={<Admin_method />} />
@@ -35,4 +35,13 @@ function App() {
     </BrowserRouter>
   );
 }
+// type OrderDetailRouteProps = {};
+// const OrderDetailRoute: React.FC<OrderDetailRouteProps> = () => {
+//   let { id, quantity } = useParams();
+//   const orderId = id ? String(id) : "";
+//   const parsedQuantity = quantity ? parseInt(quantity, 10) : 0;
+
+//   return <Order_detail orderId={orderId} quantity={parsedQuantity} />;
+// };
+
 export default App;
