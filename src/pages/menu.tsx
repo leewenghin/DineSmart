@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
 import Order_modal from "../components/order_modal";
 import "./menu.css";
-import { Link, useNavigate  } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const categories = [
   "Appetizers",
   "Main Course",
@@ -168,16 +168,16 @@ const menu = () => {
   const navigate  = useNavigate();
   const handleCheckOut = () => {
     // Create an array of objects with id and quantity properties
-    const idList = orderedItems.map(item => item.id).join('-');
-    const quantityList = orderedItems.map(item => item.quantity).join('-');
-    const queryString = `?id=${idList}&quantity=${quantityList}`;
+    // const idList = orderedItems.map(item => item.id).join('-');
+    // const quantityList = orderedItems.map(item => item.quantity).join('-');
+    // const queryString = `?id=${idList}&quantity=${quantityList}`;
     // const queryString = itemsToOrder ? `?id=${encodeURIComponent(itemsToOrder)}` : '';
 
     // // Navigate to the "order_detail" page with item IDs and quantities as a query parameter
-    // navigate({
-    //   pathname: "/order_detail",
-    //   search: `?items=${JSON.stringify(itemsToOrder)}`,
-    // });
+    const orderlist = orderedItems.map(item => ({ id: item.id, quantity: item.quantity }));
+      navigate('/order_detail', {
+        state:orderlist,
+      });
     // Convert itemsToOrder to a JSON string
     // const itemsJSON = JSON.stringify(itemsToOrder);
 
@@ -188,16 +188,16 @@ const menu = () => {
 
 
     // Navigate to the "order_detail" page with item IDs and quantities as a query parameter
-    navigate(`/order_detail${queryString}`);
+    // navigate(`/order_detail${queryString}`);
   };
 
-
+  
   return (
     <>
       <div className=" mx-1440">
         <div className=" max-w-screen-lg mx-auto mb-16">
           <div className="flex justify-between items-center">
-            <h1 className="py-2 container font-semibold">DineSmart</h1>
+            <h1 className="py-2 md:mx-auto md:container font-semibold">DineSmart</h1>
             {/* <div className="flex ">
             <span className="material-symbols-outlined">
 apps
@@ -319,7 +319,7 @@ apps
 
             {/* Show Customer Order Cart When table screen size*/}
             <div className=" ms-1 md:!ms-5 w-1/3 hidden md:block">
-              <div className="flex flex-column p-3 bg-white">
+              <div className="flex flex-col p-3 bg-white">
                 <p className="font-medium text-lg ">Table 1</p>
                 <div className="my-1 border-b-2 pb-2">
                   <FontAwesomeIcon
@@ -368,16 +368,16 @@ apps
                   <p className="font-medium">RM {totalPrice.toFixed(2)}</p>
                 </div>
                 
-                  <button className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2 w-full" onClick={handleCheckOut}>
-                    <p className="text-white font-medium sm:!text-lg xs:text-base text-sm">
-                      Check Out
-                    </p>
-                    <FontAwesomeIcon
-                      icon={faAnglesRight}
-                      size="lg"
-                      className=" text-white"
-                    />
-                  </button>
+                    <button className="bg-primaryColor flex items-center justify-between mt-12 px-2 py-2 w-full" onClick={handleCheckOut}>
+                      <p className="text-white font-medium sm:!text-lg xs:text-base text-sm">
+                        Check Out
+                      </p>
+                      <FontAwesomeIcon
+                        icon={faAnglesRight}
+                        size="lg"
+                        className=" text-white"
+                      />
+                    </button>
               </div>
             </div>
           </div>
@@ -405,7 +405,7 @@ apps
         </div>
         <Order_modal isOpen={isOpen} onClose={toggleModal}>
           <div className=" bg-white rounded">
-            <div className="flex flex-column">
+            <div className="flex flex-col">
               <div className="my-1 border-b-2 px-4 py-2 flex items-center justify-between ">
                 <div className=" flex items-center">
                   <p className="font-medium text-lg ">Table 1</p>

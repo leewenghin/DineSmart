@@ -21,7 +21,7 @@ function App() {
         <Route path="/paymentdetail" element={<Payment_detail />}></Route>
         <Route path="/cashpayment" element={<Cash_payment />}></Route>
         <Route path="/menu" element={<Menu />}></Route>
-        <Route path="/order_detail/id/quantity" element={<OrderDetailPage />} />
+        <Route path="/order_detail" element={<OrderDetailPage />} />
         <Route path="/card_payment" element={<Card_payment />}></Route>
         <Route path="/admin_panel" element={<Admin_panel />}>
           <Route path="method" element={<Admin_method />} />
