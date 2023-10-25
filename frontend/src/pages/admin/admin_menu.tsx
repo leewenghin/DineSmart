@@ -25,19 +25,27 @@ const dineMethod = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menuList, setMenuList] = useState<Menu[]>([]);
   const [newMenu, setNewMenu] = useState<submitMenu>({
-    // For reset the field
+    // Initiate value
+    // Reset the field
     name: "",
     description: "",
     published: false,
   });
   const [isChecked, setIsChecked] = useState(false);
 
-  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setIsChecked(e.target.checked);
-  };
-
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
+  };
+
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // Set as checked
+    setIsChecked(e.target.checked);
+
+    //
+    setNewMenu((prevMenu) => ({
+      ...prevMenu,
+      published: !prevMenu.published, // Toggle the "published" property
+    }));
   };
 
   const handleInputChange = (
@@ -59,8 +67,7 @@ const dineMethod = () => {
     })
       .then((response) => response.json())
       .then((data: Menu) => {
-        setMenuList([...menuList, data]);
-        setNewMenu({ name: "", description: "" }); // Clear the input fields
+        setMenuList([...menuList, data]); // update the list of menus (realtime)
       })
       .catch((error) => console.error("Error creating task: ", error));
   };
@@ -104,7 +111,7 @@ const dineMethod = () => {
                     alt="Sunset in the mountains"
                   />
                   <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
-                    <Link to={`/admin_panel/category/${item.name}`}>
+                    <Link to={`/admin_panel/category/${item.id}`}>
                       <button
                         type="button"
                         className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm w-28 py-2.5 text-center mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -132,7 +139,9 @@ const dineMethod = () => {
                     <div className="flex flex-col items-center justify-center text-2xl">
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
+                          name="published"
                           type="checkbox"
+                          defaultChecked={item.published}
                           value=""
                           className="sr-only peer"
                         />
@@ -197,11 +206,12 @@ const dineMethod = () => {
                       Name
                     </label>
                     <input
-                      type="text"
+                      id="name"
                       name="name"
+                      type="text"
                       value={newMenu.name}
                       onChange={handleInputChange}
-                      id="name"
+                      autoComplete="name"
                       // value="iPad Air Gen 5th Wi-Fi"f
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       placeholder="Ex. Apple iMac 27&ldquo;"
@@ -281,13 +291,15 @@ const dineMethod = () => {
                       </span>
                       <div className="relative ml-3">
                         <input
+                          id="modal-published"
+                          name="modal-published"
                           type="checkbox"
-                          checked={isChecked}
+                          defaultChecked={isChecked}
                           onChange={handleCheckboxChange}
-                          value="{newMenu.published}"
+                          value=""
                           className="toggle-switch sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
                       </div>
                     </label>
                     <div className="text-sm text-gray-500">
