@@ -62,7 +62,7 @@ python manage.py migrate
 python manage.py createsuperuser
 
 ## Step 6
-python manage.py makemigrations django_run_win
+python manage.py makemigrations my_django_app
 
 # When change any model need doing step 4 and step 5
 
@@ -73,9 +73,17 @@ pip install mysql_connector
 pip install mysql
 pip install djangorestframework 
 pip install Pillow
+pip install django-cors-headers
 
 
+########################################################
+#Tan 
+## Backend
 ###Open wamps
-D:\Learning\django_app\env\Scripts\activate
-cd django_run_win
+D:\dinesmart\DineSmart\backend\env\Scripts\activate
+cd D:\dinesmart\DineSmart\backend\my_django_app
 python manage.py runserver
+
+## Frontend
+cd D:\dinesmart\DineSmart\frontend
+npm run dev
