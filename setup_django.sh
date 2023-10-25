@@ -78,7 +78,12 @@ pip install django-cors-headers
 
 ########################################################
 #Tan 
+## Backend
 ###Open wamps
 D:\dinesmart\DineSmart\backend\env\Scripts\activate
 cd D:\dinesmart\DineSmart\backend\my_django_app
 python manage.py runserver
+
+## Frontend
+cd D:\dinesmart\DineSmart\frontend
+npm run dev

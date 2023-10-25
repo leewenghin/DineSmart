@@ -16,3 +16,19 @@
   'GRAD' 0,
   'opsz' 24
 }
+
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease, height 0.3s ease;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+  height: 0;
+}
+
+
+.lineColor{
+  background-image: linear-gradient(to left, #ffd700, #eda345);
+  height: 3px;
+}

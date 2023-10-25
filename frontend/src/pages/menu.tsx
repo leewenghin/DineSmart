@@ -7,6 +7,7 @@ import {
   faList,
   faMinus,
   faPlus,
+  faStar,
   faUserGroup,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
@@ -106,28 +107,29 @@ const dataArray: any[] = [
 ];
 
 const menu = () => {
+  // Button and Scroll Down Category List 
   const [activeCategory, setActiveCategory] = useState<number>(0);
   const categories = Object.keys(dataArray[0]);
   const categoryRefs: React.RefObject<HTMLDivElement>[] = categories.map(() =>
     useRef(null)
   );
-
+  
   const handleCategoryClick = (index: number) => {
     setActiveCategory(index);
     categoryRefs[index].current?.scrollIntoView({
       behavior: "smooth",
-      block: "start",
+      block: "center",
     });
   };
 
+  // Open Model on medium screen size 
   const [isOpen, setIsOpen] = useState(false);
-
   const toggleModal = () => {
     setIsOpen(!isOpen);
   };
-  const [orderedItems, setOrderedItems] = useState<any[]>([]);
-  const [foodItems, setFoodItems] = useState([]);
 
+  // Get items from API 
+  const [foodItems, setFoodItems] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -145,13 +147,16 @@ const menu = () => {
 
     fetchData();
   }, []);
-  // const foodItem = Object.keys(foodItems[0]);
 
+
+  // Count Order Items 
+  const [orderedItems, setOrderedItems] = useState<any[]>([]);
+  
+  // When click one of the items then add new label (quantity) and output to order list 
   const handleOrderClick = (item: any) => {
     const existingItemIndex = orderedItems.findIndex(
       (orderedItem) => orderedItem.id === item.id
     );
-
     if (existingItemIndex !== -1) {
       // If the item exists, update its quantity by adding 1
       const updatedItems = [...orderedItems];
@@ -162,7 +167,7 @@ const menu = () => {
       setOrderedItems([...orderedItems, { ...item, quantity: 1 }]);
     }
   };
-
+  // Minus quantity 
   const handleMinusClick = (item: any) => {
     const existingItemIndex = orderedItems.findIndex(
       (orderedItem) => orderedItem.id === item.id
@@ -177,8 +182,9 @@ const menu = () => {
       );
       setOrderedItems(updatedItems);
     }
-  };
+  }; 
 
+  // Cancel order items
   const handleCancelClick = (item: any) => {
     // Remove the item from the orderedItems array
     const updatedItems = orderedItems.filter(
@@ -187,18 +193,14 @@ const menu = () => {
     setOrderedItems(updatedItems);
   };
 
+  // Count all order items
   const totalPrice = orderedItems.reduce((acc, currentItem) => {
     return acc + currentItem.price * currentItem.quantity;
   }, 0);
+
+  // Pass data to other page
   const navigate = useNavigate();
   const handleCheckOut = () => {
-    // Create an array of objects with id and quantity properties
-    // const idList = orderedItems.map(item => item.id).join('-');
-    // const quantityList = orderedItems.map(item => item.quantity).join('-');
-    // const queryString = `?id=${idList}&quantity=${quantityList}`;
-    // const queryString = itemsToOrder ? `?id=${encodeURIComponent(itemsToOrder)}` : '';
-
-    // // Navigate to the "order_detail" page with item IDs and quantities as a query parameter
     const orderlist = orderedItems.map((item) => ({
       id: item.id,
       quantity: item.quantity,
@@ -206,22 +208,13 @@ const menu = () => {
     navigate("/order_detail", {
       state: orderlist,
     });
-    // Convert itemsToOrder to a JSON string
-    // const itemsJSON = JSON.stringify(itemsToOrder);
-
-    // // Navigate to the "order_detail" page with item IDs and quantities as query parameters
-    // navigate(`/order_detail?items=${encodeURIComponent(itemsJSON)}`);
-    // const queryString = itemsToOrder.length > 0 ? `?items=${encodeURIComponent(JSON.stringify(itemsToOrder))}` : '';
-
-    // Navigate to the "order_detail" page with item IDs and quantities as a query parameter
-    // navigate(`/order_detail${queryString}`);
   };
 
   return (
     <>
-      <div className=" mx-1440">
-        <div className="bg-white">
-          <div className="flex justify-between items-center  max-w-screen-lg mx-auto mb-5 py-3">
+      <div className=" mx-1440 relative">
+        <div className="bg-white sticky top-0 z-10 border-b-2 mb-5">
+          <div className="flex justify-between items-center md:container md:mx-auto mx-3 py-3 ">
             <h1 className="py-2 md:mx-auto md:container font-semibold ">
               DineSmart
             </h1>
@@ -243,17 +236,17 @@ const menu = () => {
         </div>
         <div className=" max-w-screen-lg mx-auto mb-16">
           <div className="flex mx-auto md:container">
-            <div className=" md:w-2/3 w-full">
-              <div className="border-b border-gray-200 dark:border-gray-700  ">
-                <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400 overflow-x-auto">
+            <div className=" md:w-2/3 w-full relative">
+              <div className="border-b border-gray-200 dark:border-gray-700 bg-white shadow mb-3 md:static sticky top-16 ">
+                <ul className="flex -mb-px md:text-base text-sm font-medium text-center text-gray-500 dark:text-gray-400 overflow-x-auto">
                   {categories.map((category, index) => (
                     <li
-                      key={index}
-                      className={`mr-2`}
+                      key={index} 
+                      className={`mr-2 `}
                       onClick={() => handleCategoryClick(index)}
                     >
                       <p
-                        className={`inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg group ${
+                        className={`inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg group whitespace-nowrap ${
                           activeCategory === index
                             ? "text-primaryColor  !border-primaryColor"
                             : "hover:text-gray-600 hover:border-gray-300"
@@ -265,11 +258,17 @@ const menu = () => {
                   ))}
                 </ul>
               </div>
+
+
               {/* Grid layout  */}
               {Object.keys(dataArray[0]).map((category, index) => (
                 <div key={index} ref={categoryRefs[index]}>
-                  <div className="p-3 bg-white mt-2 sm:flex block">
-                    <p>{category.replace(/_/g, " ")}</p>
+                  <div className="p-3 mt-2 flex items-center justify-center w-auto">
+                    <FontAwesomeIcon icon={faStar} style={{ color: "#eda345" }} />
+                    <hr className="w-1/6 mx-3 h-1 bg-gradient-to-r from-goldColor from-10% to-goldColor/[.5] rounded-full" />
+                    <p className="text-lg text-center font-semibold text-transparent bg-clip-text bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5]">{category.replace(/_/g, " ")}</p>
+                    <hr className="w-1/6 mx-3 h-1  bg-gradient-to-l from-goldColor from-10% to-goldColor/[.5]" />
+                    <FontAwesomeIcon icon={faStar} style={{ color: "#eda345" }} />
                   </div>
                   <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2">
                     {dataArray[0][category].map((item: any, index: any) => (
@@ -353,8 +352,8 @@ const menu = () => {
             </div>
 
             {/* Show Customer Order Cart When table screen size*/}
-            <div className=" ms-1 md:!ms-5 w-1/3 hidden md:block">
-              <div className="flex flex-col p-3 bg-white">
+            <div className=" ms-1 md:!ms-5 w-1/3 hidden md:block relative">
+              <div className="flex flex-col p-3 bg-white sticky top-20">
                 <p className="font-medium text-lg ">Table 1</p>
                 <div className="my-1 border-b-2 pb-2">
                   <FontAwesomeIcon
