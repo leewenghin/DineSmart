@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
+# Byte-compiled / optimized / DLL files
 __pycache__/
 
