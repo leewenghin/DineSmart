@@ -23,7 +23,7 @@ If you're not ready to commit your changes but want to temporarily save them, yo
 
 ## Ignore `__pycache__` folder in version control
 
-**Remove Existing **pycache** Directory**
+**Remove Existing __pycache__ Directory**
 
 - git rm -r --cached **pycache**
 - git commit -m "Remove **pycache** from version control"
