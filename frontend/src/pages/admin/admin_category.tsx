@@ -1,4 +1,4 @@
-import { ChangeEvent, Component, useEffect, useState } from "react";
+import { ChangeEvent, Component, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
@@ -13,6 +13,7 @@ const categories = [
   { label: "Appetizers", items: "100" },
 ];
 
+// ==================== Interfaces  ====================
 interface Menu {
   id: number;
   name: string;
@@ -22,6 +23,7 @@ interface Category {
   id: number;
   name: string;
   description: string;
+  image: File | null;
   published: boolean;
   foodmenu_id: number;
 }
@@ -29,9 +31,11 @@ interface Category {
 interface submitCategory {
   name: string;
   description: string;
+  image: File | null;
   published: boolean;
   foodmenu_id: number;
 }
+// ==================== Interfaces  ====================
 
 const admin_category = () => {
   const { foodmenu_id } = useParams();
@@ -48,11 +52,13 @@ const admin_category = () => {
     // Reset the field
     name: "",
     description: "",
+    image: null,
     published: false,
     foodmenu_id: FoodMenuId,
   });
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
+  const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
+  const [image, setImage] = useState<File | null>(null); // For modal image purpose
 
   // ==================== Toggle Method ====================
   const toggleModal = () => {
@@ -61,42 +67,52 @@ const admin_category = () => {
   // ==================== Toggle Method ====================
 
   // ==================== Fetch Method ====================
-  // Fetch data array from category table method
-  const fetchCategoryList = () => {
-    fetch(getCategoryLink)
+  // Fetch data array from table method
+  const fetchList = (getLink: string, setList: any) => {
+    fetch(getLink)
       .then((response) => response.json())
       .then((data) => {
-        setCategoryList(data);
+        setList(data);
       })
       .catch((error) => console.error("Error fetching data: ", error));
   };
 
   // Fetch & set data array from category table method
   const fetchSetCategoryList = () => {
+    const formData = new FormData();
+    if (image) {
+      // Ensure that the 'image' field is a valid File
+      if (image instanceof File) {
+        formData.append("image", image);
+        console.log("Success image file");
+      } else {
+        console.error("Invalid image file");
+        return;
+      }
+    }
+    formData.append("name", newCategory.name);
+    formData.append("description", newCategory.description);
+    formData.append("published", newCategory.published.toString());
+    formData.append("foodmenu_id", newCategory.foodmenu_id.toString());
+
     fetch(setCategoryLink, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newCategory),
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
+      body: formData,
     })
       .then((response) => {
         if (response.ok) {
-          return response.json(); // Parse the JSON data if the response is valid
+          return response.text(); // Parse the JSON data if the response is valid
         } else {
+          console.log(formData, image, newCategory.published.toString());
           throw new Error(`Response not OK. Status: ${response.status}`);
         }
       })
-      .then((data: Category) => {
-        setCategoryList([...categoryList, data]); // update the list of categories (realtime)
-        setNewCategory({
-          name: "",
-          description: "",
-          published: false,
-          foodmenu_id: FoodMenuId,
-        }); // Clear the input fields
-        fetchCategoryList();
-      })
+      // .then((data) => {
+      //   fetchList(getCategoryLink, setCategoryList);
+      // })
       .catch((error) => console.error("Error creating task: ", error));
   };
 
@@ -124,8 +140,14 @@ const admin_category = () => {
   // ==================== Fetch Method ====================
 
   // ==================== Handle Method ====================
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target && e.target.files) {
+      const selectedImage = e.target.files[0];
+      setImage(selectedImage);
+    }
+  };
 
-  const handlePublishedChange = (categoryId: number, index: number) => {
+  const handlePublished = (categoryId: number, index: number) => {
     const updatedCategoryList = [...categoryList];
     updatedCategoryList[index].published =
       !updatedCategoryList[index].published;
@@ -138,7 +160,6 @@ const admin_category = () => {
     // Set as checked
     setIsChecked(e.target.checked);
 
-    //
     setNewCategory((prevMenu) => ({
       ...prevMenu,
       published: !prevMenu.published, // Toggle the "published" property
@@ -157,6 +178,7 @@ const admin_category = () => {
     setNewCategory({
       name: "",
       description: "",
+      image: null,
       published: false,
       foodmenu_id: FoodMenuId,
     });
@@ -164,7 +186,9 @@ const admin_category = () => {
     toggleModal();
   };
 
-  const handleSave = () => {
+  const handleSave = (event: React.FormEvent) => {
+    event.preventDefault();
+
     fetchSetCategoryList(); // Fetch and set the data through api
     handleCancel(); // Reset the field list and exit modal
   };
@@ -177,14 +201,8 @@ const admin_category = () => {
   // ==================== Handle Method ====================
 
   useEffect(() => {
-    fetch(getMenuLink)
-      .then((response) => response.json())
-      .then((data) => {
-        setMenuList(data);
-      })
-      .catch((error) => console.error("Error fetching data: ", error));
-
-    fetchCategoryList();
+    fetchList(getMenuLink, setMenuList);
+    fetchList(getCategoryLink, setCategoryList);
   }, []);
 
   return (
@@ -294,9 +312,7 @@ const admin_category = () => {
                             name="published"
                             type="checkbox"
                             defaultChecked={item.published}
-                            onClick={() =>
-                              handlePublishedChange(item.id, index)
-                            }
+                            onClick={() => handlePublished(item.id, index)}
                             value=""
                             className="sr-only peer"
                           />
@@ -319,9 +335,9 @@ const admin_category = () => {
           data-modal-backdrop="static"
           tabIndex={-1}
           aria-hidden="true"
-          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full bg-black bg-opacity-50"
+          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 sm:justify-center items-center w-full md:inset-0 h-full bg-black bg-opacity-50"
         >
-          <div className="relative p-4 w-full max-w-2xl h-full md:h-auto">
+          <div className="relative p-4 w-full max-w-2xl">
             {/* <!-- Modal content --> */}
             <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
               {/* <!-- Modal header --> */}
@@ -352,7 +368,7 @@ const admin_category = () => {
                 </button>
               </div>
               {/* <!-- Modal body --> */}
-              <form action="#">
+              <form action="#" encType="multipart/form-data">
                 <div className="grid gap-4 mb-4 sm:grid-cols-2">
                   <div className="col-span-2">
                     <label
@@ -370,10 +386,11 @@ const admin_category = () => {
                       autoComplete="name"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       placeholder="Ex. Apple iMac 27&ldquo;"
+                      autoFocus
                     />
                   </div>
 
-                  <div className="sm:col-span-2">
+                  <div className="col-span-2">
                     <label
                       htmlFor="description"
                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -391,12 +408,34 @@ const admin_category = () => {
                     ></textarea>
                   </div>
 
-                  <div className="col-span-2">
-                    <label className="inline-flex items-center mb-4 cursor-pointer select-none">
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-300">
+                  <div className="relative col-span-2 sm:col-span-1">
+                    <label
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="small_size"
+                    >
+                      Upload Image
+                    </label>
+                    <input
+                      name="image"
+                      onChange={handleImageChange}
+                      className="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                      id="small_size"
+                      type="file"
+                    />
+                    <p
+                      className="block sm:absolute sm:bottom-0 mt-1 sm:mt-0 text-sm text-gray-500 dark:text-gray-300"
+                      id="file_input_help"
+                    >
+                      SVG, PNG, JPG or GIF (MAX. 800x400px).
+                    </p>
+                  </div>
+
+                  <div className="col-span-1">
+                    <label className="items-center sm:mb-4 cursor-pointer select-none">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2 sm:mb-3.5">
                         Published
-                      </span>
-                      <div className="relative ml-3">
+                      </p>
+                      <div className="relative mb-3 ">
                         <input
                           id="modal-published"
                           name="modal-published"
@@ -408,16 +447,16 @@ const admin_category = () => {
                         />
                         <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
                       </div>
-                    </label>
-                    <div className="text-sm text-gray-500">
-                      <div className={`${isChecked ? "hidden" : ""}`}>
-                        Your item are only visible to administrators.
-                      </div>
+                      <div className="text-sm text-gray-500 mt-1 sm:mt-0">
+                        <div className={`${isChecked ? "hidden" : ""}`}>
+                          Your item are only visible to administrators.
+                        </div>
 
-                      <div className={`${isChecked ? "" : "hidden"}`}>
-                        Your item will be publicly visible on your site.
+                        <div className={`${isChecked ? "" : "hidden"}`}>
+                          Your item will be publicly visible on your site.
+                        </div>
                       </div>
-                    </div>
+                    </label>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">

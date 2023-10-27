@@ -5,8 +5,9 @@ from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class FoodMenusView(viewsets.ModelViewSet):
@@ -23,6 +24,8 @@ class FoodMenusView(viewsets.ModelViewSet):
 class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD operations for a django model
     serializer_class = FoodCategoriesSerializer # Serializers are use to convert complex data type (E.g django model)
     queryset = FoodCategories.objects.all() # Include all FoodCategories instances
+    permission_classes = [permissions.AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_queryset(self):
         id = self.request.query_params.get('id') # Endpoint
@@ -38,22 +41,56 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
         return self.queryset
 
 
-    def create(self, request):
-        data = request.data
-        # Extract foodmenu_id from data
-        foodmenu_id = data.get('foodmenu_id')  # Retrives foodmenu_id value from the data
+    def create(self, request, *args, **kwargs):
+        name = request.data['name']
+        description = request.data['description']
+        published = request.data['published']
+        image = request.data['image']
+        foodmenu_id = request.data['foodmenu_id']
         
-        # Create a new FoodCategories instance
+        if published.lower() == 'true':
+            published = True
+        elif published.lower() == 'false':
+            published = False
+
         category = FoodCategories.objects.create(
-            name=data['name'],
-            description=data['description'],
-            published=data['published'],
-            foodmenu_id=foodmenu_id  # Assign the foodmenu_id
-        )
-        
-        # Serialize and return the new instance in the response
+            name=name, 
+            description=description, 
+            published=published, 
+            image=image, 
+            foodmenu_id = foodmenu_id
+            )
+
         serializer = FoodCategoriesSerializer(category)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # data = request.data
+        # # Extract foodmenu_id from data
+        # foodmenu_id = data.get('foodmenu_id') # Retrives foodmenu_id value from the data
+        # image = data.get('image') # Handle image file upload
+        
+        # if image:
+        #     # You can handle the uploaded image here
+        #     # For example, you can save it to a specific directory
+        #     category = FoodCategories.objects.create(
+        #         name=data['name'],
+        #         description=data['description'],
+        #         image=image,  # Assign the image file to the model field
+        #         published=data['published'],
+        #         foodmenu_id=foodmenu_id
+        #     )
+        # else:
+        #     # Handle cases where no image is provided
+        #     category = FoodCategories.objects.create(
+        #         name=data['name'],
+        #         description=data['description'],
+        #         published=data['published'],
+        #         foodmenu_id=foodmenu_id
+        #     )
+        
+        # # Serialize and return the new instance in the response
+        # serializer = FoodCategoriesSerializer(category)
+        # return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         
 
 class FoodItemsView(viewsets.ModelViewSet):

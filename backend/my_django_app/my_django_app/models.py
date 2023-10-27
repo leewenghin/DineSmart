@@ -18,7 +18,8 @@ class FoodMenus(models.Model):
 class FoodCategories(models.Model):
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=255)
-    published = models.BooleanField(default=True)
+    image = models.ImageField(upload_to='img/admin/categories', null=True, blank=True)
+    published = models.BooleanField(default=False)
     foodmenu = models.ForeignKey(FoodMenus, on_delete=models.CASCADE)
 
     class Meta:
@@ -31,7 +32,7 @@ class FoodCategories(models.Model):
 class FoodItems(models.Model):
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='images/', null=True)
+    image = models.ImageField(upload_to='img/admin/items', null=True, blank=True)
     price = models.FloatField()
     tag = models.CharField(max_length=128)
     published = models.BooleanField(default=True)

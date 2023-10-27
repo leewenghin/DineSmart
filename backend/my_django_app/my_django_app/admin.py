@@ -10,7 +10,7 @@ admin.site.register(FoodMenus, FoodMenusAdmin)
 
 class FoodCategoriesAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
-    list_display = ("id", "name", "description", "published", "foodmenu_id")
+    list_display = ("id", "name", "description", "image", "published", "foodmenu_id")
     
 # Register model
 admin.site.register(FoodCategories, FoodCategoriesAdmin)

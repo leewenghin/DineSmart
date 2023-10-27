@@ -196,7 +196,11 @@ const dineMethod = () => {
                 </button>
               </div>
               {/* <!-- Modal body --> */}
-              <form action="#" onSubmit={handleSubmit}>
+              <form
+                action="#"
+                onSubmit={handleSubmit}
+                encType="multipart/form-data"
+              >
                 <div className="grid gap-4 mb-4 sm:grid-cols-2">
                   <div className="col-span-2">
                     <label
