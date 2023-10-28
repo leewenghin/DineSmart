@@ -66,19 +66,23 @@ const dineMethod = () => {
       body: JSON.stringify(newMenu),
     })
       .then((response) => response.json())
-      .then((data: Menu) => {
-        setMenuList([...menuList, data]); // update the list of menus (realtime)
+      .then((data) => {
+        fetchMenuList();
       })
       .catch((error) => console.error("Error creating task: ", error));
   };
 
-  useEffect(() => {
+  const fetchMenuList = () => {
     fetch("http://127.0.0.1:8000/api/foodmenus/")
       .then((response) => response.json())
       .then((data) => {
         setMenuList(data);
       })
       .catch((error) => console.error("Error fetching data: ", error));
+  };
+
+  useEffect(() => {
+    fetchMenuList();
   }, []);
 
   return (
