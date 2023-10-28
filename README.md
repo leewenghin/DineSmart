@@ -23,12 +23,12 @@ If you're not ready to commit your changes but want to temporarily save them, yo
 
 ## Ignore `__pycache__` folder in version control
 
-**Remove Existing __pycache__ Directory**
+**Remove Existing `__pycache__` Directory**
 
-- git rm -r --cached **pycache**
-- git commit -m "Remove **pycache** from version control"
+- git rm -r --cached `__pycache__`
+- git commit -m "Remove `__pycache__` from version control"
 
 **Update .gitignore and Commit**
 
 - git add .gitignore
-- git commit -m "Update .gitignore to ignore **pycache**"
+- git commit -m "Update .gitignore to ignore `__pycache__`"

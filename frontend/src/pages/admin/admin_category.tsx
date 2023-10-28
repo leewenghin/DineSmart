@@ -376,11 +376,13 @@ const admin_category = () => {
                       <p className="mr-2 mb-2 text-base w-full">
                         {item.description} items
                       </p>
+                      {item.published.toString()}
                       <div className="absolute bottom-5 right-5 form-check form-switch flex justify-end text-2xl">
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             name="published"
                             type="checkbox"
+                            key={item.id}
                             defaultChecked={item.published}
                             onClick={() => handlePublished(item.id, index)}
                             value=""
