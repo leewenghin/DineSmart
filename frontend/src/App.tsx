@@ -26,7 +26,7 @@ function App() {
         <Route path="/card_payment" element={<Card_payment />}></Route>
         <Route path="/admin_panel" element={<Admin_panel />}>
           <Route path="menu" element={<Admin_method />} />
-          <Route path="category/:cateLabel" element={<Admin_category />} />
+          <Route path="category/:foodmenu_id" element={<Admin_category />} />
           <Route
             path="category/:cateLabel/:itemLabel"
             element={<Admin_item />}

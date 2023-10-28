@@ -1,4 +1,11 @@
-import { Component, useState } from "react";
+import {
+  ChangeEvent,
+  Component,
+  FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
@@ -13,15 +20,251 @@ const categories = [
   { label: "Appetizers", items: "100" },
 ];
 
+// ==================== Interfaces  ====================
+interface Menu {
+  id: number;
+  name: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+  image: File | null;
+  published: boolean;
+  foodmenu_id: number;
+}
+
+interface submitCategory {
+  name: string;
+  description: string;
+  image: File | null;
+  published: boolean;
+  foodmenu_id: number;
+}
+// ==================== Interfaces  ====================
+
 const admin_category = () => {
-  const { cateLabel } = useParams();
+  const { foodmenu_id } = useParams();
+  const FoodMenuId = foodmenu_id ? parseInt(foodmenu_id) : 0; // Provide a default value, 0 in this case
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const getMenuLink = `http://127.0.0.1:8000/api/foodmenus/?id=${foodmenu_id}`;
+  const getCategoryLink = `http://127.0.0.1:8000/api/foodcategories/?foodmenu_id=${foodmenu_id}`;
+  const setCategoryLink = `http://127.0.0.1:8000/api/foodcategories/`;
 
-  // Use useEffect to trigger modal open when the component is mounted
+  const [menuList, setMenuList] = useState<Menu[]>([]); // List for store data from menu table
+  const [categoryList, setCategoryList] = useState<Category[]>([]); // List for store data from category table
+  const [newCategory, setNewCategory] = useState<submitCategory>({
+    // Initial value
+    // Reset the field
+    name: "",
+    description: "",
+    image: null,
+    published: false,
+    foodmenu_id: FoodMenuId,
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
+  const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
+  const [image, setImage] = useState<File | null>(null); // For modal image purpose
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [formAlert, setFormAlert] = useState(null);
+
+  // ==================== Toggle Method ====================
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
+  // ==================== Toggle Method ====================
+
+  // ==================== Fetch Method ====================
+  // Fetch data array from table method
+  const fetchList = (getLink: string, setList: any) => {
+    fetch(getLink)
+      .then((response) => response.json())
+      .then((data) => {
+        setList(data);
+      })
+      .catch((error) => console.error("Error fetching data: ", error));
+  };
+
+  // Fetch & set data array from category table method
+  const fetchSetCategoryList = (event: FormEvent) => {
+    return new Promise((resolve, reject) => {
+      event.preventDefault();
+
+      const formData = new FormData();
+      if (image) {
+        // Ensure that the 'image' field is a valid File
+        if (image instanceof File) {
+          formData.append("image", image);
+          console.log("Success image file");
+        } else {
+          console.error("Invalid image file");
+          return;
+        }
+      } else {
+        formData.append("image", "");
+      }
+
+      formData.append("name", newCategory.name);
+      formData.append("description", newCategory.description);
+      formData.append("published", newCategory.published.toString());
+      formData.append("foodmenu_id", newCategory.foodmenu_id.toString());
+
+      fetch(setCategoryLink, {
+        method: "POST",
+        // headers: {
+        //   "Content-Type": "application/json",
+        // },
+        body: formData,
+      })
+        .then((response) => {
+          if (response.ok) {
+            // return response.json(); // Parse the JSON data if the response is valid
+            const data = response.json();
+            resolve(data); // Resolve the Promise with the fetched data
+          } else {
+            console.log("This is image: ", image);
+            return response.json().then((errorData) => {
+              if (errorData.name) {
+                const errorMessage = errorData.name[0];
+                console.error("Error (Name):", errorMessage);
+
+                // Show an alert message
+                setFormAlert(errorMessage);
+              }
+              throw new Error(`Response not OK. Status: ${response.status}`);
+            });
+          }
+        })
+        .then((data) => {
+          fetchList(getCategoryLink, setCategoryList);
+          setNewCategory({
+            name: "",
+            description: "",
+            image: null,
+            published: false,
+            foodmenu_id: FoodMenuId,
+          }); // Clear the input fields
+        })
+        .catch((error) => {
+          console.error("Error creating task: ", error);
+          reject(error); // Reject the Promise with the error
+        });
+    });
+  };
+
+  const fetchSetCategoryIDList = (
+    categoryId: number,
+    index: number,
+    updatedCategoryList: Category[]
+  ) => {
+    fetch(`http://127.0.0.1:8000/api/foodcategories/${categoryId}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ published: updatedCategoryList[index].published }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json(); // Parse the JSON data if the response is valid
+        } else {
+          throw new Error(`Response not OK. Status: ${response.status}`);
+        }
+      })
+      .catch((error) => console.error("Error updating status: ", error));
+  };
+
+  // ==================== Fetch Method ====================
+
+  // ==================== Handle Method ====================
+  // Function to hide the alert message
+  const hideAlert = () => {
+    setAlertMessage(null);
+  };
+  const hideFormAlert = () => {
+    setFormAlert(null);
+  };
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target && e.target.files) {
+      const selectedImage = e.target.files[0];
+      setImage(selectedImage);
+    }
+  };
+
+  const handlePublished = (categoryId: number, index: number) => {
+    const updatedCategoryList = [...categoryList];
+    updatedCategoryList[index].published =
+      !updatedCategoryList[index].published;
+
+    // Call the fetchSetCategoryIDList method to perform the PATCH request
+    fetchSetCategoryIDList(categoryId, index, updatedCategoryList);
+  };
+
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // Set as checked
+    setIsChecked(e.target.checked);
+
+    setNewCategory((prevMenu) => ({
+      ...prevMenu,
+      published: !prevMenu.published, // Toggle the "published" property
+    }));
+  };
+
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    setNewCategory({ ...newCategory, [name]: value });
+    hideFormAlert(); // Remove alert when have value
+  };
+
+  const handleCancel = () => {
+    // Clear the form data by setting it to its initial state
+    setNewCategory({
+      name: "",
+      description: "",
+      image: null,
+      published: false,
+      foodmenu_id: FoodMenuId,
+    });
+
+    toggleModal();
+    hideFormAlert();
+  };
+
+  const handleSave = async (event: React.FormEvent) => {
+    try {
+      await fetchSetCategoryList(event); // Wait for fetchSetCategoryList to complete
+
+      if (!formAlert) {
+        handleCancel(); // Reset the field list and exit modal
+      }
+    } catch (error) {
+      // Handle any errors that occur during the fetchSetCategoryList operation
+      console.error("Error:", error);
+    }
+  };
+
+  const handleSaveAdd = (event: React.FormEvent) => {
+    fetchSetCategoryList(event);
+  };
+
+  const alertMessageTime = () => {
+    if (alertMessage) {
+      const timeout = setTimeout(hideAlert, 2000); // 5000 milliseconds (5 seconds)
+
+      // Clear the timeout if the component unmounts
+      return () => clearTimeout(timeout);
+    }
+  };
+  // ==================== Handle Method ====================
+
+  useEffect(() => {
+    fetchList(getMenuLink, setMenuList);
+    fetchList(getCategoryLink, setCategoryList);
+  }, [alertMessage]);
 
   return (
     <div className="content px-10">
@@ -64,9 +307,14 @@ const admin_category = () => {
                       d="m1 9 4-4-4-4"
                     />
                   </svg>
-                  <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">
-                    {cateLabel}
-                  </span>
+                  {menuList.map((item, index) => (
+                    <span
+                      className="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400"
+                      key={index}
+                    >
+                      {item.name}
+                    </span>
+                  ))}
                 </div>
               </li>
             </ol>
@@ -82,19 +330,28 @@ const admin_category = () => {
       </div>
       <div className="content-box w-full py-8 px-8 shadow-sm rounded-xl">
         {/* <p className="subtitle pb-3 text-2xl font-bold  ">Dine Method</p> */}
-        <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 font-medium">
-          {categories.map((item, index) => (
+        <div className="grid sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 font-medium">
+          {categoryList.map((item, index) => (
             <div className="dine-method text-xl" key={index}>
-              <div className="card rounded overflow-hidden shadow-md border-1 border-gray-300 h-full max-w-sm relative">
+              <div className="card rounded overflow-hidden shadow-md border border-grey-300 h-full max-w-sm relative">
                 <div className="image relative">
-                  <img
-                    className="image-img w-full p-4 cursor-pointer"
-                    src="/src/assets/img/admin/tableware.png"
-                    alt="Sunset in the moufntains"
-                  />
+                  <div className="flex w-full justify-center items-center p-3 pb-0">
+                    <img
+                      className={`image-img w-full h-36 cursor-pointer rounded-md ${
+                        item.image ? "bg-transparent" : "bg-imageColor"
+                      }`}
+                      src={
+                        item.image
+                          ? item.image.toString()
+                          : "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                      }
+                      // /src/assets/img/admin/tableware.png
+                      alt="Sunset in the mountaines"
+                    />
+                  </div>
                   <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
                     <Link
-                      to={`/admin_panel/category/${cateLabel}/${item.label}`}
+                      to={`/admin_panel/category/${foodmenu_id}/${item.id}`}
                     >
                       <button
                         type="button"
@@ -112,17 +369,20 @@ const admin_category = () => {
                     </button>
                   </div>
                 </div>
-                <div id="card-text" className="card-text px-6 pt-4 pb-5">
+                <div id="card-text" className="card-text px-3 pt-2 pb-12">
                   <div className="w-full flex">
                     <div className="w-full">
-                      <p className="mr-2 mb-1 break-words">{item.label}</p>
+                      <p className="mr-2 mb-1 break-words">{item.name}</p>
                       <p className="mr-2 mb-2 text-base w-full">
-                        {item.items} items
+                        {item.description} items
                       </p>
                       <div className="absolute bottom-5 right-5 form-check form-switch flex justify-end text-2xl">
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
+                            name="published"
                             type="checkbox"
+                            defaultChecked={item.published}
+                            onClick={() => handlePublished(item.id, index)}
                             value=""
                             className="sr-only peer"
                           />
@@ -145,9 +405,9 @@ const admin_category = () => {
           data-modal-backdrop="static"
           tabIndex={-1}
           aria-hidden="true"
-          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 items-center w-full md:inset-0 h-modal md:h-full bg-black bg-opacity-50"
+          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 sm:justify-center items-center w-full md:inset-0 h-full bg-black bg-opacity-50"
         >
-          <div className="relative p-4 w-full max-w-2xl h-full md:h-auto">
+          <div className="relative p-4 w-full max-w-2xl">
             {/* <!-- Modal content --> */}
             <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
               {/* <!-- Modal header --> */}
@@ -178,7 +438,7 @@ const admin_category = () => {
                 </button>
               </div>
               {/* <!-- Modal body --> */}
-              <form action="#">
+              <form action="#" encType="multipart/form-data">
                 <div className="grid gap-4 mb-4 sm:grid-cols-2">
                   <div className="col-span-2">
                     <label
@@ -188,65 +448,28 @@ const admin_category = () => {
                       Name
                     </label>
                     <input
-                      type="text"
-                      name="name"
                       id="name"
-                      // value="iPad Air Gen 5th Wi-Fi"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      name="name"
+                      type="text"
+                      value={newCategory.name}
+                      onChange={handleInputChange}
+                      autoComplete="name"
+                      className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
+                        formAlert ? "border-red-500" : "border-gray-300"
+                      }`}
                       placeholder="Ex. Apple iMac 27&ldquo;"
+                      autoFocus
                     />
+                    {formAlert && (
+                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                        <span className="font-medium">
+                          Name field must not be empty.
+                        </span>
+                      </p>
+                    )}
                   </div>
-                  {/* <div>
-                        <label
-                          htmlFor="brand"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                          Brand
-                        </label>
-                        <input
-                          type="text"
-                          name="brand"
-                          id="brand"
-                          // value="Google"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                          placeholder="Ex. Apple"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="price"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                          Price
-                        </label>
-                        <input
-                          type="number"
-                          // value="399"
-                          name="price"
-                          id="price"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                          placeholder="$299"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="category"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                          Category
-                        </label>
-                        <select
-                          id="category"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        >
-                          <option selected={true}>Electronics</option>
-                          <option value="TV">TV/Monitors</option>
-                          <option value="PC">PC</option>
-                          <option value="GA">Gaming/Console</option>
-                          <option value="PH">Phones</option>
-                        </select>
-                      </div> */}
-                  <div className="sm:col-span-2">
+
+                  <div className="col-span-2">
                     <label
                       htmlFor="description"
                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -255,22 +478,85 @@ const admin_category = () => {
                     </label>
                     <textarea
                       id="description"
+                      name="description"
+                      value={newCategory.description}
+                      onChange={handleInputChange}
                       rows={5}
                       className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       placeholder="Write a description..."
                     ></textarea>
                   </div>
+
+                  <div className="relative col-span-2 sm:col-span-1">
+                    <label
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="small_size"
+                    >
+                      Upload Image
+                    </label>
+                    <input
+                      name="image"
+                      onChange={handleImageChange}
+                      className="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                      id="small_size"
+                      type="file"
+                    />
+                    <p
+                      className="block sm:absolute sm:bottom-0 mt-1 sm:mt-0 text-sm text-gray-500 dark:text-gray-300"
+                      id="file_input_help"
+                    >
+                      SVG, PNG, JPG or GIF (MAX. 800x400px).
+                    </p>
+                  </div>
+
+                  <div className="col-span-1">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2 sm:mb-3.5">
+                      Published
+                    </p>
+                    <div className="max-w-max">
+                      <label className="items-center sm:mb-4 cursor-pointer select-none">
+                        <div className="relative mb-3 ">
+                          <input
+                            id="modal-published"
+                            name="modal-published"
+                            type="checkbox"
+                            defaultChecked={newCategory.published}
+                            onChange={handleCheckboxChange}
+                            value=""
+                            className="toggle-switch sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                        </div>
+                      </label>
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1 sm:mt-0">
+                      <div className={`${isChecked ? "hidden" : ""}`}>
+                        Your item are only visible to administrators.
+                      </div>
+                      <div className={`${isChecked ? "" : "hidden"}`}>
+                        Your item will be publicly visible on your site.
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-4">
                   <button
                     type="submit"
+                    onClick={handleSaveAdd}
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   >
-                    Create Category
+                    Save and add another
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={handleSave}
+                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                    Save
                   </button>
                   <button
                     data-modal-hide="updateProductModal"
-                    onClick={toggleModal}
+                    onClick={handleCancel}
                     type="button"
                     className="text-red-600 inline-flex items-center hover:text-white border !border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
                   >
@@ -278,6 +564,33 @@ const admin_category = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Message */}
+      {alertMessage && (
+        <div
+          className="fixed bottom-0 right-4 animate-slideIn z-50"
+          onClick={hideAlert}
+        >
+          <div
+            className="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+            role="alert"
+          >
+            <svg
+              className="flex-shrink-0 inline w-4 h-4 mr-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+            </svg>
+            <span className="sr-only">Info</span>
+            <div>
+              <span className="font-medium">Danger alert!</span> {alertMessage}
             </div>
           </div>
         </div>

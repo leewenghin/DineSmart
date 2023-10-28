@@ -19,6 +19,10 @@ from django.urls import path, include
 from my_django_app import views
 from rest_framework import routers
 
+from django.conf import settings
+from django.conf.urls.static import static
+
+
 router = routers.DefaultRouter()
 router.register(r'foodmenus', views.FoodMenusView, 'foodmenu')
 router.register(r'foodcategories', views.FoodCategoriesView, 'foodcategory')
@@ -30,3 +34,6 @@ urlpatterns = [
     # path('drinks/', views.drink_list),
     # path('drinks/<int:id>', views.drink_detail),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
