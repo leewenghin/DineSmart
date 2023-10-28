@@ -32,19 +32,13 @@ export default {
         // Admin
         bodyColor: "#FFEADB",
         sidebarColor: "#fff",
-        sidebarTextColor: "#7d8da1"
+        sidebarTextColor: "#7d8da1",
+
+        // Admin - Category
+        imageColor: '#ffe3c3',
       },
       spacing: {
         '142': '42rem'
-      },
-      Image: {
-        "beef-bliss": "url('./src/assets/img/beef-bliss.jpg')"
-      },
-      backgroundImage: (theme) => ({
-        "gradient-yellow": "Linear-gradient(90deg, #FFFFFF)",
-        "testing-image": "url('./src/assets/img/beef-bliss.jpg)"
-      }),
-      fontFamily: {
       },
       fontSize: {
         sm: '0.8rem',
@@ -54,6 +48,15 @@ export default {
         '3xl': '1.953rem',
         '4xl': '2.441rem',
         '5xl': '3.052rem',
+      },
+      keyframes: {
+        slideIn: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        }
+      },
+      animation: {
+        slideIn: 'slideIn 0.1s ease-in-out',
       },
     },
   },

@@ -84,19 +84,19 @@
   transform: rotate(0deg);
 }
 
-/* ===== Navbar Toggler ===== */
+/* ================= Navbar Toggler ================= */
 .toggle {
   background-color: var(--primary-color);
   transform: rotate(180deg);
 }
-/* ===== Navbar Toggler ===== */
+/* ================= Navbar Toggler ================= */
 
-/* ===== Theme Toggler ===== */
+/* ================= Theme Toggler ================= */
 .theme-toggler span.active {
   background-color: var(--primary-color);
   color: white;
 }
-/* ===== Theme Toggler ===== */
+/* ================= Theme Toggler ================= */
 
 .sidebar.close ~ .content {
   margin-left: 88px !important;
@@ -122,10 +122,6 @@
   color: var(--text-color);
 }
 
-.dine-method img {
-  background-color: #ffe3c3;
-}
-
 .dine-method .card-text,
 .dine-method .card-text .text-muted {
   color: var(--text-color) !important;
@@ -143,4 +139,17 @@
   --primary-color: #3a383c;
   --toggle-color: #fff;
   --text-color: #edeffd;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-in-out;
 }

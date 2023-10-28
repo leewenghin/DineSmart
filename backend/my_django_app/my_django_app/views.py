@@ -7,8 +7,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser, FormParser
-
 
 class FoodMenusView(viewsets.ModelViewSet):
     serializer_class = FoodMenusSerializer
@@ -24,8 +22,7 @@ class FoodMenusView(viewsets.ModelViewSet):
 class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD operations for a django model
     serializer_class = FoodCategoriesSerializer # Serializers are use to convert complex data type (E.g django model)
     queryset = FoodCategories.objects.all() # Include all FoodCategories instances
-    permission_classes = [permissions.AllowAny]
-    parser_classes = (MultiPartParser, FormParser)
+    # permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         id = self.request.query_params.get('id') # Endpoint
@@ -42,27 +39,34 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
 
 
     def create(self, request, *args, **kwargs):
-        name = request.data['name']
-        description = request.data['description']
-        published = request.data['published']
-        image = request.data['image']
-        foodmenu_id = request.data['foodmenu_id']
-        
-        if published.lower() == 'true':
-            published = True
-        elif published.lower() == 'false':
-            published = False
+        if request.method == 'POST':
+            name = request.data['name']
+            description = request.data['description']
+            published = request.data['published']
+            image = request.data['image']
+            foodmenu_id = request.data['foodmenu_id']
+            
+            if published.lower() == 'true':
+                published = True
+            elif published.lower() == 'false':
+                published = False
 
-        category = FoodCategories.objects.create(
-            name=name, 
-            description=description, 
-            published=published, 
-            image=image, 
-            foodmenu_id = foodmenu_id
-            )
+            if not name:
+                return Response({"name": ["Name field must not be empty."]}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = FoodCategoriesSerializer(category)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if image is None or image == "":
+                image = None  # Set it to 'null' in the database
+
+            category = FoodCategories.objects.create(
+                name=name, 
+                description=description, 
+                published=published, 
+                image=image, 
+                foodmenu_id = foodmenu_id
+                )
+
+            serializer = FoodCategoriesSerializer(category)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         # data = request.data
         # # Extract foodmenu_id from data
         # foodmenu_id = data.get('foodmenu_id') # Retrives foodmenu_id value from the data

@@ -106,7 +106,7 @@ const dineMethod = () => {
               <div className="card rounded overflow-hidden shadow-md border-1 border-gray-300 h-full max-w-full xl:max-w-sm">
                 <div className="image relative">
                   <img
-                    className="image-img w-full p-4 cursor-pointer"
+                    className="image-img w-full p-4 cursor-pointer bg-imageColor"
                     src="../src/assets/img/admin/tableware.png"
                     alt="Sunset in the mountains"
                   />

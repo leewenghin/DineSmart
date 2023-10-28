@@ -1,4 +1,11 @@
-import { ChangeEvent, Component, useEffect, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  Component,
+  FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
@@ -59,6 +66,8 @@ const admin_category = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
   const [image, setImage] = useState<File | null>(null); // For modal image purpose
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [formAlert, setFormAlert] = useState(null);
 
   // ==================== Toggle Method ====================
   const toggleModal = () => {
@@ -78,42 +87,70 @@ const admin_category = () => {
   };
 
   // Fetch & set data array from category table method
-  const fetchSetCategoryList = () => {
-    const formData = new FormData();
-    if (image) {
-      // Ensure that the 'image' field is a valid File
-      if (image instanceof File) {
-        formData.append("image", image);
-        console.log("Success image file");
-      } else {
-        console.error("Invalid image file");
-        return;
-      }
-    }
-    formData.append("name", newCategory.name);
-    formData.append("description", newCategory.description);
-    formData.append("published", newCategory.published.toString());
-    formData.append("foodmenu_id", newCategory.foodmenu_id.toString());
+  const fetchSetCategoryList = (event: FormEvent) => {
+    return new Promise((resolve, reject) => {
+      event.preventDefault();
 
-    fetch(setCategoryLink, {
-      method: "POST",
-      // headers: {
-      //   "Content-Type": "application/json",
-      // },
-      body: formData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.text(); // Parse the JSON data if the response is valid
+      const formData = new FormData();
+      if (image) {
+        // Ensure that the 'image' field is a valid File
+        if (image instanceof File) {
+          formData.append("image", image);
+          console.log("Success image file");
         } else {
-          console.log(formData, image, newCategory.published.toString());
-          throw new Error(`Response not OK. Status: ${response.status}`);
+          console.error("Invalid image file");
+          return;
         }
+      } else {
+        formData.append("image", "");
+      }
+
+      formData.append("name", newCategory.name);
+      formData.append("description", newCategory.description);
+      formData.append("published", newCategory.published.toString());
+      formData.append("foodmenu_id", newCategory.foodmenu_id.toString());
+
+      fetch(setCategoryLink, {
+        method: "POST",
+        // headers: {
+        //   "Content-Type": "application/json",
+        // },
+        body: formData,
       })
-      // .then((data) => {
-      //   fetchList(getCategoryLink, setCategoryList);
-      // })
-      .catch((error) => console.error("Error creating task: ", error));
+        .then((response) => {
+          if (response.ok) {
+            // return response.json(); // Parse the JSON data if the response is valid
+            const data = response.json();
+            resolve(data); // Resolve the Promise with the fetched data
+          } else {
+            console.log("This is image: ", image);
+            return response.json().then((errorData) => {
+              if (errorData.name) {
+                const errorMessage = errorData.name[0];
+                console.error("Error (Name):", errorMessage);
+
+                // Show an alert message
+                setFormAlert(errorMessage);
+              }
+              throw new Error(`Response not OK. Status: ${response.status}`);
+            });
+          }
+        })
+        .then((data) => {
+          fetchList(getCategoryLink, setCategoryList);
+          setNewCategory({
+            name: "",
+            description: "",
+            image: null,
+            published: false,
+            foodmenu_id: FoodMenuId,
+          }); // Clear the input fields
+        })
+        .catch((error) => {
+          console.error("Error creating task: ", error);
+          reject(error); // Reject the Promise with the error
+        });
+    });
   };
 
   const fetchSetCategoryIDList = (
@@ -137,9 +174,18 @@ const admin_category = () => {
       })
       .catch((error) => console.error("Error updating status: ", error));
   };
+
   // ==================== Fetch Method ====================
 
   // ==================== Handle Method ====================
+  // Function to hide the alert message
+  const hideAlert = () => {
+    setAlertMessage(null);
+  };
+  const hideFormAlert = () => {
+    setFormAlert(null);
+  };
+
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target && e.target.files) {
       const selectedImage = e.target.files[0];
@@ -171,6 +217,7 @@ const admin_category = () => {
   ) => {
     const { name, value } = event.target;
     setNewCategory({ ...newCategory, [name]: value });
+    hideFormAlert(); // Remove alert when have value
   };
 
   const handleCancel = () => {
@@ -184,26 +231,40 @@ const admin_category = () => {
     });
 
     toggleModal();
+    hideFormAlert();
   };
 
-  const handleSave = (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSave = async (event: React.FormEvent) => {
+    try {
+      await fetchSetCategoryList(event); // Wait for fetchSetCategoryList to complete
 
-    fetchSetCategoryList(); // Fetch and set the data through api
-    handleCancel(); // Reset the field list and exit modal
+      if (!formAlert) {
+        handleCancel(); // Reset the field list and exit modal
+      }
+    } catch (error) {
+      // Handle any errors that occur during the fetchSetCategoryList operation
+      console.error("Error:", error);
+    }
   };
 
   const handleSaveAdd = (event: React.FormEvent) => {
-    event.preventDefault();
+    fetchSetCategoryList(event);
+  };
 
-    fetchSetCategoryList();
+  const alertMessageTime = () => {
+    if (alertMessage) {
+      const timeout = setTimeout(hideAlert, 2000); // 5000 milliseconds (5 seconds)
+
+      // Clear the timeout if the component unmounts
+      return () => clearTimeout(timeout);
+    }
   };
   // ==================== Handle Method ====================
 
   useEffect(() => {
     fetchList(getMenuLink, setMenuList);
     fetchList(getCategoryLink, setCategoryList);
-  }, []);
+  }, [alertMessage]);
 
   return (
     <div className="content px-10">
@@ -269,16 +330,25 @@ const admin_category = () => {
       </div>
       <div className="content-box w-full py-8 px-8 shadow-sm rounded-xl">
         {/* <p className="subtitle pb-3 text-2xl font-bold  ">Dine Method</p> */}
-        <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 font-medium">
+        <div className="grid sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 font-medium">
           {categoryList.map((item, index) => (
             <div className="dine-method text-xl" key={index}>
-              <div className="card rounded overflow-hidden shadow-md border-1 border-gray-300 h-full max-w-sm relative">
+              <div className="card rounded overflow-hidden shadow-md border border-grey-300 h-full max-w-sm relative">
                 <div className="image relative">
-                  <img
-                    className="image-img w-full p-4 cursor-pointer"
-                    src="/src/assets/img/admin/tableware.png"
-                    alt="Sunset in the moufntains"
-                  />
+                  <div className="flex w-full justify-center items-center p-3 pb-0">
+                    <img
+                      className={`image-img w-full h-36 cursor-pointer rounded-md ${
+                        item.image ? "bg-transparent" : "bg-imageColor"
+                      }`}
+                      src={
+                        item.image
+                          ? item.image.toString()
+                          : "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                      }
+                      // /src/assets/img/admin/tableware.png
+                      alt="Sunset in the mountaines"
+                    />
+                  </div>
                   <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
                     <Link
                       to={`/admin_panel/category/${foodmenu_id}/${item.id}`}
@@ -299,7 +369,7 @@ const admin_category = () => {
                     </button>
                   </div>
                 </div>
-                <div id="card-text" className="card-text px-6 pt-4 pb-5">
+                <div id="card-text" className="card-text px-3 pt-2 pb-12">
                   <div className="w-full flex">
                     <div className="w-full">
                       <p className="mr-2 mb-1 break-words">{item.name}</p>
@@ -384,10 +454,19 @@ const admin_category = () => {
                       value={newCategory.name}
                       onChange={handleInputChange}
                       autoComplete="name"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
+                        formAlert ? "border-red-500" : "border-gray-300"
+                      }`}
                       placeholder="Ex. Apple iMac 27&ldquo;"
                       autoFocus
                     />
+                    {formAlert && (
+                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                        <span className="font-medium">
+                          Name field must not be empty.
+                        </span>
+                      </p>
+                    )}
                   </div>
 
                   <div className="col-span-2">
@@ -431,32 +510,33 @@ const admin_category = () => {
                   </div>
 
                   <div className="col-span-1">
-                    <label className="items-center sm:mb-4 cursor-pointer select-none">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2 sm:mb-3.5">
-                        Published
-                      </p>
-                      <div className="relative mb-3 ">
-                        <input
-                          id="modal-published"
-                          name="modal-published"
-                          type="checkbox"
-                          defaultChecked={newCategory.published}
-                          onChange={handleCheckboxChange}
-                          value=""
-                          className="toggle-switch sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
-                      </div>
-                      <div className="text-sm text-gray-500 mt-1 sm:mt-0">
-                        <div className={`${isChecked ? "hidden" : ""}`}>
-                          Your item are only visible to administrators.
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2 sm:mb-3.5">
+                      Published
+                    </p>
+                    <div className="max-w-max">
+                      <label className="items-center sm:mb-4 cursor-pointer select-none">
+                        <div className="relative mb-3 ">
+                          <input
+                            id="modal-published"
+                            name="modal-published"
+                            type="checkbox"
+                            defaultChecked={newCategory.published}
+                            onChange={handleCheckboxChange}
+                            value=""
+                            className="toggle-switch sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
                         </div>
-
-                        <div className={`${isChecked ? "" : "hidden"}`}>
-                          Your item will be publicly visible on your site.
-                        </div>
+                      </label>
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1 sm:mt-0">
+                      <div className={`${isChecked ? "hidden" : ""}`}>
+                        Your item are only visible to administrators.
                       </div>
-                    </label>
+                      <div className={`${isChecked ? "" : "hidden"}`}>
+                        Your item will be publicly visible on your site.
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -484,6 +564,33 @@ const admin_category = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Message */}
+      {alertMessage && (
+        <div
+          className="fixed bottom-0 right-4 animate-slideIn z-50"
+          onClick={hideAlert}
+        >
+          <div
+            className="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+            role="alert"
+          >
+            <svg
+              className="flex-shrink-0 inline w-4 h-4 mr-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+            </svg>
+            <span className="sr-only">Info</span>
+            <div>
+              <span className="font-medium">Danger alert!</span> {alertMessage}
             </div>
           </div>
         </div>
