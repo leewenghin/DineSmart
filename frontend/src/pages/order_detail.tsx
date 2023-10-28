@@ -98,6 +98,7 @@ const dataArray: any[] = [
         price: "12.99",
       },
     ],
+
   },
 ];
 
@@ -265,8 +266,8 @@ const OrderDetailPage = () => {
                 </div>
               </div>
             </div>
-            <div className="lg:!ms-5 w-full md:w-142 lg:w-1/3 mt-4 lg:!mt-0 md:block">
-              <div className="flex flex-col pt-3 pb-5 px-3 md:!px-8 md:py-3 lg:p-3 bg-white overflow-hidden shadow-sm">
+            <div className="lg:!ms-5 w-full lg:w-1/3 mt-4 lg:!mt-0 md:block">
+              <div className="flex flex-col pt-3 pb-5 px-3 md:!p-6 bg-white overflow-hidden shadow-sm">
                 <p className="text-lg font-medium">Table 1</p>
                 <div className="my-1 border-b-2 pb-2">
                   <FontAwesomeIcon

@@ -12,7 +12,7 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Order_modal from "../components/order_modal";
 import "./menu.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -103,32 +103,84 @@ const dataArray: any[] = [
         price: "12.99",
       },
     ],
+    rice: [],
+    combo: [],
+    family: [],
+    tin: [],
+    price: [],
+    test: [],
+    yahaha: [],
   },
 ];
 
 const menu = () => {
-  // Button and Scroll Down Category List 
+  // Button and Scroll Down Category List
   const [activeCategory, setActiveCategory] = useState<number>(0);
   const categories = Object.keys(dataArray[0]);
   const categoryRefs: React.RefObject<HTMLDivElement>[] = categories.map(() =>
     useRef(null)
   );
+  window.addEventListener('resize', ()=>{
+  });
   
+  const handleCategoryItemClick = (index:any) => {
+    setActiveCategory(index);
+
+    categoryRefs[index].current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    
+    console.log(index);
+    const listElement = listRef.current;
+    if (listElement) {
+      const listItem = listElement.children[index]  ;
+      const listItemRect = listItem.getBoundingClientRect();
+      const listRect = listElement.getBoundingClientRect();
+      const scrollLeft = listElement.scrollLeft;
+      console.log("1:"+listItemRect.right);
+      console.log("2:"+listRect.right);
+      console.log("3:"+listItemRect.left);
+      console.log("4:"+listRect.left);
+      console.log("5:"+scrollLeft);
+      console.log(listItemRect);
+      console.log(listElement.children[index]);
+      console.log(listRect);
+      console.log(index);
+
+      // Check if the item is partially or fully hidden on the right side
+      if (listItemRect.right > listRect.right) {
+        // Calculate how much to scroll to fully show the item
+        const scrollAmount = listItemRect.right - listRect.right - scrollLeft; // Add some extra space
+        listElement.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      } else if (listItemRect.left < listRect.left) {
+        const scrollAmount = listItemRect.left + listRect.left - scrollLeft; 
+        // If the item is hidden on the left, scroll to bring it fully into view
+        listElement.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+      }else if(index === 0){
+        listElement.scrollBy({ left: -100, behavior: 'smooth' });
+      }
+
+      // Call the provided click handler
+      handleCategoryClick(index);
+    }
+  };
   const handleCategoryClick = (index: number) => {
     setActiveCategory(index);
+
     categoryRefs[index].current?.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
   };
 
-  // Open Model on medium screen size 
+  // Open Model on medium screen size
   const [isOpen, setIsOpen] = useState(false);
   const toggleModal = () => {
     setIsOpen(!isOpen);
   };
 
-  // Get items from API 
+  // Get items from API
   const [foodItems, setFoodItems] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
@@ -148,11 +200,10 @@ const menu = () => {
     fetchData();
   }, []);
 
-
-  // Count Order Items 
+  // Count Order Items
   const [orderedItems, setOrderedItems] = useState<any[]>([]);
-  
-  // When click one of the items then add new label (quantity) and output to order list 
+
+  // When click one of the items then add new label (quantity) and output to order list
   const handleOrderClick = (item: any) => {
     const existingItemIndex = orderedItems.findIndex(
       (orderedItem) => orderedItem.id === item.id
@@ -167,7 +218,7 @@ const menu = () => {
       setOrderedItems([...orderedItems, { ...item, quantity: 1 }]);
     }
   };
-  // Minus quantity 
+  // Minus quantity
   const handleMinusClick = (item: any) => {
     const existingItemIndex = orderedItems.findIndex(
       (orderedItem) => orderedItem.id === item.id
@@ -182,7 +233,7 @@ const menu = () => {
       );
       setOrderedItems(updatedItems);
     }
-  }; 
+  };
 
   // Cancel order items
   const handleCancelClick = (item: any) => {
@@ -209,15 +260,81 @@ const menu = () => {
       state: orderlist,
     });
   };
+  const listRef = useRef<HTMLUListElement   | null>(null);
+  const [showLeftIcon, setShowLeftIcon] = useState(false);
+  const [showRightIcon, setShowRightIcon] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const listElement = listRef.current;
+      if (listElement) {
+        const isAtStartOfContainer = listElement.scrollLeft === 0;
+        const isEndOfContainer = listElement.scrollLeft + listElement.clientWidth >= listElement.scrollWidth - 1;
+        setShowLeftIcon(!isAtStartOfContainer);
+        setShowRightIcon(!isEndOfContainer);
+      }
+    };
+
+    const listElement = listRef.current;
+    if (listElement) {
+      listElement.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (listElement) {
+        listElement.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
+  
+  const handleScrollRight =() =>{
+    const listElement = listRef.current as HTMLElement | null;
+    if (listElement) {
+      listElement.scrollBy({ left: 200, behavior: 'smooth' }); // Adjust the scroll amount as needed
+    }
+  }
+  const handleScrollLeft = () =>{
+    const listElement = listRef.current as HTMLElement | null;
+    if (listElement) {
+      listElement.scrollBy({ left: -200, behavior: 'smooth' }); // Adjust the scroll amount as needed
+    }
+  }
+  // const elementRef = useRef(null);
+  // useEffect(() => {
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       entries.forEach((entry) => {
+  //         if (entry.isIntersecting) {
+  //           console.log('Element is in the viewport!');
+  //           // You can perform actions when the element is in the viewport
+  //         } else {
+  //           console.log('Element is out of the viewport!');
+  //           // You can perform actions when the element is out of the viewport
+  //         }
+  //       });
+  //     },
+  //     {
+  //       root: null, // Use the viewport as the root
+  //       rootMargin: '0px', // No margin
+  //       threshold: 0.5, // 50% of the element must be visible to trigger the callback
+  //     }
+  //   );
+
+  //   observer.observe(elementRef.current);
+
+  //   // Cleanup the observer when the component is unmounted
+  //   return () => {
+  //     observer.disconnect();
+  //   };
+  // }, []); 
+
 
   return (
     <>
       <div className=" mx-1440 relative">
         <div className="bg-white sticky top-0 z-10 border-b-2 mb-5">
-          <div className="flex justify-between items-center md:container md:mx-auto mx-3 py-3 ">
-            <h1 className="py-2 md:mx-auto md:container font-semibold ">
-              DineSmart
-            </h1>
+          <div className="flex justify-between items-center lg:max-w-screen-lg md:max-w-screen-md max-w-none md:mx-auto mx-3 py-3 ">
+            <h1 className="py-2  font-semibold ">DineSmart</h1>
             <div className="flex align-center">
               <button className="bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5] flex justify-center items-center px-3 me-3 rounded ">
                 <p className="text-white">Login</p>
@@ -234,41 +351,90 @@ const menu = () => {
             </div>
           </div>
         </div>
-        <div className=" max-w-screen-lg mx-auto mb-16">
-          <div className="flex mx-auto md:container">
+        <div className=" max-w-screen-lg mx-auto mb-16 ">
+          <div className="flex mx-auto md:container ">
             <div className=" md:w-2/3 w-full relative">
               <div className="border-b border-gray-200 dark:border-gray-700 bg-white shadow mb-3 md:static sticky top-16 ">
-                <ul className="flex -mb-px md:text-base text-sm font-medium text-center text-gray-500 dark:text-gray-400 overflow-x-auto">
+                <ul className="flex -mb-px md:text-base text-sm items-center font-medium text-center text-gray-500 dark:text-gray-400 overflow-x-auto no-scrollbar cursor-grabbing " ref={listRef} >
                   {categories.map((category, index) => (
                     <li
-                      key={index} 
+                      key={index}
+                      
                       className={`mr-2 `}
-                      onClick={() => handleCategoryClick(index)}
+                      onClick={() => handleCategoryItemClick(index)}
                     >
                       <p
                         className={`inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg group whitespace-nowrap ${
                           activeCategory === index
                             ? "text-primaryColor  !border-primaryColor"
                             : "hover:text-gray-600 hover:border-gray-300"
-                        }`} 
+                        }`}
                       >
                         {category.replace(/_/g, " ")}
                       </p>
-                    </li> 
+                    </li>
                   ))}
+                  {showLeftIcon && (
+                      <button className="bg-white border-b border-gray-200 px-2 py-4 cursor-pointer absolute " onClick={handleScrollLeft}>
+                        &lt;
+                      </button>
+                  )}
+                  {showRightIcon && (
+                      <button className="bg-white border-b border-gray-200 px-2 py-4 absolute right-0 cursor-pointer " onClick={handleScrollRight}>
+                          &gt;
+                      </button>
+                      )}
                 </ul>
               </div>
-
+              {/* <div className="border-b border-gray-200 dark:border-gray-700 bg-white shadow mb-3 md:static sticky top-16 overflow-x-auto">
+                <div className="flex md:text-base text-sm font-medium text-center text-gray-500 dark:text-gray-400 overflow-x-auto">
+                  <div className="flex space-x-2 ">
+                    <button className="px-2 py-1  rounded-l cursor-pointer ">
+                      &lt;
+                    </button>
+                    <div className="flex space-x-2 " style={{ width: "100%" }}>
+                      {categories.map((category, index) => (
+                        <div
+                          key={index}
+                          className={`flex-none whitespace-nowrap`}
+                          onClick={() => handleCategoryClick(index)}
+                        >
+                          <p
+                            className={`inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg group whitespace-nowrap ${
+                              activeCategory === index
+                                ? "text-primaryColor !border-primaryColor"
+                                : "hover:text-gray-600 hover:border-gray-300"
+                            }`}
+                          >
+                            {category.replace(/_/g, " ")}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="px-2 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-r cursor-pointer">
+                      &gt;
+                    </button>
+                  </div>
+                </div>
+              </div> */}
 
               {/* Grid layout  */}
               {Object.keys(dataArray[0]).map((category, index) => (
                 <div key={index} ref={categoryRefs[index]}>
                   <div className="p-3 mt-2 flex items-center justify-center w-auto">
-                    <FontAwesomeIcon icon={faStar} style={{ color: "#eda345" }} />
+                    <FontAwesomeIcon
+                      icon={faStar}
+                      style={{ color: "#eda345" }}
+                    />
                     <hr className="w-1/6 mx-3 h-1 bg-gradient-to-r from-goldColor from-10% to-goldColor/[.5] rounded-full" />
-                    <p className="text-lg text-center font-semibold text-transparent bg-clip-text bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5]">{category.replace(/_/g, " ")}</p>
+                    <p className="text-lg text-center font-semibold text-transparent bg-clip-text bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5]">
+                      {category.replace(/_/g, " ")}
+                    </p>
                     <hr className="w-1/6 mx-3 h-1  bg-gradient-to-l from-goldColor from-10% to-goldColor/[.5]" />
-                    <FontAwesomeIcon icon={faStar} style={{ color: "#eda345" }} />
+                    <FontAwesomeIcon
+                      icon={faStar}
+                      style={{ color: "#eda345" }}
+                    />
                   </div>
                   <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2">
                     {dataArray[0][category].map((item: any, index: any) => (
