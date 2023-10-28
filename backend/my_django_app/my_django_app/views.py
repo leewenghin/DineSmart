@@ -13,11 +13,12 @@ class FoodMenusView(viewsets.ModelViewSet):
     queryset = FoodMenus.objects.all()
 
     def get_queryset(self):
+        queryset = FoodMenus.objects.all()  # Make a copy of the initial queryset
+
         id = self.request.query_params.get('id')
         if id is not None:
-            # Filter records based on the menu_id parameter
-            return FoodMenus.objects.filter(id=id)
-        return self.queryset
+            queryset = queryset.filter(id=id)  # Apply the filter
+        return queryset  # Return the filtered or unfiltered queryset
 
 class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD operations for a django model
     serializer_class = FoodCategoriesSerializer # Serializers are use to convert complex data type (E.g django model)
@@ -25,16 +26,18 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
     # permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
+        queryset = FoodCategories.objects.all()
+
         id = self.request.query_params.get('id') # Endpoint
         foodmenu_id = self.request.query_params.get('foodmenu_id') # Endpoint
 
         if id is not None:
             # Filter records based on the menu_id parameter
-            return FoodCategories.objects.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu_id'
+            return queryset.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu_id'
             
         if foodmenu_id is not None:
             # Filter records based on the menu_id parameter
-            return FoodCategories.objects.filter(foodmenu_id=foodmenu_id) # Only filter instances inside FoodCategories with 'foodmenu_id'
+            return queryset.filter(foodmenu_id=foodmenu_id) # Only filter instances inside FoodCategories with 'foodmenu_id'
         return self.queryset
 
 
