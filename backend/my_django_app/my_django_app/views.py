@@ -16,6 +16,7 @@ class FoodMenusView(viewsets.ModelViewSet):
         queryset = FoodMenus.objects.all()  # Make a copy of the initial queryset
 
         id = self.request.query_params.get('id')
+
         if id is not None:
             queryset = queryset.filter(id=id)  # Apply the filter
         return queryset  # Return the filtered or unfiltered queryset
@@ -70,39 +71,60 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
 
             serializer = FoodCategoriesSerializer(category)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # data = request.data
-        # # Extract foodmenu_id from data
-        # foodmenu_id = data.get('foodmenu_id') # Retrives foodmenu_id value from the data
-        # image = data.get('image') # Handle image file upload
-        
-        # if image:
-        #     # You can handle the uploaded image here
-        #     # For example, you can save it to a specific directory
-        #     category = FoodCategories.objects.create(
-        #         name=data['name'],
-        #         description=data['description'],
-        #         image=image,  # Assign the image file to the model field
-        #         published=data['published'],
-        #         foodmenu_id=foodmenu_id
-        #     )
-        # else:
-        #     # Handle cases where no image is provided
-        #     category = FoodCategories.objects.create(
-        #         name=data['name'],
-        #         description=data['description'],
-        #         published=data['published'],
-        #         foodmenu_id=foodmenu_id
-        #     )
-        
-        # # Serialize and return the new instance in the response
-        # serializer = FoodCategoriesSerializer(category)
-        # return Response(serializer.data, status=status.HTTP_201_CREATED)
-
         
 
 class FoodItemsView(viewsets.ModelViewSet):
     serializer_class = FoodItemsSerializer
     queryset = FoodItems.objects.all()
+
+    def get_queryset(self):
+        queryset = FoodItems.objects.all()  # Make a copy of the initial queryset
+
+        id = self.request.query_params.get('id') # Endpoint
+        foodcategory_id = self.request.query_params.get('foodcategory_id')
+
+        if id is not None:
+            # Filter records based on the menu_id parameter
+            return queryset.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu_id'
+        
+        if foodcategory_id is not None:
+            queryset = queryset.filter(foodcategory_id=foodcategory_id)  # Apply the filter
+        return queryset  # Return the filtered or unfiltered queryset
+
+    def create(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            name = request.data['name']
+            price = request.data['price']
+            description = request.data['description']
+            image = request.data['image']
+            published = request.data['published']
+            foodcategory_id = request.data['foodcategory_id']
+            
+            if published.lower() == 'true':
+                published = True
+            elif published.lower() == 'false':
+                published = False
+
+            if not name:
+                return Response({"name": ["Name field must not be empty."]}, status=status.HTTP_400_BAD_REQUEST)
+
+            if not price:
+                return Response({"price": ["Price field must not be empty."]}, status=status.HTTP_400_BAD_REQUEST)
+
+            if image is None or image == "":
+                image = None  # Set it to 'null' in the database
+
+            item = FoodItems.objects.create(
+                name=name, 
+                price=price,
+                description=description, 
+                image=image, 
+                published=published, 
+                foodcategory_id = foodcategory_id
+                )
+
+            serializer = FoodItemsSerializer(item)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 # @api_view(['GET', 'POST'])

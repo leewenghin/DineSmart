@@ -32,7 +32,6 @@ interface Category {
   description: string;
   image: File | null;
   published: boolean;
-  foodmenu_id: number;
 }
 
 interface submitCategory {

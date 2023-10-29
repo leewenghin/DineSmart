@@ -28,7 +28,7 @@ function App() {
           <Route path="menu" element={<Admin_method />} />
           <Route path="category/:foodmenu_id" element={<Admin_category />} />
           <Route
-            path="category/:cateLabel/:itemLabel"
+            path="category/:foodmenu_id/:foodcategory_id"
             element={<Admin_item />}
           />
         </Route>

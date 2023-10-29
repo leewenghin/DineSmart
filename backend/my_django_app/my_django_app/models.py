@@ -52,8 +52,8 @@ class FoodItems(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False)
     description = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(upload_to='admin/item', null=True, blank=True)
-    price = models.FloatField()
-    tag = models.CharField(max_length=128)
+    price = models.FloatField(null=False, blank=False)
+    tag = models.CharField(max_length=128, null=True, blank=True)
     published = models.BooleanField(default=True)
     foodcategory = models.ForeignKey(FoodCategories, on_delete=models.CASCADE)
 
