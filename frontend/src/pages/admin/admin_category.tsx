@@ -55,6 +55,7 @@ const admin_category = () => {
   const [menuList, setMenuList] = useState<Menu[]>([]); // List for store data from menu table
   const [categoryList, setCategoryList] = useState<Category[]>([]); // List for store data from category table
   const [newCategory, setNewCategory] = useState<submitCategory>({
+    // For save input value
     // Initial value
     // Reset the field
     name: "",
@@ -66,8 +67,9 @@ const admin_category = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
   const [image, setImage] = useState<File | null>(null); // For modal image purpose
-  const [alertMessage, setAlertMessage] = useState(null);
-  const [formAlert, setFormAlert] = useState(null);
+  const [formAlert, setFormAlert] = useState(null); // For form warning message
+  const [alertMessage, setAlertMessage] = useState<string | null>(null); // For success alert message
+  const [isSave, setSave] = useState(false); // To detect whether press save button
 
   // ==================== Toggle Method ====================
   const toggleModal = () => {
@@ -136,7 +138,7 @@ const admin_category = () => {
             });
           }
         })
-        .then((data) => {
+        .then(() => {
           fetchList(getCategoryLink, setCategoryList);
           setNewCategory({
             name: "",
@@ -172,6 +174,9 @@ const admin_category = () => {
           throw new Error(`Response not OK. Status: ${response.status}`);
         }
       })
+      .then(() => {
+        fetchList(getCategoryLink, setCategoryList);
+      })
       .catch((error) => console.error("Error updating status: ", error));
   };
 
@@ -179,11 +184,12 @@ const admin_category = () => {
 
   // ==================== Handle Method ====================
   // Function to hide the alert message
-  const hideAlert = () => {
-    setAlertMessage(null);
-  };
   const hideFormAlert = () => {
     setFormAlert(null);
+  };
+
+  const hideAlert = () => {
+    setAlertMessage(null);
   };
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -216,8 +222,16 @@ const admin_category = () => {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
-    setNewCategory({ ...newCategory, [name]: value });
-    hideFormAlert(); // Remove alert when have value
+    switch (name) {
+      case "name":
+        if (value == null || value == "") {
+          setNewCategory({ ...newCategory, [name]: value });
+        } else {
+          hideFormAlert(); // Remove alert when have value
+        }
+      default:
+        setNewCategory({ ...newCategory, [name]: value });
+    }
   };
 
   const handleCancel = () => {
@@ -234,12 +248,16 @@ const admin_category = () => {
     hideFormAlert();
   };
 
-  const handleSave = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     try {
       await fetchSetCategoryList(event); // Wait for fetchSetCategoryList to complete
-
       if (!formAlert) {
-        handleCancel(); // Reset the field list and exit modal
+        if (isSave) {
+          handleCancel(); // Reset the field list and exit modal
+          setSave(false);
+        }
+        console.log(alertMessage);
+        setAlertMessage("Successful Created"); // Make sure this code is executed
       }
     } catch (error) {
       // Handle any errors that occur during the fetchSetCategoryList operation
@@ -247,10 +265,12 @@ const admin_category = () => {
     }
   };
 
-  const handleSaveAdd = (event: React.FormEvent) => {
-    fetchSetCategoryList(event);
+  const handleSave = () => {
+    setSave(true);
   };
+  // ==================== Handle Method ====================
 
+  // ==================== Alert Method ====================
   const alertMessageTime = () => {
     if (alertMessage) {
       const timeout = setTimeout(hideAlert, 2000); // 5000 milliseconds (5 seconds)
@@ -259,11 +279,12 @@ const admin_category = () => {
       return () => clearTimeout(timeout);
     }
   };
-  // ==================== Handle Method ====================
+  // ==================== Alert Method ====================
 
   useEffect(() => {
     fetchList(getMenuLink, setMenuList);
     fetchList(getCategoryLink, setCategoryList);
+    alertMessageTime();
   }, [alertMessage]);
 
   return (
@@ -440,7 +461,11 @@ const admin_category = () => {
                 </button>
               </div>
               {/* <!-- Modal body --> */}
-              <form action="#" encType="multipart/form-data">
+              <form
+                action="#"
+                encType="multipart/form-data"
+                onSubmit={handleSubmit}
+              >
                 <div className="grid gap-4 mb-4 sm:grid-cols-2">
                   <div className="col-span-2">
                     <label
@@ -461,6 +486,7 @@ const admin_category = () => {
                       }`}
                       placeholder="Ex. Apple iMac 27&ldquo;"
                       autoFocus
+                      required
                     />
                     {formAlert && (
                       <p className="mt-2 text-xs text-red-600 dark:text-red-400">
@@ -544,14 +570,13 @@ const admin_category = () => {
                 <div className="flex items-center space-x-4">
                   <button
                     type="submit"
-                    onClick={handleSaveAdd}
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   >
                     Save and add another
                   </button>
                   <button
-                    type="submit"
                     onClick={handleSave}
+                    type="submit"
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   >
                     Save
@@ -578,7 +603,7 @@ const admin_category = () => {
           onClick={hideAlert}
         >
           <div
-            className="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+            className="flex items-center p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
             role="alert"
           >
             <svg
@@ -592,7 +617,8 @@ const admin_category = () => {
             </svg>
             <span className="sr-only">Info</span>
             <div>
-              <span className="font-medium">Danger alert!</span> {alertMessage}
+              <span className="font-medium">Success alert!</span> {alertMessage}
+              .
             </div>
           </div>
         </div>

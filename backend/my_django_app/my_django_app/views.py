@@ -38,7 +38,7 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
         if foodmenu_id is not None:
             # Filter records based on the menu_id parameter
             return queryset.filter(foodmenu_id=foodmenu_id) # Only filter instances inside FoodCategories with 'foodmenu_id'
-        return self.queryset
+        return queryset
 
 
     def create(self, request, *args, **kwargs):
