@@ -104,7 +104,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
     index: number,
     updatedCategoryList: Menu[]
   ) => {
-    fetch(`http://127.0.0.1:8000/api/foodmenus/${menuId}/`, {
+    fetch(`${getMenuLink}${menuId}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
