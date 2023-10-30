@@ -58,16 +58,16 @@ interface submitItem {
   foodcategory_id: number;
 }
 
-const menu = ({ changeIP }: { changeIP: string }) => {
+const admin_item = ({ changeIP }: { changeIP: string }) => {
   const { foodmenu_id } = useParams();
 
   const { foodcategory_id } = useParams();
   const FoodCategoryId = foodcategory_id ? parseInt(foodcategory_id) : 0; // Provide a default value, 0 in this case
 
-  const getMenuLink = `http://127.0.0.1:8000/api/foodmenus/?id=${foodmenu_id}`;
-  const getCategoryLink = `http://127.0.0.1:8000/api/foodcategories/?id=${foodcategory_id}`;
-  const getItemLink = `http://127.0.0.1:8000/api/fooditems/?foodcategory_id=${foodcategory_id}`;
-  const setItemLink = `http://127.0.0.1:8000/api/fooditems/`;
+  const getMenuLink = `http://${changeIP}:8000/api/foodmenus/?id=${foodmenu_id}`;
+  const getCategoryLink = `http://${changeIP}:8000/api/foodcategories/?id=${foodcategory_id}`;
+  const getItemLink = `http://${changeIP}:8000/api/fooditems/?foodcategory_id=${foodcategory_id}`;
+  const setItemLink = `http://${changeIP}:8000/api/fooditems/`;
 
   const [menuList, setMenuList] = useState<Category[]>([]);
   const [categoryList, setCategoryList] = useState<Category[]>([]);
@@ -691,4 +691,4 @@ const menu = ({ changeIP }: { changeIP: string }) => {
   );
 };
 
-export default menu;
+export default admin_item;

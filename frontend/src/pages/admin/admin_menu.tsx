@@ -21,10 +21,8 @@ interface submitMenu {
   published: boolean;
 }
 
-
 const dineMethod = ({ changeIP }: { changeIP: string }) => {
-
-  const getMenuLink = `http://${ changeIP }:8000/api/foodmenus/`;
+  const getMenuLink = `http://${changeIP}:8000/api/foodmenus/`;
 
   const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
   const [menuList, setMenuList] = useState<Menu[]>([]); // List for store data from menu table
@@ -106,7 +104,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
     index: number,
     updatedCategoryList: Menu[]
   ) => {
-    fetch(`http://${ changeIP }/api/foodmenus/${menuId}/`, {
+    fetch(`${getMenuLink}${menuId}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

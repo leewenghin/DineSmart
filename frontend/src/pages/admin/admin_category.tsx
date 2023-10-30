@@ -159,7 +159,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     index: number,
     updatedCategoryList: Category[]
   ) => {
-    fetch(`http://${changeIP}:8000/api/foodcategories/${categoryId}/`, {
+    fetch(`${setCategoryLink}/${categoryId}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
