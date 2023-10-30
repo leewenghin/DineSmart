@@ -113,7 +113,7 @@ const dataArray: any[] = [
   },
 ];
 
-const menu = (changeip:any) => {
+const menu = ({ changeIP }: { changeIP: string }) => {
   // Button and Scroll Down Category List
   const [activeCategory, setActiveCategory] = useState<number>(0);
   const categories = Object.keys(dataArray[0]);

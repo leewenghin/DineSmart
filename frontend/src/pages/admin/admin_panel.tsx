@@ -19,7 +19,7 @@ const links = [
   { label: "Dashboard", url: "#", icon: "home", status: "" },
 ];
 
-const admin_menu = () => {
+const admin_menu = ({ changeIP }: { changeIP: string }) => {
   // const [isClose, setIsClose] = useState(false);
 
   // const toggleNav = () => {

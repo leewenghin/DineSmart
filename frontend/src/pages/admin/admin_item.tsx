@@ -58,7 +58,7 @@ interface submitItem {
   foodcategory_id: number;
 }
 
-const menu = () => {
+const menu = ({ changeIP }: { changeIP: string }) => {
   const { foodmenu_id } = useParams();
 
   const { foodcategory_id } = useParams();

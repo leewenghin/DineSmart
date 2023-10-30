@@ -43,13 +43,13 @@ interface submitCategory {
 }
 // ==================== Interfaces  ====================
 
-const admin_category = () => {
+const admin_category = ({ changeIP }: { changeIP: string }) => {
   const { foodmenu_id } = useParams();
   const FoodMenuId = foodmenu_id ? parseInt(foodmenu_id) : 0; // Provide a default value, 0 in this case
 
-  const getMenuLink = `http://127.0.0.1:8000/api/foodmenus/?id=${foodmenu_id}`;
-  const getCategoryLink = `http://127.0.0.1:8000/api/foodcategories/?foodmenu_id=${foodmenu_id}`;
-  const setCategoryLink = `http://127.0.0.1:8000/api/foodcategories/`;
+  const getMenuLink = `http://${changeIP}:8000/api/foodmenus/?id=${foodmenu_id}`;
+  const getCategoryLink = `http://${changeIP}:8000/api/foodcategories/?foodmenu_id=${foodmenu_id}`;
+  const setCategoryLink = `http://${changeIP}:8000/api/foodcategories/`;
 
   const [menuList, setMenuList] = useState<Menu[]>([]); // List for store data from menu table
   const [categoryList, setCategoryList] = useState<Category[]>([]); // List for store data from category table
@@ -159,7 +159,7 @@ const admin_category = () => {
     index: number,
     updatedCategoryList: Category[]
   ) => {
-    fetch(`http://127.0.0.1:8000/api/foodcategories/${categoryId}/`, {
+    fetch(`http://${changeIP}:8000/api/foodcategories/${categoryId}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
