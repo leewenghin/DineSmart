@@ -13,6 +13,7 @@ import Admin_panel from "./pages/admin/admin_panel";
 import Admin_method from "./pages/admin/admin_menu";
 import Admin_category from "./pages/admin/admin_category";
 import Admin_item from "./pages/admin/admin_item";
+import Testing from "./pages/testing";
 
 function App() {
   return (
@@ -22,13 +23,14 @@ function App() {
         <Route path="/paymentdetail" element={<Payment_detail />}></Route>
         <Route path="/cashpayment" element={<Cash_payment />}></Route>
         <Route path="/menu" element={<Menu />}></Route>
+        <Route path="/testing" element={<Testing />}></Route>
         <Route path="/order_detail" element={<OrderDetailPage />} />
         <Route path="/card_payment" element={<Card_payment />}></Route>
         <Route path="/admin_panel" element={<Admin_panel />}>
           <Route path="menu" element={<Admin_method />} />
           <Route path="category/:foodmenu_id" element={<Admin_category />} />
           <Route
-            path="category/:cateLabel/:itemLabel"
+            path="category/:foodmenu_id/:foodcategory_id"
             element={<Admin_item />}
           />
         </Route>
