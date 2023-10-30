@@ -10,7 +10,7 @@ const links = [
   { label: "Dashboard", url: "#", icon: "home", status: "" },
   {
     label: "Menu",
-    url: "/admin_panel/method",
+    url: "/admin_panel/menu",
     icon: "menu_book",
     status: "active",
   },

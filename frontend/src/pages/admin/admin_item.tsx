@@ -1,4 +1,4 @@
-import { Component, useEffect, useState } from "react";
+import { ChangeEvent, Component, FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 const items = [
@@ -31,34 +31,188 @@ const tags = [
 ];
 
 // Define the Item type
+interface Category {
+  id: number;
+  name: string;
+}
+
+// Define the Item type
 interface Item {
   id: number;
   name: string;
-  price: number;
   description: string;
+  image: File | null;
+  price: number;
   tag: string;
+  published: boolean;
 }
 
 // Define the submitItem type
 interface submitItem {
   name: string;
   description: string;
+  image: File | null;
+  price: number;
+  tag: string;
+  published: boolean;
+  foodcategory_id: number;
 }
 
 const menu = () => {
-  const { cateLabel } = useParams();
-  const { itemLabel } = useParams();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { foodmenu_id } = useParams();
+
+  const { foodcategory_id } = useParams();
+  const FoodCategoryId = foodcategory_id ? parseInt(foodcategory_id) : 0; // Provide a default value, 0 in this case
+
+  const getMenuLink = `http://127.0.0.1:8000/api/foodmenus/?id=${foodmenu_id}`;
+  const getCategoryLink = `http://127.0.0.1:8000/api/foodcategories/?id=${foodcategory_id}`;
+  const getItemLink = `http://127.0.0.1:8000/api/fooditems/?foodcategory_id=${foodcategory_id}`;
+  const setItemLink = `http://127.0.0.1:8000/api/fooditems/`;
+
+  const [menuList, setMenuList] = useState<Category[]>([]);
+  const [categoryList, setCategoryList] = useState<Category[]>([]);
   const [itemList, setItemList] = useState<Item[]>([]); // Provide type annotation for taskList
   const [newItem, setNewItem] = useState<submitItem>({
     // For reset the field
     name: "",
     description: "",
+    image: null,
+    price: 0,
+    tag: "",
+    published: false,
+    foodcategory_id: FoodCategoryId,
   });
 
+  const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
+  const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
+  const [image, setImage] = useState<File | null>(null); // For modal image purpose
+  const [formAlert, setFormAlert] = useState(null); // For form warning message
+  const [alertMessage, setAlertMessage] = useState<string | null>(null); // For success alert message
+  const [isSave, setSave] = useState(false); // To detect whether press save button
+
+  // ==================== Toggle Method ====================
   // Modal toggler
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
+  };
+  // ==================== Toggle Method ====================
+
+  // ==================== Fetch Method ====================
+  // Fetch data array from table method
+  const fetchList = (getLink: string, setList: any) => {
+    fetch(getLink)
+      .then((response) => response.json())
+      .then((data) => {
+        setList(data);
+      })
+      .catch((error) => console.error("Error fetching data: ", error));
+  };
+
+  // Fetch & set data array from category table method
+  const fetchSetItemList = (event: FormEvent) => {
+    return new Promise((resolve, reject) => {
+      event.preventDefault();
+
+      const formData = new FormData();
+      if (image) {
+        // Ensure that the 'image' field is a valid File
+        if (image instanceof File) {
+          formData.append("image", image);
+          console.log("Success image file");
+        } else {
+          console.error("Invalid image file");
+          return;
+        }
+      } else {
+        formData.append("image", "");
+      }
+
+      formData.append("name", newItem.name);
+      formData.append("price", newItem.price.toString());
+      formData.append("description", newItem.description);
+      formData.append("published", newItem.published.toString());
+      formData.append("foodcategory_id", newItem.foodcategory_id.toString());
+
+      fetch(setItemLink, {
+        method: "POST",
+        // headers: {
+        //   "Content-Type": "application/json",
+        // },
+        body: formData,
+      })
+        .then((response) => {
+          if (response.ok) {
+            // return response.json(); // Parse the JSON data if the response is valid
+            const data = response.json();
+            resolve(data); // Resolve the Promise with the fetched data
+          } else {
+            console.log("This is image: ", image);
+            return response.json().then((errorData) => {
+              if (errorData.name) {
+                const errorMessage = errorData.name[0];
+                console.error("Error (Name):", errorMessage);
+
+                // Show an alert message
+                setFormAlert(errorMessage);
+              }
+              throw new Error(`Response not OK. Status: ${response.status}`);
+            });
+          }
+        })
+        .then(() => {
+          fetchList(getItemLink, setItemList);
+          setNewItem({
+            name: "",
+            description: "",
+            image: null,
+            price: 0,
+            tag: "",
+            published: false,
+            foodcategory_id: FoodCategoryId,
+          }); // Clear the input fields
+        })
+        .catch((error) => {
+          console.error("Error creating task: ", error);
+          reject(error); // Reject the Promise with the error
+        });
+    });
+  };
+  // ==================== Fetch Method ====================
+
+  // ==================== Handle Method ====================
+  // Function to hide the alert message
+  const hideFormAlert = () => {
+    setFormAlert(null);
+  };
+
+  const hideAlert = () => {
+    setAlertMessage(null);
+  };
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target && e.target.files) {
+      const selectedImage = e.target.files[0];
+      setImage(selectedImage);
+    }
+  };
+
+  // const handlePublished = (categoryId: number, index: number) => {
+  //   const updatedCategoryList = [...itemList];
+  //   updatedCategoryList[index].published =
+  //     !updatedCategoryList[index].published;
+
+  //   // Call the fetchSetCategoryIDList method to perform the PATCH request
+  //   fetchSetCategoryIDList(categoryId, index, updatedCategoryList);
+  // };
+
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // Set as checked
+    setIsChecked(e.target.checked);
+
+    setNewItem((prevMenu) => ({
+      ...prevMenu,
+      published: !prevMenu.published, // Toggle the "published" property
+    }));
   };
 
   // Submit form changes
@@ -69,35 +223,61 @@ const menu = () => {
     setNewItem({ ...newItem, [name]: value });
   };
 
-  // Submit form logic
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleCancel = () => {
+    // Clear the form data by setting it to its initial state
+    setNewItem({
+      name: "",
+      description: "",
+      image: null,
+      price: 0,
+      tag: "",
+      published: false,
+      foodcategory_id: FoodCategoryId,
+    });
 
-    // Send a POST request to Django with the newTask data
-    fetch("http://127.0.0.1:8000/api/fooditems/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newItem),
-    })
-      .then((response) => response.json())
-      .then((data: Item) => {
-        // Update the taskList with the newly created task
-        setItemList([...itemList, data]);
-        setNewItem({ name: "", description: "" }); // Clear the input fields
-      })
-      .catch((error) => console.error("Error creating task: ", error));
+    toggleModal();
+    hideFormAlert();
   };
+
+  // Submit form logic
+  const handleSubmit = async (event: React.FormEvent) => {
+    try {
+      await fetchSetItemList(event); // Wait for fetchSetCategoryList to complete
+      if (!formAlert) {
+        if (isSave) {
+          handleCancel(); // Reset the field list and exit modal
+          setSave(false);
+        }
+        console.log(alertMessage);
+        setAlertMessage("Successful Created"); // Make sure this code is executed
+      }
+    } catch (error) {
+      // Handle any errors that occur during the fetchSetCategoryList operation
+      console.error("Error:", error);
+    }
+  };
+
+  const handleSave = () => {
+    setSave(true);
+  };
+  // ==================== Handle Method ====================
+
+  // ==================== Alert Method ====================
+  const alertMessageTime = () => {
+    if (alertMessage) {
+      const timeout = setTimeout(hideAlert, 2000); // 5000 milliseconds (5 seconds)
+
+      // Clear the timeout if the component unmounts
+      return () => clearTimeout(timeout);
+    }
+  };
+  // ==================== Handle Method ====================
 
   // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/fooditems/")
-      .then((response) => response.json())
-      .then((data) => {
-        setItemList(data);
-      })
-      .catch((error) => console.error("Error fetching data: ", error));
+    fetchList(getMenuLink, setMenuList);
+    fetchList(getCategoryLink, setCategoryList);
+    fetchList(getItemLink, setItemList);
   }, []);
 
   return (
@@ -141,12 +321,15 @@ const menu = () => {
                       d="m1 9 4-4-4-4"
                     />
                   </svg>
-                  <a
-                    href={`/admin_panel/category/${cateLabel}`}
-                    className="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2 dark:text-gray-400 dark:hover:text-white"
-                  >
-                    {cateLabel}
-                  </a>
+                  {menuList.map((item, index) => (
+                    <a
+                      href={`/admin_panel/category/${foodmenu_id}`}
+                      className="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2 dark:text-gray-400 dark:hover:text-white"
+                      key={index}
+                    >
+                      {item.name}
+                    </a>
+                  ))}
                 </div>
               </li>
               <li aria-current="page">
@@ -166,9 +349,14 @@ const menu = () => {
                       d="m1 9 4-4-4-4"
                     />
                   </svg>
-                  <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">
-                    {itemLabel}
-                  </span>
+                  {categoryList.map((item, index) => (
+                    <span
+                      className="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400"
+                      key={index}
+                    >
+                      {item.name}
+                    </span>
+                  ))}
                 </div>
               </li>
             </ol>
@@ -189,11 +377,19 @@ const menu = () => {
             <div className="dine-method text-xl" key={index}>
               <div className="card rounded overflow-hidden shadow-md border-1 border-gray-300 h-full max-w-sm relative">
                 <div className="image relative">
-                  <img
-                    className="image-img w-full p-4 cursor-pointer"
-                    src="/src/assets/img/admin/tableware.png"
-                    alt="Sunset in the moufntains"
-                  />
+                  <div className="flex w-full justify-center items-center p-3 pb-0">
+                    <img
+                      className={`image-img w-full h-36 cursor-pointer rounded-md ${
+                        item.image ? "bg-transparent" : "bg-imageColor"
+                      }`}
+                      src={
+                        item.image
+                          ? item.image.toString()
+                          : "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                      }
+                      alt="Sunset in the moufntains"
+                    />
+                  </div>
                   <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
                     <button
                       type="button"
@@ -203,7 +399,7 @@ const menu = () => {
                     </button>
                   </div>
                 </div>
-                <div id="card-text" className="card-text px-6 pt-4 pb-14">
+                <div id="card-text" className="card-text px-3 pt-2 pb-12">
                   <div className="w-full flex">
                     <div className="w-full">
                       <p className="mr-2 mb-1 break-words capitalize">
@@ -379,24 +575,6 @@ const menu = () => {
                     ></textarea>
                   </div>
 
-                  <div className="sm:col-span-2">
-                    <label
-                      htmlFor="description"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Description
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={newItem.description}
-                      onChange={handleInputChange}
-                      rows={5}
-                      className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Write a description..."
-                    ></textarea>
-                  </div>
-
                   <div className="col-span-2">
                     <label
                       htmlFor="brand"
@@ -435,25 +613,56 @@ const menu = () => {
                     </ul>
                   </div>
 
-                  <div className="col-span-2">
+                  <div className="relative col-span-2 sm:col-span-1">
                     <label
                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      htmlFor="file_input"
+                      htmlFor="small_size"
                     >
-                      Upload image
+                      Upload Image
                     </label>
                     <input
-                      className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                      aria-describedby="file_input_help"
-                      id="file_input"
+                      name="image"
+                      onChange={handleImageChange}
+                      className="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                      id="small_size"
                       type="file"
                     />
                     <p
-                      className="mt-1 text-sm text-gray-500 dark:text-gray-300"
+                      className="block sm:absolute sm:bottom-0 mt-1 sm:mt-0 text-sm text-gray-500 dark:text-gray-300"
                       id="file_input_help"
                     >
-                      SVG, PNG or JPG (MAX. 800x400px).
+                      SVG, PNG, JPG or GIF (MAX. 800x400px).
                     </p>
+                  </div>
+
+                  <div className="col-span-1">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2 sm:mb-3.5">
+                      Published
+                    </p>
+                    <div className="max-w-max">
+                      <label className="items-center sm:mb-4 cursor-pointer select-none">
+                        <div className="relative mb-3 ">
+                          <input
+                            id="modal-published"
+                            name="modal-published"
+                            type="checkbox"
+                            defaultChecked={newItem.published}
+                            onChange={handleCheckboxChange}
+                            value=""
+                            className="toggle-switch sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                        </div>
+                      </label>
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1 sm:mt-0">
+                      <div className={`${isChecked ? "hidden" : ""}`}>
+                        Your item are only visible to administrators.
+                      </div>
+                      <div className={`${isChecked ? "" : "hidden"}`}>
+                        Your item will be publicly visible on your site.
+                      </div>
+                    </div>
                   </div>
                 </div>
 

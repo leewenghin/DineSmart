@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const cards = [
@@ -22,19 +22,116 @@ interface submitMenu {
 }
 
 const dineMethod = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [menuList, setMenuList] = useState<Menu[]>([]);
+  const getMenuLink = `http://127.0.0.1:8000/api/foodmenus/`;
+
+  const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
+  const [menuList, setMenuList] = useState<Menu[]>([]); // List for store data from menu table
   const [newMenu, setNewMenu] = useState<submitMenu>({
+    // For save input value
     // Initiate value
     // Reset the field
     name: "",
     description: "",
     published: false,
   });
-  const [isChecked, setIsChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
+  const [formAlert, setFormAlert] = useState(null); // For form warning message
+  const [alertMessage, setAlertMessage] = useState<string | null>(null); // For success alert message
+  const [isSave, setSave] = useState(false); // To detect whether press save button
 
+  // ==================== Toggle Method ====================
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
+  };
+  // ==================== Toggle Method ====================
+
+  // ==================== Fetch Method ====================
+  const fetchList = (getLink: string, setList: any) => {
+    fetch(getLink)
+      .then((response) => response.json())
+      .then((data) => {
+        setList(data);
+      })
+      .catch((error) => console.error("Error fetching data: ", error));
+  };
+
+  const fetchSetMenuList = (event: FormEvent) => {
+    return new Promise((resolve, reject) => {
+      event.preventDefault();
+
+      fetch("http://127.0.0.1:8000/api/foodmenus/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newMenu),
+      })
+        .then((response) => {
+          if (response.ok) {
+            // return response.json(); // Parse the JSON data if the response is valid
+            const data = response.json();
+            resolve(data); // Resolve the Promise with the fetched data
+          } else {
+            return response.json().then((errorData) => {
+              if (errorData.name) {
+                const errorMessage = errorData.name[0];
+                console.error("Error (Name):", errorMessage);
+
+                // Show an alert message
+                setFormAlert(errorMessage);
+              }
+              throw new Error(`Response not OK. Status: ${response.status}`);
+            });
+          }
+        })
+        .then(() => {
+          fetchList(getMenuLink, setMenuList);
+          setNewMenu({
+            name: "",
+            description: "",
+            published: false,
+          }); // Clear the input fields
+        })
+        .catch((error) => {
+          console.error("Error creating task: ", error);
+          reject(error); // Reject the Promise with the error
+        });
+    });
+  };
+
+  const fetchSetMenuIDList = (
+    menuId: number,
+    index: number,
+    updatedCategoryList: Menu[]
+  ) => {
+    fetch(`http://127.0.0.1:8000/api/foodmenus/${menuId}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ published: updatedCategoryList[index].published }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json(); // Parse the JSON data if the response is valid
+        } else {
+          throw new Error(`Response not OK. Status: ${response.status}`);
+        }
+      })
+      .then(() => {
+        fetchList(getMenuLink, setMenuList);
+      })
+      .catch((error) => console.error("Error updating status: ", error));
+  };
+  // ==================== Fetch Method ====================
+
+  // ==================== Handle Method ====================
+  const hideFormAlert = () => {
+    setFormAlert(null);
+  };
+
+  const hideAlert = () => {
+    setAlertMessage(null);
   };
 
   const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -52,37 +149,59 @@ const dineMethod = () => {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
-    setNewMenu({ ...newMenu, [name]: value });
+    switch (name) {
+      case "name":
+        if (value == null || value == "") {
+          setNewMenu({ ...newMenu, [name]: value });
+        } else {
+          hideFormAlert(); // Remove alert when have value
+        }
+      default:
+        setNewMenu({ ...newMenu, [name]: value });
+    }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+  const handlePublished = (menuId: number, index: number) => {
+    const updatedCategoryList = [...menuList];
+    updatedCategoryList[index].published =
+      !updatedCategoryList[index].published;
 
-    fetch("http://127.0.0.1:8000/api/foodmenus/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newMenu),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        fetchMenuList();
-      })
-      .catch((error) => console.error("Error creating task: ", error));
+    // Call the fetchSetmenuIdList method to perform the PATCH request
+    fetchSetMenuIDList(menuId, index, updatedCategoryList);
   };
 
-  const fetchMenuList = () => {
-    fetch("http://127.0.0.1:8000/api/foodmenus/")
-      .then((response) => response.json())
-      .then((data) => {
-        setMenuList(data);
-      })
-      .catch((error) => console.error("Error fetching data: ", error));
+  const handleCancel = () => {
+    // Clear the form data by setting it to its initial state
+    setNewMenu({
+      name: "",
+      description: "",
+      published: false,
+    });
+
+    toggleModal();
+    hideFormAlert();
   };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    try {
+      await fetchSetMenuList(event); // Wait for fetchSetCategoryList to complete
+      if (!formAlert) {
+        if (isSave) {
+          handleCancel(); // Reset the field list and exit modal
+          setSave(false);
+        }
+        console.log(alertMessage);
+        setAlertMessage("Successful Created"); // Make sure this code is executed
+      }
+    } catch (error) {
+      // Handle any errors that occur during the fetchSetCategoryList operation
+      console.error("Error:", error);
+    }
+  };
+  // ==================== Handle Method ====================
 
   useEffect(() => {
-    fetchMenuList();
+    fetchList(getMenuLink, setMenuList);
   }, []);
 
   return (
@@ -145,7 +264,9 @@ const dineMethod = () => {
                         <input
                           name="published"
                           type="checkbox"
+                          key={item.id}
                           defaultChecked={item.published}
+                          onClick={() => handlePublished(item.id, index)}
                           value=""
                           className="sr-only peer"
                         />
@@ -221,9 +342,19 @@ const dineMethod = () => {
                       onChange={handleInputChange}
                       autoComplete="name"
                       // value="iPad Air Gen 5th Wi-Fi"f
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
+                        formAlert ? "border-red-500" : "border-gray-300"
+                      }`}
                       placeholder="Ex. Apple iMac 27&ldquo;"
+                      required
                     />
+                    {formAlert && (
+                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                        <span className="font-medium">
+                          Name field must not be empty.
+                        </span>
+                      </p>
+                    )}
                   </div>
                   {/* <div>
                   <label
@@ -302,7 +433,7 @@ const dineMethod = () => {
                           id="modal-published"
                           name="modal-published"
                           type="checkbox"
-                          defaultChecked={isChecked}
+                          defaultChecked={newMenu.published}
                           onChange={handleCheckboxChange}
                           value=""
                           className="toggle-switch sr-only peer"
@@ -331,7 +462,7 @@ const dineMethod = () => {
                   </button>
                   <button
                     data-modal-hide="updateProductModal"
-                    onClick={toggleModal}
+                    onClick={handleCancel}
                     type="button"
                     className="text-red-600 inline-flex items-center hover:text-white border !border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
                   >
