@@ -21,8 +21,10 @@ interface submitMenu {
   published: boolean;
 }
 
-const dineMethod = () => {
-  const getMenuLink = `http://127.0.0.1:8000/api/foodmenus/`;
+
+const dineMethod = ({ changeIP }: { changeIP: string }) => {
+
+  const getMenuLink = `http://${ changeIP }:8000/api/foodmenus/`;
 
   const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
   const [menuList, setMenuList] = useState<Menu[]>([]); // List for store data from menu table
@@ -59,7 +61,7 @@ const dineMethod = () => {
     return new Promise((resolve, reject) => {
       event.preventDefault();
 
-      fetch("http://127.0.0.1:8000/api/foodmenus/", {
+      fetch(getMenuLink, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

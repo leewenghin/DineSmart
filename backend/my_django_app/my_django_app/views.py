@@ -30,7 +30,7 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
         queryset = FoodCategories.objects.all()
 
         id = self.request.query_params.get('id') # Endpoint
-        foodmenu_id = self.request.query_params.get('foodmenu_id') # Endpoint
+        foodmenu_id = self.request.query_params.get('foodmenu_id') # Endpoint``
 
         if id is not None:
             # Filter records based on the menu_id parameter
@@ -125,6 +125,8 @@ class FoodItemsView(viewsets.ModelViewSet):
 
             serializer = FoodItemsSerializer(item)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 
 # @api_view(['GET', 'POST'])

@@ -113,7 +113,7 @@ const dataArray: any[] = [
   },
 ];
 
-const menu = () => {
+const menu = (changeip:any) => {
   // Button and Scroll Down Category List
   const [activeCategory, setActiveCategory] = useState<number>(0);
   const categories = Object.keys(dataArray[0]);
@@ -337,7 +337,9 @@ const menu = () => {
             <h1 className="py-2  font-semibold ">DineSmart</h1>
             <div className="flex align-center">
               <button className="bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5] flex justify-center items-center px-3 me-3 rounded ">
+                <Link to={"/admin_panel/menu"}>
                 <p className="text-white">Login</p>
+                </Link>
               </button>
               <button className="bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5] flex justify-center items-center  w-8 h-8 me-3 rounded ">
                 <span className="material-symbols-outlined text-white text-center ">
