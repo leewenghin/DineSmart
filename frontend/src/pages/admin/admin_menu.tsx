@@ -59,7 +59,7 @@ const dineMethod = () => {
     return new Promise((resolve, reject) => {
       event.preventDefault();
 
-      fetch("http://127.0.0.1:8000/api/foodmenus/", {
+      fetch("getMenuLink", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
