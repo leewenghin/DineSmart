@@ -13,19 +13,25 @@ import Admin_panel from "./pages/admin/admin_panel";
 import Admin_method from "./pages/admin/admin_menu";
 import Admin_category from "./pages/admin/admin_category";
 import Admin_item from "./pages/admin/admin_item";
+import Testing from "./pages/testing";
+interface changeIP{
+  ip: string;
+}
 
 function App() {
+  const changeip = "192.168.1.46";
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Menu />}></Route>
         <Route path="/paymentdetail" element={<Payment_detail />}></Route>
         <Route path="/cashpayment" element={<Cash_payment />}></Route>
-        <Route path="/menu" element={<Menu />}></Route>
+        <Route path="/menu" element={<Menu  changeip = {changeip}/>}></Route>
+        <Route path="/testing" element={<Testing />}></Route>
         <Route path="/order_detail" element={<OrderDetailPage />} />
         <Route path="/card_payment" element={<Card_payment />}></Route>
         <Route path="/admin_panel" element={<Admin_panel />}>
-          <Route path="menu" element={<Admin_method />} />
+          <Route path="menu" element={<Admin_method changeIP = {changeip}/>} />
           <Route path="category/:foodmenu_id" element={<Admin_category />} />
           <Route
             path="category/:foodmenu_id/:foodcategory_id"
