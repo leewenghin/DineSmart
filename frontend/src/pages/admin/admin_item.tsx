@@ -1,5 +1,7 @@
 import { ChangeEvent, Component, FormEvent, useEffect, useState } from "react";
+import { ModalProps } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
+import AlertModal from "../../components/admin/alert_modal";
 
 const items = [
   { label: "black pepper prawn", items: "20" },
@@ -42,8 +44,8 @@ interface Item {
   name: string;
   description: string;
   image: File | null;
-  price: number;
-  tag: string;
+  price: number | null;
+  tag: string[];
   published: boolean;
 }
 
@@ -52,11 +54,19 @@ interface submitItem {
   name: string;
   description: string;
   image: File | null;
-  price: number;
-  tag: string;
+  price: number | null;
+  tag: string[];
   published: boolean;
   foodcategory_id: number;
 }
+
+const ErrorMessage = ({ message }: any) => {
+  return (
+    <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+      <span className="font-medium">{message}</span>
+    </p>
+  );
+};
 
 const admin_item = ({ changeIP }: { changeIP: string }) => {
   const { foodmenu_id } = useParams();
@@ -77,23 +87,25 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     name: "",
     description: "",
     image: null,
-    price: 0,
-    tag: "",
+    price: null,
+    tag: [],
     published: false,
     foodcategory_id: FoodCategoryId,
   });
 
-  const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // For toggle modal purpose
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // For toggle modal purpose
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
   const [image, setImage] = useState<File | null>(null); // For modal image purpose
-  const [formAlert, setFormAlert] = useState(null); // For form warning message
+  const [nameAlert, setNameAlert] = useState<string | null>(null); // For form warning message
+  const [priceAlert, setPriceAlert] = useState<string | null>(null); // For form warning message
   const [alertMessage, setAlertMessage] = useState<string | null>(null); // For success alert message
   const [isSave, setSave] = useState(false); // To detect whether press save button
 
   // ==================== Toggle Method ====================
   // Modal toggler
   const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
+    setIsCreateModalOpen(!isCreateModalOpen);
   };
   // ==================== Toggle Method ====================
 
@@ -128,7 +140,17 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       }
 
       formData.append("name", newItem.name);
-      formData.append("price", newItem.price.toString());
+      formData.append(
+        "price",
+        newItem.price !== null ? newItem.price.toString() : ""
+      );
+      newItem.tag.forEach((tag) => {
+        formData.append("tag", tag);
+        console.log("Tags: ", tag);
+      });
+
+      console.log("This is price: ", newItem.price);
+      console.log("This is tag: ", newItem.tag);
       formData.append("description", newItem.description);
       formData.append("published", newItem.published.toString());
       formData.append("foodcategory_id", newItem.foodcategory_id.toString());
@@ -153,7 +175,14 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                 console.error("Error (Name):", errorMessage);
 
                 // Show an alert message
-                setFormAlert(errorMessage);
+                setNameAlert(errorMessage);
+              }
+              if (errorData.price) {
+                const errorMessage = errorData.price[0];
+                console.error("Error (price):", errorMessage);
+
+                // Show an alert message
+                setPriceAlert(errorMessage);
               }
               throw new Error(`Response not OK. Status: ${response.status}`);
             });
@@ -165,8 +194,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
             name: "",
             description: "",
             image: null,
-            price: 0,
-            tag: "",
+            price: null,
+            tag: [],
             published: false,
             foodcategory_id: FoodCategoryId,
           }); // Clear the input fields
@@ -177,11 +206,36 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         });
     });
   };
+
+  const fetchSetItemIDList = (
+    itemID: number,
+    index: number,
+    updatedCategoryList: Item[]
+  ) => {
+    fetch(`${setItemLink}${itemID}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ published: updatedCategoryList[index].published }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json(); // Parse the JSON data if the response is valid
+        } else {
+          throw new Error(`Response not OK. Status: ${response.status}`);
+        }
+      })
+      .then(() => {
+        fetchList(getItemLink, setItemList);
+      })
+      .catch((error) => console.error("Error updating status: ", error));
+  };
   // ==================== Fetch Method ====================
 
   // ==================== Handle Method ====================
-  // Function to hide the alert message
-  const hideFormAlert = () => {
+  // Method to hide the alert message
+  const hideFormAlert = (setFormAlert: (value: string | null) => void) => {
     setFormAlert(null);
   };
 
@@ -196,14 +250,32 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     }
   };
 
-  // const handlePublished = (categoryId: number, index: number) => {
-  //   const updatedCategoryList = [...itemList];
-  //   updatedCategoryList[index].published =
-  //     !updatedCategoryList[index].published;
+  const handlePublished = (ItemID: number, index: number) => {
+    const updatedCategoryList = [...itemList];
+    updatedCategoryList[index].published =
+      !updatedCategoryList[index].published;
 
-  //   // Call the fetchSetCategoryIDList method to perform the PATCH request
-  //   fetchSetCategoryIDList(categoryId, index, updatedCategoryList);
-  // };
+    // Call the fetchSetItemIDList method to perform the PATCH request
+    fetchSetItemIDList(ItemID, index, updatedCategoryList);
+  };
+
+  const handleTagChange = (tagValue: string) => {
+    const { tag } = newItem;
+
+    if (tag.includes(tagValue)) {
+      // If the tag is already in the list, remove it
+      setNewItem({
+        ...newItem,
+        tag: tag.filter((item) => item !== tagValue),
+      });
+    } else {
+      // If the tag is not in the list, add it
+      setNewItem({
+        ...newItem,
+        tag: [...tag, tagValue],
+      });
+    }
+  };
 
   const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
     // Set as checked
@@ -220,7 +292,23 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
-    setNewItem({ ...newItem, [name]: value });
+    switch (name) {
+      case "name":
+        if (value !== null || value !== "") {
+          hideFormAlert(setNameAlert); // Remove alert when have value
+          setNewItem({ ...newItem, [name]: value });
+        }
+        break;
+
+      case "price":
+        if (value !== null || value !== "") {
+          hideFormAlert(setPriceAlert); // Remove alert when have value
+        } else {
+          setNewItem({ ...newItem, [name]: value });
+        }
+      default:
+        setNewItem({ ...newItem, [name]: value });
+    }
   };
 
   const handleCancel = () => {
@@ -229,21 +317,22 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       name: "",
       description: "",
       image: null,
-      price: 0,
-      tag: "",
+      price: null,
+      tag: [],
       published: false,
       foodcategory_id: FoodCategoryId,
     });
 
     toggleModal();
-    hideFormAlert();
+    hideFormAlert(setNameAlert);
+    hideFormAlert(setPriceAlert);
   };
 
   // Submit form logic
   const handleSubmit = async (event: React.FormEvent) => {
     try {
       await fetchSetItemList(event); // Wait for fetchSetCategoryList to complete
-      if (!formAlert) {
+      if (!nameAlert) {
         if (isSave) {
           handleCancel(); // Reset the field list and exit modal
           setSave(false);
@@ -260,6 +349,19 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const handleSave = () => {
     setSave(true);
   };
+
+  const handleOverflow = () => {
+    if (isCreateModalOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+
+    // Clean up the effect
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  };
   // ==================== Handle Method ====================
 
   // ==================== Alert Method ====================
@@ -271,14 +373,15 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       return () => clearTimeout(timeout);
     }
   };
-  // ==================== Handle Method ====================
 
   // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
     fetchList(getMenuLink, setMenuList);
     fetchList(getCategoryLink, setCategoryList);
     fetchList(getItemLink, setItemList);
-  }, []);
+    alertMessageTime();
+    handleOverflow();
+  }, [alertMessage, isCreateModalOpen]);
 
   return (
     <div className="content px-10">
@@ -322,13 +425,13 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                     />
                   </svg>
                   {menuList.map((item, index) => (
-                    <a
-                      href={`/admin_panel/category/${foodmenu_id}`}
+                    <Link
+                      to={`/admin_panel/category/${foodmenu_id}`}
                       className="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2 dark:text-gray-400 dark:hover:text-white"
                       key={index}
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </li>
@@ -377,7 +480,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
             <div className="dine-method text-xl" key={index}>
               <div className="card rounded overflow-hidden shadow-md border-1 border-gray-300 h-full max-w-sm relative">
                 <div className="image relative">
-                  <div className="flex w-full justify-center items-center p-3 pb-0">
+                  <div className="flex w-full justify-center items-center p-3">
                     <img
                       className={`image-img w-full h-36 cursor-pointer rounded-md ${
                         item.image ? "bg-transparent" : "bg-imageColor"
@@ -393,13 +496,13 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                   <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
                     <button
                       type="button"
-                      className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 font-medium rounded-full text-sm w-28 py-2.5 text-center mb-2 dark:focus:ring-orange-900"
+                      className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 font-medium rounded-full text-sm w-28 py-2.5 text-center dark:focus:ring-orange-900"
                     >
                       Edit
                     </button>
                   </div>
                 </div>
-                <div id="card-text" className="card-text px-3 pt-2 pb-12">
+                <div id="card-text" className="card-text px-3 pb-12">
                   <div className="w-full flex">
                     <div className="w-full">
                       <p className="mr-2 mb-1 break-words capitalize">
@@ -408,10 +511,15 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                       <p className="mr-2 mb-2 text-base w-full">
                         {item.description} items
                       </p>
+                      {item.published.toString()}
+
                       <div className="absolute bottom-5 right-5 form-check form-switch flex justify-end text-2xl">
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
+                            name="published"
                             type="checkbox"
+                            defaultChecked={item.published}
+                            onClick={() => handlePublished(item.id, index)}
                             value=""
                             className="sr-only peer"
                           />
@@ -428,13 +536,13 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       </div>
 
       {/* <!-- Main modal --> */}
-      {isModalOpen && (
+      {isCreateModalOpen && (
         <div
           id="updateProductModal"
           data-modal-backdrop="static"
           tabIndex={-1}
           aria-hidden="true"
-          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 items-center w-full md:inset-0 h-modal md:h-full bg-black bg-opacity-50"
+          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-40 items-center w-full md:inset-0 h-full bg-black bg-opacity-50"
         >
           <div className="relative p-4 w-full max-w-2xl">
             {/* <!-- Modal content --> */}
@@ -446,7 +554,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                 </h3>
                 <button
                   type="button"
-                  onClick={toggleModal}
+                  onClick={handleCancel}
                   className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
                   data-modal-toggle="updateProductModal"
                 >
@@ -483,61 +591,16 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                       onChange={handleInputChange}
                       id="name"
                       // value="iPad Air Gen 5th Wi-Fi"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
+                        nameAlert ? "border-red-500" : "border-gray-300"
+                      }`}
                       placeholder="Ex. Apple iMac 27&ldquo;"
+                      autoComplete="name"
+                      autoFocus
+                      required
                     />
+                    {nameAlert && <ErrorMessage message={nameAlert} />}
                   </div>
-
-                  {/* <div>
-                          <label
-                            htmlFor="brand"
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                          >
-                            Brand
-                          </label>
-                          <input
-                            type="text"
-                            name="brand"
-                            id="brand"
-                            // value="Google"
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                            placeholder="Ex. Apple"
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="price"
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                          >
-                            Price
-                          </label>
-                          <input
-                            type="number"
-                            // value="399"
-                            name="price"
-                            id="price"
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                            placeholder="$299"
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="category"
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                          >
-                            Category
-                          </label>
-                          <select
-                            id="category"
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                          >
-                            <option selected={true}>Electronics</option>
-                            <option value="TV">TV/Monitors</option>
-                            <option value="PC">PC</option>
-                            <option value="GA">Gaming/Console</option>
-                            <option value="PH">Phones</option>
-                          </select>
-                        </div> */}
 
                   <div className="col-span-1">
                     <label
@@ -548,13 +611,18 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                     </label>
                     <input
                       type="text"
-                      // value="399"
-                      name="price"
                       id="price"
+                      name="price"
                       pattern="[0-9]+(\.[0-9]{2})?"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      value={newItem.price !== null ? newItem.price : ""}
+                      onChange={handleInputChange}
+                      className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
+                        priceAlert ? "border-red-500" : "border-gray-300"
+                      }`}
                       placeholder="RM299"
+                      required
                     />
+                    {priceAlert && <ErrorMessage message={priceAlert} />}
                   </div>
 
                   <div className="sm:col-span-2">
@@ -576,22 +644,20 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                   </div>
 
                   <div className="col-span-2">
-                    <label
-                      htmlFor="brand"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
+                    <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                       Tags
-                    </label>
+                    </p>
 
                     <ul className="grid w-full gap-2 md:grid-cols-5">
                       {tags.map((item, index) => (
                         <li key={index}>
                           <input
-                            type="checkbox"
                             id={item.id}
-                            value=""
+                            type="checkbox"
+                            value={newItem.tag}
+                            checked={newItem.tag.includes(item.label)} // checks if item.label inside newItem.tag, if not then uncheck
+                            onChange={() => handleTagChange(item.label)}
                             className="hidden peer"
-                            required={false}
                           />
                           <label
                             htmlFor={item.id}
@@ -671,11 +737,18 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                     type="submit"
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   >
-                    Create Item
+                    Save and add another
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    type="submit"
+                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                    Save
                   </button>
                   <button
                     data-modal-hide="updateProductModal"
-                    onClick={toggleModal}
+                    onClick={handleCancel}
                     type="button"
                     className="text-red-600 inline-flex items-center hover:text-white border !border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
                   >
@@ -686,6 +759,14 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Alert Message */}
+      {alertMessage && (
+        <AlertModal
+          hideAlert={hideAlert}
+          alertMessage={alertMessage}
+        ></AlertModal>
       )}
     </div>
   );

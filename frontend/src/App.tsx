@@ -32,7 +32,10 @@ function App() {
         <Route path="/testing" element={<Testing />}></Route>
         <Route path="/order_detail" element={<OrderDetailPage />} />
         <Route path="/card_payment" element={<Card_payment />}></Route>
-        <Route path="/admin_panel" element={<Admin_panel />}>
+        <Route
+          path="/admin_panel"
+          element={<Admin_panel changeIP={changeip} />}
+        >
           <Route path="menu" element={<Admin_method changeIP={changeip} />} />
           <Route
             path="category/:foodmenu_id"
