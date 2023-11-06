@@ -59,7 +59,7 @@ const admin_menu = ({ changeIP }: { changeIP: string }) => {
   return (
     <div id="admin-panel">
       <nav
-        className={`sidebar fixed top-0 left-0 h-full ${
+        className={`sidebar fixed top-0 left-0 h-full hidden sm:block ${
           isClose ? "close" : ""
         }`}
       >

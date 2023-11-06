@@ -9,6 +9,8 @@ import {
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
+import CU_Modal from "../../components/admin/cu_modal";
+import DeleteModal from "../../components/admin/delete_modal";
 
 const categories = [
   { label: "Prawn", items: "20" },
@@ -42,6 +44,157 @@ interface submitCategory {
   published: boolean;
   foodmenu_id: number;
 }
+
+const Card = ({
+  item,
+  index,
+  foodmenu_id,
+  toggleUpdateModal,
+  toggleDeleteModal,
+  handlePublished,
+}: any) => {
+  const options = [
+    { name: "Edit", clickEvent: toggleUpdateModal },
+    // { name: "Clone", clickEvent: () => toggleUpdateModal },
+    { name: "Delete", clickEvent: toggleDeleteModal },
+  ];
+
+  const [isOptionModalOpen, setIsOptionModalOpen] = useState(false); // For toggle modal purpose
+
+  const toggleModal = () => {
+    setIsOptionModalOpen(!isOptionModalOpen);
+  };
+
+  useEffect(() => {
+    const handleDocumentClick = (event: React.MouseEvent | MouseEvent) => {
+      if (isOptionModalOpen) {
+        const targetElement = event.target as HTMLElement;
+        if (
+          !targetElement ||
+          !targetElement.closest(`#dropdownBottomButton${index}`)
+        ) {
+          setIsOptionModalOpen(false);
+        }
+      }
+    };
+
+    if (isOptionModalOpen) {
+      // Add a click event listener to the document
+      document.addEventListener("click", handleDocumentClick);
+    }
+
+    return () => {
+      // Clean up the event listener when the component unmounts or the modal closes
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [isOptionModalOpen]);
+
+  return (
+    <div className="dine-method text-xl relative">
+      <div className="absolute top-0 right-0 z-20">
+        <div className="w-24 flex justify-end">
+          <button
+            id={`dropdownBottomButton${index}`}
+            data-dropdown-toggle="dropdownBottom"
+            data-dropdown-placement="bottom"
+            type="button"
+            onClick={toggleModal}
+            className="material-symbols-outlined w-10 h-10 rounded-full cursor-pointer flex justify-center content-center flex-wrap select-none"
+          >
+            more_vert
+          </button>
+        </div>
+
+        {/* <!-- Dropdown menu --> */}
+        {isOptionModalOpen && (
+          <div
+            id="dropdownBottom"
+            key={item.id}
+            className="modal w-24 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700"
+          >
+            <ul
+              className="py-2 text-sm text-gray-700 dark:text-gray-200"
+              aria-labelledby="dropdownBottomButton"
+            >
+              {options.map((item, index) => (
+                <li key={index}>
+                  <button
+                    onClick={item.clickEvent}
+                    className="block w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  >
+                    {item.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <div className="card rounded overflow-hidden shadow-md border border-grey-300 h-full max-w-sm relative">
+        <div className="image relative">
+          <div className="flex w-full justify-center items-center p-3">
+            <img
+              className={`image-img w-full h-36 cursor-pointer rounded-md ${
+                item.image ? "bg-transparent" : "bg-imageColor"
+              }`}
+              src={
+                item.image
+                  ? item.image.toString()
+                  : "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+              }
+              // /src/assets/img/admin/tableware.png
+              alt="Sunset in the mountaines"
+            />
+          </div>
+          <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
+            <Link to={`/admin_panel/category/${foodmenu_id}/${item.id}`}>
+              <button
+                type="button"
+                className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm w-28 py-2.5 text-center mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                Enter
+              </button>
+            </Link>
+
+            <button
+              type="button"
+              onClick={toggleUpdateModal}
+              className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 font-medium rounded-full text-sm w-28 py-2.5 text-center dark:focus:ring-orange-900"
+            >
+              Edit
+            </button>
+          </div>
+        </div>
+        <div id="card-text" className="card-text px-3 pb-12">
+          <div className="w-full flex">
+            <div className="w-full">
+              <p className="mr-2 mb-1 break-words">{item.name}</p>
+              <p className="mr-2 mb-2 text-base w-full break-all">
+                {item.description} items
+              </p>
+              {item.published.toString()}
+              <div className="absolute bottom-5 right-5 form-check form-switch flex justify-end text-2xl">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    name="published"
+                    type="checkbox"
+                    key={item.id}
+                    checked={item.published}
+                    onChange={handlePublished}
+                    value=""
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-600 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 // ==================== Interfaces  ====================
 
 const admin_category = ({ changeIP }: { changeIP: string }) => {
@@ -52,12 +205,17 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   const getCategoryLink = `http://${changeIP}:8000/api/foodcategories/?foodmenu_id=${foodmenu_id}`;
   const setCategoryLink = `http://${changeIP}:8000/api/foodcategories/`;
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // For toggle modal purpose
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // For toggle modal purpose
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // For toggle modal purpose
+  const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(
+    null
+  );
   const [menuList, setMenuList] = useState<Menu[]>([]); // List for store data from menu table
   const [categoryList, setCategoryList] = useState<Category[]>([]); // List for store data from category table
   const [newCategory, setNewCategory] = useState<submitCategory>({
     // For save input value
     // Initial value
-    // Reset the field
     name: "",
     description: "",
     image: null,
@@ -65,12 +223,12 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     foodmenu_id: FoodMenuId,
   });
   const [updateCategory, setUpdateCategory] = useState<submitCategory[]>([]);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // For toggle modal purpose
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // For toggle modal purpose
-  const [isDeletedModalOpen, setisDeletedModalOpen] = useState(false); // For toggle modal purpose
-
+  const [categoryID, setCategoryID] = useState<number | null>(null); // Keep the menuID when press edit button
+  const [categoryIndex, setCategoryIndex] = useState<number | null>(null); // Keep the menuIndex when press edit button
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
-  const [image, setImage] = useState<File | null>(null); // For modal image purpose
+  // const [image, setImage] = useState<File | null>(null); // For modal image purpose
+  const fileInputRef = useRef<HTMLInputElement | null>(null); // Specify the type as HTMLInputElement | null and initialize it with null
+
   const [formAlert, setFormAlert] = useState(null); // For form warning message
   const [alertMessage, setAlertMessage] = useState<string | null>(null); // For success alert message
   const [isSave, setSave] = useState(false); // To detect whether press save button
@@ -81,6 +239,18 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   ) => {
     setIsModalOpen(!isModalOpen);
+  };
+
+  const toggleIDModal = (
+    isModalOpen: boolean,
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    categoryID: number,
+    index: number
+  ) => {
+    setIsModalOpen(!isModalOpen);
+    setSelectedItemIndex(index);
+    setCategoryID(categoryID);
+    setCategoryIndex(index);
   };
   // ==================== Toggle Method ====================
 
@@ -101,10 +271,10 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
       event.preventDefault();
 
       const formData = new FormData();
-      if (image) {
+      if (newCategory.image) {
         // Ensure that the 'image' field is a valid File
-        if (image instanceof File) {
-          formData.append("image", image);
+        if (newCategory.image instanceof File) {
+          formData.append("image", newCategory.image);
           console.log("Success image file");
         } else {
           console.error("Invalid image file");
@@ -121,9 +291,6 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
       fetch(setCategoryLink, {
         method: "POST",
-        // headers: {
-        //   "Content-Type": "application/json",
-        // },
         body: formData,
       })
         .then((response) => {
@@ -132,7 +299,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
             const data = response.json();
             resolve(data); // Resolve the Promise with the fetched data
           } else {
-            console.log("This is image: ", image);
+            console.log("This is image: ", newCategory.image);
             return response.json().then((errorData) => {
               if (errorData.name) {
                 const errorMessage = errorData.name[0];
@@ -147,6 +314,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         })
         .then(() => {
           fetchList(getCategoryLink, setCategoryList);
+          fetchList(getCategoryLink, setUpdateCategory);
           setNewCategory({
             name: "",
             description: "",
@@ -154,6 +322,9 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
             published: false,
             foodmenu_id: FoodMenuId,
           }); // Clear the input fields
+          if (fileInputRef.current) {
+            fileInputRef.current.value = ""; // Clear the file input
+          }
         })
         .catch((error) => {
           console.error("Error creating task: ", error);
@@ -183,13 +354,81 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
       })
       .then(() => {
         fetchList(getCategoryLink, setCategoryList);
+        fetchList(getCategoryLink, setUpdateCategory);
       })
       .catch((error) => console.error("Error updating status: ", error));
   };
 
+  const fetchUpdateCategoryIDList = (event: FormEvent) => {
+    console.log("Fetch id: ", categoryID);
+    console.log("Fetch index: ", categoryIndex);
+
+    return new Promise((resolve, reject) => {
+      event.preventDefault();
+
+      const formData = new FormData();
+      if (updateCategory[categoryIndex ?? 0].image) {
+        // Ensure that the 'image' field is a valid File
+        const image = updateCategory[categoryIndex ?? 0].image;
+
+        if (image instanceof File) {
+          formData.append("image", image);
+          console.log("Success image file");
+        }
+      } else {
+        formData.append("image", "");
+      }
+
+      formData.append("name", updateCategory[categoryIndex ?? 0].name);
+      formData.append(
+        "description",
+        updateCategory[categoryIndex ?? 0].description
+      );
+      formData.append(
+        "published",
+        updateCategory[categoryIndex ?? 0].published.toString()
+      );
+      formData.append(
+        "foodmenu_id",
+        updateCategory[categoryIndex ?? 0].foodmenu_id.toString()
+      );
+
+      fetch(`${setCategoryLink}${categoryID}/`, {
+        method: "PUT",
+        body: formData,
+      })
+        .then((response) => {
+          if (response.ok) {
+            // return response.json(); // Parse the JSON data if the response is valid
+            const data = response.json();
+            resolve(data); // Resolve the Promise with the fetched data
+          } else {
+            return response.json().then((errorData) => {
+              if (errorData.name) {
+                const errorMessage = errorData.name[0];
+                console.error("Error (Name):", errorMessage);
+
+                // Show an alert message
+                setFormAlert(errorMessage);
+              }
+              throw new Error(`Response not OK. Status: ${response.status}`);
+            });
+          }
+        })
+        .then(() => {
+          fetchList(getCategoryLink, setCategoryList);
+          fetchList(getCategoryLink, setUpdateCategory);
+        })
+        .catch((error) => {
+          console.error("Error creating task: ", error);
+          reject(error); // Reject the Promise with the error
+        });
+    });
+  };
+
   const fetchDeleteCategoryIDList = (categoryID: number) => {
     return new Promise((resolve, reject) => {
-      fetch(`${getCategoryLink}${categoryID}/`, { method: "DELETE" })
+      fetch(`${setCategoryLink}${categoryID}/`, { method: "DELETE" })
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -203,6 +442,10 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         .then(() => {
           fetchList(getCategoryLink, setCategoryList);
           fetchList(getCategoryLink, setUpdateCategory);
+        })
+        .catch((error) => {
+          console.error("Error deleting task: ", error);
+          reject(error); // Reject the Promise with the error
         });
     });
   };
@@ -219,13 +462,6 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     setAlertMessage(null);
   };
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target && e.target.files) {
-      const selectedImage = e.target.files[0];
-      setImage(selectedImage);
-    }
-  };
-
   const handlePublished = (categoryId: number, index: number) => {
     const updatedCategoryList = [...categoryList];
     updatedCategoryList[index].published =
@@ -235,29 +471,71 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     fetchSetCategoryPublishedIDList(categoryId, index, updatedCategoryList);
   };
 
-  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
-    // Set as checked
-    setIsChecked(e.target.checked);
+  const handleInputChangeCreate = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value, checked } = event.target;
 
-    setNewCategory((prevMenu) => ({
-      ...prevMenu,
-      published: !prevMenu.published, // Toggle the "published" property
-    }));
+    setIsChecked(event.target.checked);
+
+    if (name == "name" || "description") {
+      if (value !== null || value !== "") {
+        setNewCategory({ ...newCategory, [name]: value });
+        hideFormAlert(); // Remove alert when there's a value
+      }
+    }
+    if (name === "published") {
+      // Handle the "published" property separately
+      setNewCategory({ ...newCategory, [name]: checked });
+    }
+    if (name === "image") {
+      if (event.target && event.target.files) {
+        const selectedImage = event.target.files[0];
+        setNewCategory({ ...newCategory, [name]: selectedImage });
+      } else {
+        // Handle the case when the user canceled the file selection
+        console.log("File selection canceled");
+      }
+    }
   };
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  const handleInputChangeEdit = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    index: number
   ) => {
-    const { name, value } = event.target;
-    switch (name) {
-      case "name":
-        if (value !== null && value !== "") {
-          hideFormAlert(); // Remove alert when have value
-        }
-      default:
-        setNewCategory({ ...newCategory, [name]: value });
+    const { name, value, checked } = event.target;
+
+    setIsChecked(event.target.checked);
+
+    const assignInput = (valueType: string | boolean | File) => {
+      updatedInputValues[index] = {
+        ...updatedInputValues[index],
+        [name]: valueType,
+      };
+    };
+
+    const updatedInputValues = [...updateCategory];
+    if (name === "name" || name === "description") {
+      if (value !== null || value !== "") {
+        assignInput(value);
+        hideFormAlert();
+      }
     }
-    console.log(newCategory);
+    if (name === "published") {
+      assignInput(checked);
+    }
+
+    if (name === "image") {
+      if (event.target && event.target.files) {
+        const selectedImage = event.target.files[0];
+        assignInput(selectedImage);
+        console.log("Image:", selectedImage.name);
+      } else {
+        // Handle the case when the user canceled the file selection
+        console.log("File selection canceled");
+      }
+    }
+    setUpdateCategory(updatedInputValues);
   };
 
   const handleCancel = (
@@ -297,11 +575,25 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     }
   };
 
+  const handleUpdate = async (event: React.FormEvent) => {
+    try {
+      await fetchUpdateCategoryIDList(event); // Wait for fetchSetMenuList to complete
+      if (!formAlert) {
+        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false); // Reset the field list and exit modal
+        console.log(alertMessage);
+        setAlertMessage("Successful Updated"); // Make sure this code is executed
+      }
+    } catch (error) {
+      // Handle any errors that occur during the fetchSetMenuList operation
+      console.error("Error:", error);
+    }
+  };
+
   const handleDelete = async (categoryID: number) => {
     try {
       await fetchDeleteCategoryIDList(categoryID);
       if (!formAlert) {
-        handleCancel(isDeletedModalOpen, setisDeletedModalOpen, false);
+        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false);
         console.log(alertMessage);
         setAlertMessage("Successful Deleted");
       }
@@ -345,6 +637,10 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
   useEffect(() => {
     fetchList(getCategoryLink, setCategoryList);
+  }, []);
+
+  useEffect(() => {
+    fetchList(getCategoryLink, setUpdateCategory);
   }, []);
 
   useEffect(() => {
@@ -421,255 +717,77 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         {/* <p className="subtitle pb-3 text-2xl font-bold  ">Dine Method</p> */}
         <div className="grid sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 font-medium">
           {categoryList.map((item, index) => (
-            <div className="dine-method text-xl" key={index}>
-              <div className="card rounded overflow-hidden shadow-md border border-grey-300 h-full max-w-sm relative">
-                <div className="image relative">
-                  <div className="flex w-full justify-center items-center p-3">
-                    <img
-                      className={`image-img w-full h-36 cursor-pointer rounded-md ${
-                        item.image ? "bg-transparent" : "bg-imageColor"
-                      }`}
-                      src={
-                        item.image
-                          ? item.image.toString()
-                          : "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-                      }
-                      // /src/assets/img/admin/tableware.png
-                      alt="Sunset in the mountaines"
-                    />
-                  </div>
-                  <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
-                    <Link
-                      to={`/admin_panel/category/${foodmenu_id}/${item.id}`}
-                    >
-                      <button
-                        type="button"
-                        className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm w-28 py-2.5 text-center mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      >
-                        Enter
-                      </button>
-                    </Link>
-
-                    <button
-                      type="button"
-                      className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 font-medium rounded-full text-sm w-28 py-2.5 text-center dark:focus:ring-orange-900"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                </div>
-                <div id="card-text" className="card-text px-3 pb-12">
-                  <div className="w-full flex">
-                    <div className="w-full">
-                      <p className="mr-2 mb-1 break-words">{item.name}</p>
-                      <p className="mr-2 mb-2 text-base w-full">
-                        {item.description} items
-                      </p>
-                      {item.published.toString()}
-                      <div className="absolute bottom-5 right-5 form-check form-switch flex justify-end text-2xl">
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            name="published"
-                            type="checkbox"
-                            key={item.id}
-                            defaultChecked={item.published}
-                            onClick={() => handlePublished(item.id, index)}
-                            value=""
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-600 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Card
+              key={item.id}
+              item={item}
+              index={index}
+              foodmenu_id={foodmenu_id}
+              toggleUpdateModal={() =>
+                toggleIDModal(
+                  isUpdateModalOpen,
+                  setIsUpdateModalOpen,
+                  item.id,
+                  index
+                )
+              }
+              toggleDeleteModal={() =>
+                toggleIDModal(
+                  isDeleteModalOpen,
+                  setIsDeleteModalOpen,
+                  item.id,
+                  index
+                )
+              }
+              handlePublished={() => handlePublished(item.id, index)}
+            ></Card>
           ))}
         </div>
       </div>
 
       {/* <!-- Main modal --> */}
       {isCreateModalOpen && (
-        <div
-          id="updateProductModal"
-          data-modal-backdrop="static"
-          tabIndex={-1}
-          aria-hidden="true"
-          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-40 sm:justify-center items-center w-full md:inset-0 h-full bg-black bg-opacity-50"
-        >
-          <div className="relative p-4 w-full max-w-2xl">
-            {/* <!-- Modal content --> */}
-            <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
-              {/* <!-- Modal header --> */}
-              <div className="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Create Category
-                </h3>
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleCancel(isCreateModalOpen, setIsCreateModalOpen, true)
-                  }
-                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                  data-modal-toggle="updateProductModal"
-                >
-                  <svg
-                    aria-hidden="true"
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                  <span className="sr-only">Close modal</span>
-                </button>
-              </div>
-              {/* <!-- Modal body --> */}
-              <form
-                action="#"
-                encType="multipart/form-data"
-                onSubmit={handleSubmit}
-              >
-                <div className="grid gap-4 mb-4 sm:grid-cols-2">
-                  <div className="col-span-2">
-                    <label
-                      htmlFor="name"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Name
-                    </label>
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      value={newCategory.name}
-                      onChange={handleInputChange}
-                      autoComplete="name"
-                      className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
-                        formAlert ? "border-red-500" : "border-gray-300"
-                      }`}
-                      placeholder="Ex. Apple iMac 27&ldquo;"
-                      autoFocus
-                      required
-                    />
-                    {formAlert && (
-                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">
-                        <span className="font-medium">
-                          Name field must not be empty.
-                        </span>
-                      </p>
-                    )}
-                  </div>
+        <CU_Modal
+          page="Category"
+          name="Create"
+          list={newCategory}
+          fileInputRef={fileInputRef}
+          handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            handleInputChangeCreate(event)
+          }
+          isChecked={isChecked}
+          handleCancel={() =>
+            handleCancel(isCreateModalOpen, setIsCreateModalOpen, true)
+          }
+          handleSubmit={handleSubmit}
+          handleSave={handleSave}
+        ></CU_Modal>
+      )}
 
-                  <div className="col-span-2">
-                    <label
-                      htmlFor="description"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Description
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={newCategory.description}
-                      onChange={handleInputChange}
-                      rows={5}
-                      className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Write a description..."
-                    ></textarea>
-                  </div>
+      {isUpdateModalOpen && (
+        <CU_Modal
+          page="Category"
+          name={"Edit"}
+          list={updateCategory[selectedItemIndex ?? 0]}
+          fileInputRef={fileInputRef}
+          handleCancel={() =>
+            toggleModal(isUpdateModalOpen, setIsUpdateModalOpen)
+          }
+          handleSubmit={handleUpdate}
+          handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            handleInputChangeEdit(event, categoryIndex ?? 0)
+          }
+          isChecked={isChecked}
+          nameAlert={formAlert}
+        ></CU_Modal>
+      )}
 
-                  <div className="relative col-span-2 sm:col-span-1">
-                    <label
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      htmlFor="small_size"
-                    >
-                      Upload Image
-                    </label>
-                    <input
-                      name="image"
-                      onChange={handleImageChange}
-                      className="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                      id="small_size"
-                      type="file"
-                    />
-                    <p
-                      className="block sm:absolute sm:bottom-0 mt-1 sm:mt-0 text-sm text-gray-500 dark:text-gray-300"
-                      id="file_input_help"
-                    >
-                      SVG, PNG, JPG or GIF (MAX. 800x400px).
-                    </p>
-                  </div>
-
-                  <div className="col-span-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2 sm:mb-3.5">
-                      Published
-                    </p>
-                    <div className="max-w-max">
-                      <label className="items-center sm:mb-4 cursor-pointer select-none">
-                        <div className="relative mb-3 ">
-                          <input
-                            id="modal-published"
-                            name="modal-published"
-                            type="checkbox"
-                            defaultChecked={newCategory.published}
-                            onChange={handleCheckboxChange}
-                            value=""
-                            className="toggle-switch sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
-                        </div>
-                      </label>
-                    </div>
-                    <div className="text-sm text-gray-500 mt-1 sm:mt-0">
-                      <div className={`${isChecked ? "hidden" : ""}`}>
-                        Your item are only visible to administrators.
-                      </div>
-                      <div className={`${isChecked ? "" : "hidden"}`}>
-                        Your item will be publicly visible on your site.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <button
-                    type="submit"
-                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  >
-                    Save and add another
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    type="submit"
-                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  >
-                    Save
-                  </button>
-                  <button
-                    data-modal-hide="updateProductModal"
-                    onClick={() =>
-                      handleCancel(
-                        isCreateModalOpen,
-                        setIsCreateModalOpen,
-                        true
-                      )
-                    }
-                    type="button"
-                    className="text-red-600 inline-flex items-center hover:text-white border !border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+      {isDeleteModalOpen && (
+        <DeleteModal
+          handleCancel={() =>
+            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false)
+          }
+          handleDelete={() => handleDelete(categoryID ?? 0)}
+        ></DeleteModal>
       )}
 
       {/* Alert Message */}
