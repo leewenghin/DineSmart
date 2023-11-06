@@ -7,12 +7,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const links = [
   { label: "Dashboard", url: "#", icon: "home", status: "" },
   { label: "Dashboard", url: "#", icon: "home", status: "" },
-  { label: "Dashboard", url: "#", icon: "home", status: "" },
+  { label: "Table List", url: "/admin_panel/qrtable", icon: "table_restaurant", status: "" },
   {
     label: "Menu",
     url: "/admin_panel/menu",
     icon: "menu_book",
-    status: "active",
+    status: "",
   },
   { label: "Dashboard", url: "#", icon: "home", status: "" },
   { label: "Dashboard", url: "#", icon: "home", status: "" },
@@ -86,7 +86,7 @@ const admin_menu = ({ changeIP }: { changeIP: string }) => {
             />
           </div>
         </header>
-
+        
         <div className="menu-bar px-3">
           <div className="menu">
             {/* <li className="search-box flex items-center bg-bodyColor mt-3 h-12">

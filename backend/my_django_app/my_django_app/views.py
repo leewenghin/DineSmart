@@ -203,6 +203,54 @@ class FoodItemsView(viewsets.ModelViewSet):
     #         serializer = FoodItemsSerializer(item)
     #         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+class OrderTablesView(viewsets.ModelViewSet):
+    serializer_class = OrderTablesSerializer
+    queryset = OrderTables.objects.all()
+
+    def get_queryset(self):
+        queryset = OrderTables.objects.all()  # Make a copy of the initial queryset
+
+        id = self.request.query_params.get('id') # Endpoint
+
+        if id is not None:
+            # Filter records based on the menu_id parameter
+            return queryset.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu_id'
+        return queryset  # Return the filtered or unfiltered queryset
+
+    def create(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            name = request.data['name']
+            status = request.data['status']
+            published = request.data.get('published', False) 
+            
+            # Check if published is a string representing a boolean
+            if isinstance(published, str):
+                if published.lower() == 'true':
+                    published = True
+                elif published.lower() == 'false':
+                    published = False
+                else:
+                    return Response({"error": "'published' must be 'true' or 'false'."}, status=400)
+
+            # Handle the case where 'published' is a boolean
+            elif isinstance(published, bool):
+                pass  # No conversion needed for booleans
+
+            if not name:
+                return Response({"name": ["URL field must not be empty."]}, status=status.HTTP_400_BAD_REQUEST)
+
+            item = OrderTables.objects.create(
+                name=name, 
+                status=status, 
+                published=published, 
+                )
+
+            serializer = OrderTablesSerializer(item)
+            return Response(serializer.data, status=201)
+
+            
+
+
 class FoodTagsView(viewsets.ModelViewSet):
     serializer_class = FoodTagsSerializer
     queryset = FoodTags.objects.all()

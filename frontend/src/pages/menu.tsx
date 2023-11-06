@@ -113,6 +113,47 @@ const dataArray: any[] = [
   },
 ];
 
+const data1 = [
+  {
+    id: 1,
+    name: "Apple",
+    description: "A basket of apple ",
+    price: 0.0,
+    image:
+      "http://127.0.0.1:8000/media/admin/item/red-fresh-apple-isolated-on-white-background-royalty-free-image-1627314996_LhBIQYM.jpg",
+    tag: null,
+    foodcategory_id: 1,
+  },
+  {
+    id: 2,
+    name: "basketball",
+    description: "A  basketball",
+    price: 10.0,
+    image: "http://127.0.0.1:8000/media/admin/item/basketball.jpg",
+    tag: null,
+    foodcategory_id: 2,
+  },
+];
+
+const data2 = [
+  {
+    id: 2,
+    name: "Fish",
+    description: "A nice fish\r\n",
+    image: null,
+    published: false,
+    foodmenu_id: 1,
+  },
+  {
+    id: 1,
+    name: "Main Food",
+    description: "food",
+    image: null,
+    published: true,
+    foodmenu_id: 2,
+  },
+];
+
 const menu = ({ changeIP }: { changeIP: string }) => {
   // Button and Scroll Down Category List
   const [activeCategory, setActiveCategory] = useState<number>(0);
@@ -120,29 +161,28 @@ const menu = ({ changeIP }: { changeIP: string }) => {
   const categoryRefs: React.RefObject<HTMLDivElement>[] = categories.map(() =>
     useRef(null)
   );
-  window.addEventListener('resize', ()=>{
-  });
-  
-  const handleCategoryItemClick = (index:any) => {
+  window.addEventListener("resize", () => {});
+
+  const handleCategoryItemClick = (index: any) => {
     setActiveCategory(index);
 
     categoryRefs[index].current?.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
-    
+
     console.log(index);
     const listElement = listRef.current;
     if (listElement) {
-      const listItem = listElement.children[index]  ;
+      const listItem = listElement.children[index];
       const listItemRect = listItem.getBoundingClientRect();
       const listRect = listElement.getBoundingClientRect();
       const scrollLeft = listElement.scrollLeft;
-      console.log("1:"+listItemRect.right);
-      console.log("2:"+listRect.right);
-      console.log("3:"+listItemRect.left);
-      console.log("4:"+listRect.left);
-      console.log("5:"+scrollLeft);
+      console.log("1:" + listItemRect.right);
+      console.log("2:" + listRect.right);
+      console.log("3:" + listItemRect.left);
+      console.log("4:" + listRect.left);
+      console.log("5:" + scrollLeft);
       console.log(listItemRect);
       console.log(listElement.children[index]);
       console.log(listRect);
@@ -152,13 +192,13 @@ const menu = ({ changeIP }: { changeIP: string }) => {
       if (listItemRect.right > listRect.right) {
         // Calculate how much to scroll to fully show the item
         const scrollAmount = listItemRect.right - listRect.right - scrollLeft; // Add some extra space
-        listElement.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        listElement.scrollBy({ left: scrollAmount, behavior: "smooth" });
       } else if (listItemRect.left < listRect.left) {
-        const scrollAmount = listItemRect.left + listRect.left - scrollLeft; 
+        const scrollAmount = listItemRect.left + listRect.left - scrollLeft;
         // If the item is hidden on the left, scroll to bring it fully into view
-        listElement.scrollBy({ top: scrollAmount, behavior: 'smooth' });
-      }else if(index === 0){
-        listElement.scrollBy({ left: -100, behavior: 'smooth' });
+        listElement.scrollBy({ top: scrollAmount, behavior: "smooth" });
+      } else if (index === 0) {
+        listElement.scrollBy({ left: -100, behavior: "smooth" });
       }
 
       // Call the provided click handler
@@ -182,13 +222,21 @@ const menu = ({ changeIP }: { changeIP: string }) => {
 
   // Get items from API
   const [foodItems, setFoodItems] = useState([]);
+  const [foodCategory, setFoodCategory] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/fooditem/");
-        if (response.ok) {
-          const data = await response.json();
-          setFoodItems(data);
+        const response_category = await fetch(
+          `http://${changeIP}:8000/api/foodcategories/`
+        );
+        const response_items = await fetch(
+          `http://${changeIP}:8000/api/fooditems/`
+        );
+        if (response_items.ok && response_category.ok) {
+          const data_items = await response_items.json();
+          const data_category = await response_category.json();
+          setFoodItems(data_items);
+          setFoodCategory(data_category);
         } else {
           console.error("Failed to fetch data");
         }
@@ -196,9 +244,11 @@ const menu = ({ changeIP }: { changeIP: string }) => {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
   }, []);
+
+  console.log(foodItems);
+  console.log(foodCategory);
 
   // Count Order Items
   const [orderedItems, setOrderedItems] = useState<any[]>([]);
@@ -260,7 +310,7 @@ const menu = ({ changeIP }: { changeIP: string }) => {
       state: orderlist,
     });
   };
-  const listRef = useRef<HTMLUListElement   | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
   const [showLeftIcon, setShowLeftIcon] = useState(false);
   const [showRightIcon, setShowRightIcon] = useState(true);
 
@@ -269,7 +319,9 @@ const menu = ({ changeIP }: { changeIP: string }) => {
       const listElement = listRef.current;
       if (listElement) {
         const isAtStartOfContainer = listElement.scrollLeft === 0;
-        const isEndOfContainer = listElement.scrollLeft + listElement.clientWidth >= listElement.scrollWidth - 1;
+        const isEndOfContainer =
+          listElement.scrollLeft + listElement.clientWidth >=
+          listElement.scrollWidth - 1;
         setShowLeftIcon(!isAtStartOfContainer);
         setShowRightIcon(!isEndOfContainer);
       }
@@ -277,28 +329,29 @@ const menu = ({ changeIP }: { changeIP: string }) => {
 
     const listElement = listRef.current;
     if (listElement) {
-      listElement.addEventListener('scroll', handleScroll);
+      listElement.addEventListener("scroll", handleScroll);
     }
 
     return () => {
       if (listElement) {
-        listElement.removeEventListener('scroll', handleScroll);
+        listElement.removeEventListener("scroll", handleScroll);
       }
     };
   }, []);
-  
-  const handleScrollRight =() =>{
+
+  const handleScrollRight = () => {
     const listElement = listRef.current as HTMLElement | null;
     if (listElement) {
-      listElement.scrollBy({ left: 200, behavior: 'smooth' }); // Adjust the scroll amount as needed
+      listElement.scrollBy({ left: 200, behavior: "smooth" }); // Adjust the scroll amount as needed
     }
-  }
-  const handleScrollLeft = () =>{
+  };
+  const handleScrollLeft = () => {
     const listElement = listRef.current as HTMLElement | null;
     if (listElement) {
-      listElement.scrollBy({ left: -200, behavior: 'smooth' }); // Adjust the scroll amount as needed
+      listElement.scrollBy({ left: -200, behavior: "smooth" }); // Adjust the scroll amount as needed
     }
-  }
+  };
+
   // const elementRef = useRef(null);
   // useEffect(() => {
   //   const observer = new IntersectionObserver(
@@ -326,8 +379,9 @@ const menu = ({ changeIP }: { changeIP: string }) => {
   //   return () => {
   //     observer.disconnect();
   //   };
-  // }, []); 
+  // }, []);
 
+  // const sortedFoodCategory = foodCategory.sort((a, b) => a.id - b.id);
 
   return (
     <>
@@ -338,7 +392,7 @@ const menu = ({ changeIP }: { changeIP: string }) => {
             <div className="flex align-center">
               <button className="bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5] flex justify-center items-center px-3 me-3 rounded ">
                 <Link to={"/admin_panel/menu"}>
-                <p className="text-white">Login</p>
+                  <p className="text-white">Login</p>
                 </Link>
               </button>
               <button className="bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5] flex justify-center items-center  w-8 h-8 me-3 rounded ">
@@ -357,11 +411,15 @@ const menu = ({ changeIP }: { changeIP: string }) => {
           <div className="flex mx-auto md:container ">
             <div className=" md:w-2/3 w-full relative">
               <div className="border-b border-gray-200 dark:border-gray-700 bg-white shadow mb-3 md:static sticky top-16 ">
-                <ul className="flex -mb-px md:text-base text-sm items-center font-medium text-center text-gray-500 dark:text-gray-400 overflow-x-auto no-scrollbar cursor-grabbing " ref={listRef} >
-                  {categories.map((category, index) => (
+                <ul
+                  className="flex -mb-px md:text-base text-sm items-center font-medium text-center text-gray-500 dark:text-gray-400 overflow-x-auto no-scrollbar cursor-grabbing "
+                  ref={listRef}
+                >
+                  {foodCategory.map((category:any, index) => {
+                    if(category.published == true){
+                      return(
                     <li
                       key={index}
-                      
                       className={`mr-2 `}
                       onClick={() => handleCategoryItemClick(index)}
                     >
@@ -372,20 +430,30 @@ const menu = ({ changeIP }: { changeIP: string }) => {
                             : "hover:text-gray-600 hover:border-gray-300"
                         }`}
                       >
-                        {category.replace(/_/g, " ")}
+                        {category.name}
                       </p>
                     </li>
-                  ))}
-                  {showLeftIcon && (
-                      <button className="bg-white border-b border-gray-200 px-2 py-4 cursor-pointer absolute " onClick={handleScrollLeft}>
-                        &lt;
-                      </button>
+
+                      )
+                    }
+                  }
+                  )}
+                  {/* {showLeftIcon && (
+                    <button
+                      className="bg-white border-b border-gray-200 px-2 py-4 cursor-pointer absolute "
+                      onClick={handleScrollLeft}
+                    >
+                      &lt;
+                    </button>
                   )}
                   {showRightIcon && (
-                      <button className="bg-white border-b border-gray-200 px-2 py-4 absolute right-0 cursor-pointer " onClick={handleScrollRight}>
-                          &gt;
-                      </button>
-                      )}
+                    <button
+                      className="bg-white border-b border-gray-200 px-2 py-4 absolute right-0 cursor-pointer "
+                      onClick={handleScrollRight}
+                    >
+                      &gt;
+                    </button>
+                  )} */}
                 </ul>
               </div>
               {/* <div className="border-b border-gray-200 dark:border-gray-700 bg-white shadow mb-3 md:static sticky top-16 overflow-x-auto">
@@ -419,10 +487,12 @@ const menu = ({ changeIP }: { changeIP: string }) => {
                   </div>
                 </div>
               </div> */}
-
+              
               {/* Grid layout  */}
-              {Object.keys(dataArray[0]).map((category, index) => (
-                <div key={index} ref={categoryRefs[index]}>
+              {foodCategory.map((category: any, categoryIndex) => {
+                if(category.published == true){
+                  return(
+                <div key={categoryIndex} ref={categoryRefs[categoryIndex]}>
                   <div className="p-3 mt-2 flex items-center justify-center w-auto">
                     <FontAwesomeIcon
                       icon={faStar}
@@ -430,7 +500,7 @@ const menu = ({ changeIP }: { changeIP: string }) => {
                     />
                     <hr className="w-1/6 mx-3 h-1 bg-gradient-to-r from-goldColor from-10% to-goldColor/[.5] rounded-full" />
                     <p className="text-lg text-center font-semibold text-transparent bg-clip-text bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5]">
-                      {category.replace(/_/g, " ")}
+                      {category.name}
                     </p>
                     <hr className="w-1/6 mx-3 h-1  bg-gradient-to-l from-goldColor from-10% to-goldColor/[.5]" />
                     <FontAwesomeIcon
@@ -439,45 +509,54 @@ const menu = ({ changeIP }: { changeIP: string }) => {
                     />
                   </div>
                   <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2">
-                    {dataArray[0][category].map((item: any, index: any) => (
-                      <div
-                        key={index}
-                        className="bg-white sm:!p-2 p-0 sm:!rounded rounded-none shadow-md flex sm:flex-col  "
-                      >
-                        <div className="sm:!w-full xs:!w-1/3 w-2/5  sm:h-auto h-28  my-auto">
-                          <img
-                            src={item.imageSrc}
-                            alt=""
-                            className="w-full sm:!mb-2 mb-0 sm:!h-40  h-full object-cover"
-                          />
-                        </div>
-                        <div className="sm:!p-1 xs:p-4 p-3 sm:!w-full truncate xs:w-2/3 w-3/5  flex flex-col justify-between food-item-container ">
-                          <div className="truncate line-clamp-4 mb-2  whitespace-normal sm:!leading-none leading-none sm:!text-lg xs:!text-base text-sm  food-item-container">
-                            {item.foodTitle}
-                            <br />
-                            <div className="xs:text-sm text-xs">
-                              {item.description}
+                    {foodItems.map((item: any, itemIndex) => {
+                      if (item.foodcategory_id === category.id && category.published == true) {
+                        return (
+                          <div
+                            key={itemIndex}
+                            className="bg-white sm:!p-2 p-0 sm:!rounded rounded-none shadow-md flex sm:flex-col  "
+                          >
+                            <div className="sm:!w-full xs:!w-1/3 w-2/5  sm:h-auto h-28  my-auto">
+                              <img
+                                src={item.image}
+                                alt=""
+                                className="w-full sm:!mb-2 mb-0 sm:!h-40  h-full object-cover"
+                              />
+                            </div>
+                            <div className="sm:!p-1 xs:p-4 p-3 sm:!w-full truncate xs:w-2/3 w-3/5  flex flex-col justify-between food-item-container ">
+                              <div className="truncate line-clamp-4 mb-2  whitespace-normal sm:!leading-none leading-none sm:!text-lg xs:!text-base text-sm  food-item-container">
+                                {item.name}
+                                <br />
+                                <div className="xs:text-sm text-xs">
+                                  {item.description}
+                                </div>
+                              </div>
+                              <div className="flex justify-end sm:justify-between items-center ">
+                                <p className=" sm:!text-base xs:text-sm text-xs font-bold sm:!pe-0 pe-2 ">
+                                  RM {item.price}
+                                </p>
+                                <button
+                                  className="bg-primaryColor rounded "
+                                  onClick={() => handleOrderClick(item)}
+                                >
+                                  <p className="text-white sm:!text-base xs:text-sm text-xs font-bold hover:bg-black/[.10] py-1 xs:!px-4 px-2 rounded">
+                                    Order
+                                  </p>
+                                </button>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex justify-end sm:justify-between items-center ">
-                            <p className=" sm:!text-base xs:text-sm text-xs font-bold sm:!pe-0 pe-2 ">
-                              RM {item.price}
-                            </p>
-                            <button
-                              className="bg-primaryColor rounded "
-                              onClick={() => handleOrderClick(item)}
-                            >
-                              <p className="text-white sm:!text-base xs:text-sm text-xs font-bold hover:bg-black/[.10] py-1 xs:!px-4 px-2 rounded">
-                                Order
-                              </p>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      }
+                      return null;
+                    })}
                   </div>
                 </div>
-              ))}
+
+                  )
+                }
+              }
+              )}
               {/* horizontal layout */}
               {/* {Object.keys(dataArray[0]).map((category) => (
                 <div key={category}>
