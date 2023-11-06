@@ -28,9 +28,9 @@ const CU_Modal = ({
   page,
   name,
   list,
+  fileInputRef,
   handleInputChange,
-  handleTagChange,
-  handleImageChange,
+  handleTagChange = () => {},
   isChecked,
   handleCancel,
   handleSubmit,
@@ -52,7 +52,7 @@ const CU_Modal = ({
           {/* <!-- Modal header --> */}
           <div className="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {name} Menu
+              {name} {page}
             </h3>
             <button
               type="button"
@@ -167,7 +167,7 @@ const CU_Modal = ({
                           type="checkbox"
                           value={list.tag}
                           checked={list.tag.includes(item.label)} // checks if item.label inside newItem.tag, if not then uncheck
-                          onChange={handleTagChange}
+                          onChange={() => handleTagChange(item.label)}
                           className="hidden peer"
                         />
                         <label
@@ -201,7 +201,9 @@ const CU_Modal = ({
                   </label>
                   <input
                     name="image"
-                    onChange={handleImageChange}
+                    accept=".jpg, .jpeg, .png"
+                    ref={fileInputRef}
+                    onChange={handleInputChange}
                     className="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                     id="small_size"
                     type="file"
@@ -231,7 +233,7 @@ const CU_Modal = ({
                       <input
                         name="published"
                         type="checkbox"
-                        defaultChecked={list.published}
+                        checked={list.published}
                         onChange={handleInputChange}
                         value=""
                         className="toggle-switch sr-only peer"
@@ -248,10 +250,9 @@ const CU_Modal = ({
                       <label className="items-center sm:mb-4 cursor-pointer select-none">
                         <div className="relative mb-3 ">
                           <input
-                            id="modal-published"
-                            name="modal-published"
+                            name="published"
                             type="checkbox"
-                            defaultChecked={list.published}
+                            checked={list.published}
                             onChange={handleInputChange}
                             value=""
                             className="toggle-switch sr-only peer"
@@ -260,7 +261,6 @@ const CU_Modal = ({
                         </div>
                       </label>
                     </div>
-                    f
                   </>
                 )}
 
@@ -285,7 +285,7 @@ const CU_Modal = ({
                 type="submit"
                 className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {page === "Category" || page === "Item" ? (
+                {page === "Menu" || name === "Edit" ? (
                   <>
                     {name} {page}
                   </>
@@ -294,7 +294,7 @@ const CU_Modal = ({
                 )}
               </button>
 
-              {(page === "Category" || page === "Item") && (
+              {page !== "Menu" && name !== "Edit" && (
                 <>
                   <button
                     onClick={handleSave}

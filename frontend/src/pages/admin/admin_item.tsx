@@ -1,7 +1,15 @@
-import { ChangeEvent, Component, FormEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  Component,
+  FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { ModalProps } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
+import CU_Modal from "../../components/admin/cu_modal";
 
 const items = [
   { label: "black pepper prawn", items: "20" },
@@ -60,11 +68,144 @@ interface submitItem {
   foodcategory_id: number;
 }
 
-const ErrorMessage = ({ message }: any) => {
+const Card = ({
+  item,
+  index,
+  foodcategory_id,
+  toggleUpdateModal,
+  toggleDeleteModal,
+  handlePublished,
+}: any) => {
+  const options = [
+    { name: "Edit", clickEvent: toggleUpdateModal },
+    // { name: "Clone", clickEvent: () => toggleUpdateModal },
+    { name: "Delete", clickEvent: toggleDeleteModal },
+  ];
+
+  const [isOptionModalOpen, setIsOptionModalOpen] = useState(false); // For toggle modal purpose
+
+  const toggleModal = () => {
+    setIsOptionModalOpen(!isOptionModalOpen);
+  };
+
+  useEffect(() => {
+    const handleDocumentClick = (event: React.MouseEvent | MouseEvent) => {
+      if (isOptionModalOpen) {
+        const targetElement = event.target as HTMLElement;
+        if (
+          !targetElement ||
+          !targetElement.closest(`#dropdownBottomButton${index}`)
+        ) {
+          setIsOptionModalOpen(false);
+        }
+      }
+    };
+
+    if (isOptionModalOpen) {
+      // Add a click event listener to the document
+      document.addEventListener("click", handleDocumentClick);
+    }
+
+    return () => {
+      // Clean up the event listener when the component unmounts or the modal closes
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [isOptionModalOpen]);
+
   return (
-    <p className="mt-2 text-xs text-red-600 dark:text-red-400">
-      <span className="font-medium">{message}</span>
-    </p>
+    <div className="dine-method text-xl" key={index}>
+      <div className="absolute top-0 right-0 z-20">
+        <div className="w-24 flex justify-end">
+          <button
+            id={`dropdownBottomButton${index}`}
+            data-dropdown-toggle="dropdownBottom"
+            data-dropdown-placement="bottom"
+            type="button"
+            onClick={toggleModal}
+            className="material-symbols-outlined w-10 h-10 rounded-full cursor-pointer flex justify-center content-center flex-wrap select-none"
+          >
+            more_vert
+          </button>
+        </div>
+
+        {/* <!-- Dropdown menu --> */}
+        {isOptionModalOpen && (
+          <div
+            id="dropdownBottom"
+            key={item.id}
+            className="modal w-24 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700"
+          >
+            <ul
+              className="py-2 text-sm text-gray-700 dark:text-gray-200"
+              aria-labelledby="dropdownBottomButton"
+            >
+              {options.map((item, index) => (
+                <li key={index}>
+                  <button
+                    onClick={item.clickEvent}
+                    className="block w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  >
+                    {item.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <div className="card rounded overflow-hidden shadow-md border-1 border-gray-300 h-full max-w-sm relative">
+        <div className="image relative">
+          <div className="flex w-full justify-center items-center p-3">
+            <img
+              className={`image-img w-full h-36 cursor-pointer rounded-md ${
+                item.image ? "bg-transparent" : "bg-imageColor"
+              }`}
+              src={
+                item.image
+                  ? item.image.toString()
+                  : "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+              }
+              alt="Sunset in the moufntains"
+            />
+          </div>
+          <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
+            <button
+              type="button"
+              onClick={toggleUpdateModal}
+              className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 font-medium rounded-full text-sm w-28 py-2.5 text-center dark:focus:ring-orange-900"
+            >
+              Edit
+            </button>
+          </div>
+        </div>
+        <div id="card-text" className="card-text px-3 pb-12">
+          <div className="w-full flex">
+            <div className="w-full">
+              <p className="mr-2 mb-1 break-words capitalize">{item.name}</p>
+              <p className="mr-2 mb-2 text-base w-full">
+                {item.description} items
+              </p>
+              {item.published.toString()}
+
+              <div className="absolute bottom-5 right-5 form-check form-switch flex justify-end text-2xl">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    name="published"
+                    type="checkbox"
+                    defaultChecked={item.published}
+                    onClick={() => handlePublished(item.id, index)}
+                    value=""
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-600 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -95,7 +236,16 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // For toggle modal purpose
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // For toggle modal purpose
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // For toggle modal purpose
+  const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(
+    null
+  );
+  const [updateItem, setUpdateItem] = useState<submitItem[]>([]);
+  const [itemID, setItemID] = useState<number | null>(null); // Keep the menuID when press edit button
+  const [itemIndex, setItemIndex] = useState<number | null>(null); // Keep the menuIndex when press edit button
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
+  const fileInputRef = useRef<HTMLInputElement | null>(null); // Specify the type as HTMLInputElement | null and initialize it with null
+
   const [image, setImage] = useState<File | null>(null); // For modal image purpose
   const [nameAlert, setNameAlert] = useState<string | null>(null); // For form warning message
   const [priceAlert, setPriceAlert] = useState<string | null>(null); // For form warning message
@@ -104,8 +254,23 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
   // ==================== Toggle Method ====================
   // Modal toggler
-  const toggleModal = () => {
-    setIsCreateModalOpen(!isCreateModalOpen);
+  const toggleModal = (
+    isModalOpen: boolean,
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const toggleIDModal = (
+    isModalOpen: boolean,
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    itemID: number,
+    index: number
+  ) => {
+    setIsModalOpen(!isModalOpen);
+    setSelectedItemIndex(index);
+    setItemID(itemID);
+    setItemIndex(index);
   };
   // ==================== Toggle Method ====================
 
@@ -126,10 +291,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       event.preventDefault();
 
       const formData = new FormData();
-      if (image) {
+      if (newItem.image) {
         // Ensure that the 'image' field is a valid File
-        if (image instanceof File) {
-          formData.append("image", image);
+        if (newItem.image instanceof File) {
+          formData.append("image", newItem.image);
           console.log("Success image file");
         } else {
           console.error("Invalid image file");
@@ -168,7 +333,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
             const data = response.json();
             resolve(data); // Resolve the Promise with the fetched data
           } else {
-            console.log("This is image: ", image);
+            // console.log("This is image: ", image);
             return response.json().then((errorData) => {
               if (errorData.name) {
                 const errorMessage = errorData.name[0];
@@ -190,6 +355,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         })
         .then(() => {
           fetchList(getItemLink, setItemList);
+          fetchList(getItemLink, setUpdateItem);
           setNewItem({
             name: "",
             description: "",
@@ -231,6 +397,97 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       })
       .catch((error) => console.error("Error updating status: ", error));
   };
+
+  const fetchUpdateItemIDList = (event: FormEvent) => {
+    console.log("Fetch id: ", itemID);
+    console.log("Fetch index: ", itemIndex);
+
+    return new Promise((resolve, reject) => {
+      event.preventDefault();
+
+      const formData = new FormData();
+      if (updateItem[itemIndex ?? 0].image) {
+        // Ensure that the 'image' field is a valid File
+        const image = updateItem[itemIndex ?? 0].image;
+
+        if (image instanceof File) {
+          formData.append("image", image);
+          console.log("Success image file");
+          console.log("This is image: ", image);
+        }
+      } else {
+        formData.append("image", "");
+      }
+
+      formData.append("name", updateItem[itemIndex ?? 0].name);
+      formData.append("description", updateItem[itemIndex ?? 0].description);
+      formData.append(
+        "price",
+        updateItem?.[itemIndex ?? 0]?.price?.toString() ?? ""
+      );
+
+      formData.append(
+        "published",
+        updateItem[itemIndex ?? 0].published.toString()
+      );
+      formData.append(
+        "foodcategory_id",
+        updateItem[itemIndex ?? 0].foodcategory_id.toString()
+      );
+
+      console.log("Name: ", updateItem[itemIndex ?? 0].name);
+      console.log("description: ", updateItem[itemIndex ?? 0].description);
+      console.log("Price: ", updateItem?.[itemIndex ?? 0]?.price?.toString());
+      console.log(
+        "published: ",
+        updateItem[itemIndex ?? 0].published.toString()
+      );
+      console.log(
+        "foodcategory_id: ",
+        updateItem[itemIndex ?? 0].foodcategory_id.toString()
+      );
+
+      fetch(`${setItemLink}${itemID}/`, {
+        method: "PUT",
+        body: formData,
+      })
+        .then((response) => {
+          if (response.ok) {
+            // return response.json(); // Parse the JSON data if the response is valid
+            console.log("This is image: ", image);
+
+            const data = response.json();
+            resolve(data); // Resolve the Promise with the fetched data
+          } else {
+            return response.json().then((errorData) => {
+              if (errorData.name) {
+                const errorMessage = errorData.name[0];
+                console.error("Error (Name):", errorMessage);
+
+                // Show an alert message
+                setNameAlert(errorMessage);
+              }
+              if (errorData.price) {
+                const errorMessage = errorData.price[0];
+                console.error("Error (price):", errorMessage);
+
+                // Show an alert message
+                setPriceAlert(errorMessage);
+              }
+              throw new Error(`Response not OK. Status: ${response.status}`);
+            });
+          }
+        })
+        .then(() => {
+          fetchList(getItemLink, setItemList);
+          fetchList(getItemLink, setUpdateItem);
+        })
+        .catch((error) => {
+          console.error("Error creating task: ", error);
+          reject(error); // Reject the Promise with the error
+        });
+    });
+  };
   // ==================== Fetch Method ====================
 
   // ==================== Handle Method ====================
@@ -259,6 +516,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     fetchSetItemIDList(ItemID, index, updatedCategoryList);
   };
 
+  const handleTagChangeWithParameter = (tagValue: string) => {
+    handleTagChange(tagValue);
+  };
+
   const handleTagChange = (tagValue: string) => {
     const { tag } = newItem;
 
@@ -277,53 +538,114 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     }
   };
 
-  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
-    // Set as checked
-    setIsChecked(e.target.checked);
-
-    setNewItem((prevMenu) => ({
-      ...prevMenu,
-      published: !prevMenu.published, // Toggle the "published" property
-    }));
-  };
-
-  // Submit form changes
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  const handleInputChangeCreate = (
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const { name, value } = event.target;
-    switch (name) {
-      case "name":
-        if (value !== null || value !== "") {
-          hideFormAlert(setNameAlert); // Remove alert when have value
-          setNewItem({ ...newItem, [name]: value });
-        }
-        break;
+    const { name, value, checked } = event.target;
 
-      case "price":
-        if (value !== null || value !== "") {
-          hideFormAlert(setPriceAlert); // Remove alert when have value
-        } else {
-          setNewItem({ ...newItem, [name]: value });
-        }
-      default:
+    setIsChecked(event.target.checked);
+
+    if (name == "name" || "description") {
+      if (value !== null || value !== "") {
         setNewItem({ ...newItem, [name]: value });
+        hideFormAlert(setNameAlert); // Remove alert when there's a value
+      }
+    }
+    if (name == "price") {
+      if (value !== null) {
+        try {
+          const numericValue = parseFloat(value);
+          if (!isNaN(numericValue)) {
+            setNewItem({ ...newItem, [name]: numericValue });
+            hideFormAlert(setPriceAlert); // Remove alert when there's a value
+          } else {
+            console.error("Invalid numeric value:", value);
+          }
+        } catch (error) {
+          console.error("Error while parsing numeric value:", error);
+        }
+      }
+    }
+    if (name == "published") {
+      // Handle the "published" property separately
+      setNewItem({ ...newItem, [name]: checked });
+    }
+    if (name == "image") {
+      if (event.target && event.target.files) {
+        const selectedImage = event.target.files[0];
+        setNewItem({ ...newItem, [name]: selectedImage });
+      } else {
+        // Handle the case when the user canceled the file selection
+        console.log("File selection canceled");
+      }
     }
   };
 
-  const handleCancel = () => {
-    // Clear the form data by setting it to its initial state
-    setNewItem({
-      name: "",
-      description: "",
-      image: null,
-      price: null,
-      tag: [],
-      published: false,
-      foodcategory_id: FoodCategoryId,
-    });
+  const handleInputChangeEdit = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const { name, value, checked } = event.target;
 
-    toggleModal();
+    setIsChecked(event.target.checked);
+
+    const assignInput = (valueType: string | number | boolean | File) => {
+      updatedInputValues[index] = {
+        ...updatedInputValues[index],
+        [name]: valueType,
+      };
+    };
+
+    const updatedInputValues = [...updateItem];
+    if (name === "name" || name === "description") {
+      if (value !== null || value !== "") {
+        assignInput(value);
+        hideFormAlert(setNameAlert);
+      }
+    }
+    if (name === "price") {
+      if (value !== null) {
+        const numericValue = parseFloat(value);
+        assignInput(numericValue);
+        hideFormAlert(setPriceAlert); // Remove alert when there's a value
+      }
+    }
+    if (name === "published") {
+      assignInput(checked);
+    }
+
+    if (name === "image") {
+      if (event.target && event.target.files) {
+        const selectedImage = event.target.files[0];
+        assignInput(selectedImage);
+        console.log("Image:", selectedImage.name);
+      } else {
+        // Handle the case when the user canceled the file selection
+        console.log("File selection canceled");
+      }
+    }
+    setUpdateItem(updatedInputValues);
+  };
+
+  const handleCancel = (
+    isModalOpen: boolean,
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    reset: boolean
+  ) => {
+    // Clear the form data by setting it to its initial state
+    if (reset) {
+      setNewItem({
+        name: "",
+        description: "",
+        image: null,
+        price: null,
+        tag: [],
+        published: false,
+        foodcategory_id: FoodCategoryId,
+      });
+    }
+
+    toggleModal(isModalOpen, setIsModalOpen);
     hideFormAlert(setNameAlert);
     hideFormAlert(setPriceAlert);
   };
@@ -334,7 +656,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       await fetchSetItemList(event); // Wait for fetchSetCategoryList to complete
       if (!nameAlert) {
         if (isSave) {
-          handleCancel(); // Reset the field list and exit modal
+          handleCancel(isCreateModalOpen, setIsCreateModalOpen, true); // Reset the field list and exit modal
           setSave(false);
         }
         console.log(alertMessage);
@@ -346,6 +668,19 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     }
   };
 
+  const handleUpdate = async (event: React.FormEvent) => {
+    try {
+      await fetchUpdateItemIDList(event); // Wait for fetchSetMenuList to complete
+      if (!nameAlert || !priceAlert) {
+        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false); // Reset the field list and exit modal
+        console.log(alertMessage);
+        setAlertMessage("Successful Updated"); // Make sure this code is executed
+      }
+    } catch (error) {
+      // Handle any errors that occur during the fetchSetMenuList operation
+      console.error("Error:", error);
+    }
+  };
   const handleSave = () => {
     setSave(true);
   };
@@ -377,17 +712,36 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
     fetchList(getMenuLink, setMenuList);
+  }, []);
+
+  // Use useEffect to trigger modal open when the component is mounted
+  useEffect(() => {
     fetchList(getCategoryLink, setCategoryList);
+  }, []);
+
+  // Use useEffect to trigger modal open when the component is mounted
+  useEffect(() => {
     fetchList(getItemLink, setItemList);
+  }, []);
+  // Use useEffect to trigger modal open when the component is mounted
+  useEffect(() => {
+    fetchList(getItemLink, setUpdateItem);
+  }, []);
+
+  // Use useEffect to trigger modal open when the component is mounted
+  useEffect(() => {
     alertMessageTime();
+  }, [alertMessage]);
+  // Use useEffect to trigger modal open when the component is mounted
+  useEffect(() => {
     handleOverflow();
-  }, [alertMessage, isCreateModalOpen]);
+  }, [isCreateModalOpen]);
 
   return (
     <div className="content px-10">
       <div className="flex justify-between items-center">
         <div>
-          <p className="title text-2xl font-bold my-2">Catering Categories</p>
+          <p className="title text-2xl font-bold my-2">Catering Items</p>
           <nav className="flex" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-3">
               <li className="inline-flex items-center">
@@ -467,7 +821,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         </div>
         <button
           type="button"
-          onClick={toggleModal}
+          onClick={() => toggleModal(isCreateModalOpen, setIsCreateModalOpen)}
           className="text-white bg-gradient-to-br from-orange-500 to-yellow-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-8 py-2.5 text-center"
         >
           Add Item
@@ -475,290 +829,72 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       </div>
       <div className="content-box w-full py-8 px-8 shadow-sm rounded-xl">
         {/* <p className="subtitle pb-3 text-2xl font-bold  ">Dine Method</p> */}
-        <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 font-medium">
+        <div className="grid sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 font-medium">
           {itemList.map((item, index) => (
-            <div className="dine-method text-xl" key={index}>
-              <div className="card rounded overflow-hidden shadow-md border-1 border-gray-300 h-full max-w-sm relative">
-                <div className="image relative">
-                  <div className="flex w-full justify-center items-center p-3">
-                    <img
-                      className={`image-img w-full h-36 cursor-pointer rounded-md ${
-                        item.image ? "bg-transparent" : "bg-imageColor"
-                      }`}
-                      src={
-                        item.image
-                          ? item.image.toString()
-                          : "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-                      }
-                      alt="Sunset in the moufntains"
-                    />
-                  </div>
-                  <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
-                    <button
-                      type="button"
-                      className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 font-medium rounded-full text-sm w-28 py-2.5 text-center dark:focus:ring-orange-900"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                </div>
-                <div id="card-text" className="card-text px-3 pb-12">
-                  <div className="w-full flex">
-                    <div className="w-full">
-                      <p className="mr-2 mb-1 break-words capitalize">
-                        {item.name}
-                      </p>
-                      <p className="mr-2 mb-2 text-base w-full">
-                        {item.description} items
-                      </p>
-                      {item.published.toString()}
-
-                      <div className="absolute bottom-5 right-5 form-check form-switch flex justify-end text-2xl">
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            name="published"
-                            type="checkbox"
-                            defaultChecked={item.published}
-                            onClick={() => handlePublished(item.id, index)}
-                            value=""
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-600 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Card
+              key={item.id}
+              item={item}
+              index={index}
+              foodmenu_id={foodmenu_id}
+              toggleUpdateModal={() =>
+                toggleIDModal(
+                  isUpdateModalOpen,
+                  setIsUpdateModalOpen,
+                  item.id,
+                  index
+                )
+              }
+              toggleDeleteModal={() =>
+                toggleIDModal(
+                  isDeleteModalOpen,
+                  setIsDeleteModalOpen,
+                  item.id,
+                  index
+                )
+              }
+              handlePublished={() => handlePublished(item.id, index)}
+            ></Card>
           ))}
         </div>
       </div>
 
       {/* <!-- Main modal --> */}
       {isCreateModalOpen && (
-        <div
-          id="updateProductModal"
-          data-modal-backdrop="static"
-          tabIndex={-1}
-          aria-hidden="true"
-          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-40 items-center w-full md:inset-0 h-full bg-black bg-opacity-50"
-        >
-          <div className="relative p-4 w-full max-w-2xl">
-            {/* <!-- Modal content --> */}
-            <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
-              {/* <!-- Modal header --> */}
-              <div className="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Create Item
-                </h3>
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                  data-modal-toggle="updateProductModal"
-                >
-                  <svg
-                    aria-hidden="true"
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                  <span className="sr-only">Close modal</span>
-                </button>
-              </div>
-              {/* <!-- Modal body --> */}
-              <form action="#" onSubmit={handleSubmit}>
-                <div className="grid gap-4 mb-4 sm:grid-cols-2">
-                  <div className="col-span-1">
-                    <label
-                      htmlFor="name"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={newItem.name}
-                      onChange={handleInputChange}
-                      id="name"
-                      // value="iPad Air Gen 5th Wi-Fi"
-                      className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
-                        nameAlert ? "border-red-500" : "border-gray-300"
-                      }`}
-                      placeholder="Ex. Apple iMac 27&ldquo;"
-                      autoComplete="name"
-                      autoFocus
-                      required
-                    />
-                    {nameAlert && <ErrorMessage message={nameAlert} />}
-                  </div>
+        <CU_Modal
+          page="Item"
+          name="Create"
+          list={newItem}
+          fileInputRef={fileInputRef}
+          handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            handleInputChangeCreate(event)
+          }
+          handleTagChange={handleTagChangeWithParameter}
+          isChecked={isChecked}
+          handleCancel={() =>
+            handleCancel(isCreateModalOpen, setIsCreateModalOpen, true)
+          }
+          handleSubmit={handleSubmit}
+          handleSave={handleSave}
+        ></CU_Modal>
+      )}
 
-                  <div className="col-span-1">
-                    <label
-                      htmlFor="price"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Price
-                    </label>
-                    <input
-                      type="text"
-                      id="price"
-                      name="price"
-                      pattern="[0-9]+(\.[0-9]{2})?"
-                      value={newItem.price !== null ? newItem.price : ""}
-                      onChange={handleInputChange}
-                      className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
-                        priceAlert ? "border-red-500" : "border-gray-300"
-                      }`}
-                      placeholder="RM299"
-                      required
-                    />
-                    {priceAlert && <ErrorMessage message={priceAlert} />}
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label
-                      htmlFor="description"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Description
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={newItem.description}
-                      onChange={handleInputChange}
-                      rows={5}
-                      className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Write a description..."
-                    ></textarea>
-                  </div>
-
-                  <div className="col-span-2">
-                    <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                      Tags
-                    </p>
-
-                    <ul className="grid w-full gap-2 md:grid-cols-5">
-                      {tags.map((item, index) => (
-                        <li key={index}>
-                          <input
-                            id={item.id}
-                            type="checkbox"
-                            value={newItem.tag}
-                            checked={newItem.tag.includes(item.label)} // checks if item.label inside newItem.tag, if not then uncheck
-                            onChange={() => handleTagChange(item.label)}
-                            className="hidden peer"
-                          />
-                          <label
-                            htmlFor={item.id}
-                            className="inline-flex justify-center items-center w-full p-3 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-orange-500 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
-                          >
-                            <div className="flex flex-col items-center text-center capitalize">
-                              <img
-                                className="mb-2 w-7 h-7 text-sky-500 select-none"
-                                src={item.icon}
-                                alt="Chili"
-                              />
-                              <div className="w-full text-sm font-semibold select-none">
-                                {item.label}
-                              </div>
-                            </div>
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="relative col-span-2 sm:col-span-1">
-                    <label
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      htmlFor="small_size"
-                    >
-                      Upload Image
-                    </label>
-                    <input
-                      name="image"
-                      onChange={handleImageChange}
-                      className="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                      id="small_size"
-                      type="file"
-                    />
-                    <p
-                      className="block sm:absolute sm:bottom-0 mt-1 sm:mt-0 text-sm text-gray-500 dark:text-gray-300"
-                      id="file_input_help"
-                    >
-                      SVG, PNG, JPG or GIF (MAX. 800x400px).
-                    </p>
-                  </div>
-
-                  <div className="col-span-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2 sm:mb-3.5">
-                      Published
-                    </p>
-                    <div className="max-w-max">
-                      <label className="items-center sm:mb-4 cursor-pointer select-none">
-                        <div className="relative mb-3 ">
-                          <input
-                            id="modal-published"
-                            name="modal-published"
-                            type="checkbox"
-                            defaultChecked={newItem.published}
-                            onChange={handleCheckboxChange}
-                            value=""
-                            className="toggle-switch sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
-                        </div>
-                      </label>
-                    </div>
-                    <div className="text-sm text-gray-500 mt-1 sm:mt-0">
-                      <div className={`${isChecked ? "hidden" : ""}`}>
-                        Your item are only visible to administrators.
-                      </div>
-                      <div className={`${isChecked ? "" : "hidden"}`}>
-                        Your item will be publicly visible on your site.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <button
-                    type="submit"
-                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  >
-                    Save and add another
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    type="submit"
-                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  >
-                    Save
-                  </button>
-                  <button
-                    data-modal-hide="updateProductModal"
-                    onClick={handleCancel}
-                    type="button"
-                    className="text-red-600 inline-flex items-center hover:text-white border !border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+      {isUpdateModalOpen && (
+        <CU_Modal
+          page="Item"
+          name="Edit"
+          list={updateItem[selectedItemIndex ?? 0]}
+          fileInputRef={fileInputRef}
+          handleCancel={() =>
+            toggleModal(isUpdateModalOpen, setIsUpdateModalOpen)
+          }
+          handleSubmit={handleUpdate}
+          handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            handleInputChangeEdit(event, itemIndex ?? 0)
+          }
+          isChecked={isChecked}
+          nameAlert={nameAlert}
+          priceAlert={priceAlert}
+        ></CU_Modal>
       )}
 
       {/* Alert Message */}
