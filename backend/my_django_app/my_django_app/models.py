@@ -1,5 +1,10 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from PIL import Image, ImageDraw
+import re
+import qrcode
+from io import BytesIO
+from django.core.files import File 
 
 # instance represent the file is attached to
 # filename is the original name of the uploaded file
@@ -60,6 +65,42 @@ class FoodItems(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name_plural = 'Items'
+
+    def __str__(self):
+        return self.name
+        # return self.name + ' ' + self.description + ' ' + self.image + self.foodcategory + self.price + self.tag + str(self.published)
+
+
+class OrderTables(models.Model):
+    name = models.CharField(max_length=128, null=False, blank=False) # URL
+    image = models.ImageField(upload_to='table/qrcode', null=True, blank=True)
+    status = models.CharField(max_length=128, null=False, blank=False)
+    published = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name_plural = 'QRtable'
+
+    def save(self, *args, **kwargs):
+        qrcode_img = qrcode.make(self.name)
+        # Get the dimensions of the QR code image
+        qr_width, qr_height = qrcode_img.size
+        
+        # Calculate the canvas size based on QR code dimensions (add padding if needed)
+        canvas_width = qr_width + 20  # Example: Add 20 pixels padding on both sides
+        canvas_height = qr_height + 20  # Example: Add 20 pixels padding on both top and bottom
+        
+        canvas = Image.new('RGB', (canvas_width, canvas_height), 'orange')  # Create a new canvas image
+        draw = ImageDraw.Draw(canvas)
+        canvas.paste(qrcode_img, (10, 10))  # Paste the QR code image with padding
+        
+        sanitized_name = re.sub(r'[^\w\s.-]', '', self.name)
+        fname = f'qr_code-{sanitized_name}.png'
+        buffer = BytesIO()
+        canvas.save(buffer, 'PNG')
+        self.image.save(fname, File(buffer), save=False)
+        buffer.close()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
