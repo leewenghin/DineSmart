@@ -193,8 +193,9 @@ const Card = ({
                   <input
                     name="published"
                     type="checkbox"
-                    defaultChecked={item.published}
-                    onClick={() => handlePublished(item.id, index)}
+                    key={item.id}
+                    checked={item.published}
+                    onChange={handlePublished}
                     value=""
                     className="sr-only peer"
                   />
