@@ -47,8 +47,10 @@ function App() {
         <Route path="/testing1" element={<Testing1 />}></Route>
         <Route path="/components/qr_modal" element={<QRModal />} />
         <Route path="/order_detail" element={<OrderDetailPage />} />
-        <Route path="/card_payment" element={<Card_payment  />}></Route>
-        <Route path="/admin_panel" element={<Admin_panel changeIP={changeip} />}>
+        <Route
+          path="/admin_panel"
+          element={<Admin_panel changeIP={changeip} />}
+        >
           <Route path="menu" element={<Admin_method changeIP={changeip} />} />
           <Route path="qrtable" element={<Admin_qrtable changeIP={changeip} />} />
           <Route

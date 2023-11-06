@@ -17,14 +17,18 @@ admin.site.register(FoodCategories, FoodCategoriesAdmin)
 
 class FoodItemsAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
-    list_display = ("id", "name", "description", "price", "image", "tag", "foodcategory_id")
+    list_display = ("id", "name", "description", "price", "image", "get_tag", "published", "foodcategory_id")
+
+    def get_tag(self, obj):
+        return ", ".join([tag.name for tag in obj.tag.all()])
+
+    get_tag.short_description = "tag"
     
 # Register model
 admin.site.register(FoodItems, FoodItemsAdmin)
 
-class OrderTablesAdmin(admin.ModelAdmin):
+class FoodTagsAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
-    list_display = ("id", "name", "status", "published", "image")
+    list_display = ("id", "name")
     
-# Register model
-admin.site.register(OrderTables, OrderTablesAdmin)
+admin.site.register(FoodTags, FoodTagsAdmin)

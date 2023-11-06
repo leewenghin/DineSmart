@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import AlertModal from "../../components/admin/alert_modal";
 
 const categories = [
   { label: "Prawn", items: "20" },
@@ -63,7 +64,11 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     published: false,
     foodmenu_id: FoodMenuId,
   });
-  const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
+  const [updateCategory, setUpdateCategory] = useState<submitCategory[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // For toggle modal purpose
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // For toggle modal purpose
+  const [isDeletedModalOpen, setisDeletedModalOpen] = useState(false); // For toggle modal purpose
+
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
   const [image, setImage] = useState<File | null>(null); // For modal image purpose
   const [formAlert, setFormAlert] = useState(null); // For form warning message
@@ -71,7 +76,10 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   const [isSave, setSave] = useState(false); // To detect whether press save button
 
   // ==================== Toggle Method ====================
-  const toggleModal = () => {
+  const toggleModal = (
+    isModalOpen: boolean,
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
     setIsModalOpen(!isModalOpen);
   };
   // ==================== Toggle Method ====================
@@ -154,12 +162,12 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     });
   };
 
-  const fetchSetCategoryIDList = (
+  const fetchSetCategoryPublishedIDList = (
     categoryId: number,
     index: number,
     updatedCategoryList: Category[]
   ) => {
-    fetch(`${setCategoryLink}/${categoryId}/`, {
+    fetch(`${setCategoryLink}${categoryId}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -177,6 +185,26 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         fetchList(getCategoryLink, setCategoryList);
       })
       .catch((error) => console.error("Error updating status: ", error));
+  };
+
+  const fetchDeleteCategoryIDList = (categoryID: number) => {
+    return new Promise((resolve, reject) => {
+      fetch(`${getCategoryLink}${categoryID}/`, { method: "DELETE" })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          if (response.status === 204) {
+            resolve(true);
+            return;
+          }
+          return response.json;
+        })
+        .then(() => {
+          fetchList(getCategoryLink, setCategoryList);
+          fetchList(getCategoryLink, setUpdateCategory);
+        });
+    });
   };
 
   // ==================== Fetch Method ====================
@@ -203,8 +231,8 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     updatedCategoryList[index].published =
       !updatedCategoryList[index].published;
 
-    // Call the fetchSetCategoryIDList method to perform the PATCH request
-    fetchSetCategoryIDList(categoryId, index, updatedCategoryList);
+    // Call the fetchSetCategoryPublishedIDList method to perform the PATCH request
+    fetchSetCategoryPublishedIDList(categoryId, index, updatedCategoryList);
   };
 
   const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -223,27 +251,32 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     const { name, value } = event.target;
     switch (name) {
       case "name":
-        if (value == null || value == "") {
-          setNewCategory({ ...newCategory, [name]: value });
-        } else {
+        if (value !== null && value !== "") {
           hideFormAlert(); // Remove alert when have value
         }
       default:
         setNewCategory({ ...newCategory, [name]: value });
     }
+    console.log(newCategory);
   };
 
-  const handleCancel = () => {
+  const handleCancel = (
+    isModalOpen: boolean,
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    reset: boolean
+  ) => {
     // Clear the form data by setting it to its initial state
-    setNewCategory({
-      name: "",
-      description: "",
-      image: null,
-      published: false,
-      foodmenu_id: FoodMenuId,
-    });
+    if (reset) {
+      setNewCategory({
+        name: "",
+        description: "",
+        image: null,
+        published: false,
+        foodmenu_id: FoodMenuId,
+      });
+    }
 
-    toggleModal();
+    toggleModal(isModalOpen, setIsModalOpen);
     hideFormAlert();
   };
 
@@ -252,7 +285,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
       await fetchSetCategoryList(event); // Wait for fetchSetCategoryList to complete
       if (!formAlert) {
         if (isSave) {
-          handleCancel(); // Reset the field list and exit modal
+          handleCancel(isCreateModalOpen, setIsCreateModalOpen, true); // Reset the field list and exit modal
           setSave(false);
         }
         console.log(alertMessage);
@@ -264,8 +297,34 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     }
   };
 
+  const handleDelete = async (categoryID: number) => {
+    try {
+      await fetchDeleteCategoryIDList(categoryID);
+      if (!formAlert) {
+        handleCancel(isDeletedModalOpen, setisDeletedModalOpen, false);
+        console.log(alertMessage);
+        setAlertMessage("Successful Deleted");
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  };
+
   const handleSave = () => {
     setSave(true);
+  };
+
+  const handleOverflow = () => {
+    if (isCreateModalOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+
+    // Clean up the effect
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
   };
   // ==================== Handle Method ====================
 
@@ -282,9 +341,19 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
   useEffect(() => {
     fetchList(getMenuLink, setMenuList);
+  }, []);
+
+  useEffect(() => {
     fetchList(getCategoryLink, setCategoryList);
+  }, []);
+
+  useEffect(() => {
     alertMessageTime();
   }, [alertMessage]);
+
+  useEffect(() => {
+    handleOverflow();
+  }, [isCreateModalOpen]);
 
   return (
     <div className="content px-10">
@@ -342,7 +411,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         </div>
         <button
           type="button"
-          onClick={toggleModal}
+          onClick={() => toggleModal(isCreateModalOpen, setIsCreateModalOpen)}
           className="text-white bg-gradient-to-br from-orange-500 to-yellow-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-8 py-2.5 text-center"
         >
           Add Category
@@ -355,7 +424,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
             <div className="dine-method text-xl" key={index}>
               <div className="card rounded overflow-hidden shadow-md border border-grey-300 h-full max-w-sm relative">
                 <div className="image relative">
-                  <div className="flex w-full justify-center items-center p-3 pb-0">
+                  <div className="flex w-full justify-center items-center p-3">
                     <img
                       className={`image-img w-full h-36 cursor-pointer rounded-md ${
                         item.image ? "bg-transparent" : "bg-imageColor"
@@ -383,13 +452,13 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
                     <button
                       type="button"
-                      className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 font-medium rounded-full text-sm w-28 py-2.5 text-center mb-2 dark:focus:ring-orange-900"
+                      className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 font-medium rounded-full text-sm w-28 py-2.5 text-center dark:focus:ring-orange-900"
                     >
                       Edit
                     </button>
                   </div>
                 </div>
-                <div id="card-text" className="card-text px-3 pt-2 pb-12">
+                <div id="card-text" className="card-text px-3 pb-12">
                   <div className="w-full flex">
                     <div className="w-full">
                       <p className="mr-2 mb-1 break-words">{item.name}</p>
@@ -421,13 +490,13 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
       </div>
 
       {/* <!-- Main modal --> */}
-      {isModalOpen && (
+      {isCreateModalOpen && (
         <div
           id="updateProductModal"
           data-modal-backdrop="static"
           tabIndex={-1}
           aria-hidden="true"
-          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 sm:justify-center items-center w-full md:inset-0 h-full bg-black bg-opacity-50"
+          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-40 sm:justify-center items-center w-full md:inset-0 h-full bg-black bg-opacity-50"
         >
           <div className="relative p-4 w-full max-w-2xl">
             {/* <!-- Modal content --> */}
@@ -439,7 +508,9 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
                 </h3>
                 <button
                   type="button"
-                  onClick={toggleModal}
+                  onClick={() =>
+                    handleCancel(isCreateModalOpen, setIsCreateModalOpen, true)
+                  }
                   className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
                   data-modal-toggle="updateProductModal"
                 >
@@ -582,7 +653,13 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
                   </button>
                   <button
                     data-modal-hide="updateProductModal"
-                    onClick={handleCancel}
+                    onClick={() =>
+                      handleCancel(
+                        isCreateModalOpen,
+                        setIsCreateModalOpen,
+                        true
+                      )
+                    }
                     type="button"
                     className="text-red-600 inline-flex items-center hover:text-white border !border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
                   >
@@ -597,30 +674,10 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
       {/* Alert Message */}
       {alertMessage && (
-        <div
-          className="fixed bottom-0 right-4 animate-slideIn z-50"
-          onClick={hideAlert}
-        >
-          <div
-            className="flex items-center p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
-            role="alert"
-          >
-            <svg
-              className="flex-shrink-0 inline w-4 h-4 mr-3"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
-            </svg>
-            <span className="sr-only">Info</span>
-            <div>
-              <span className="font-medium">Success alert!</span> {alertMessage}
-              .
-            </div>
-          </div>
-        </div>
+        <AlertModal
+          hideAlert={hideAlert}
+          alertMessage={alertMessage}
+        ></AlertModal>
       )}
     </div>
   );

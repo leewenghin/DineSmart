@@ -11,6 +11,7 @@ class FoodCategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = FoodCategories
         fields = ['id', 'name', 'description', 'image', 'published', 'foodmenu_id']
+        image = serializers.FileField()  # Use FileField for file uploads
 
 class FoodItemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,3 +23,9 @@ class OrderTablesSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderTables
         fields = ['id', 'name','status','image', 'published']
+
+
+class FoodTagsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FoodTags
+        fields = ['id', 'name']

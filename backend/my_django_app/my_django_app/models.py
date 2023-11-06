@@ -25,7 +25,7 @@ class FoodMenus(models.Model):
     published = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('id',)
         verbose_name_plural = 'Menus'
 
     def __str__(self):
@@ -46,7 +46,7 @@ class FoodCategories(models.Model):
             raise ValidationError("Name field must not be empty.")
             
     class Meta:
-        ordering = ('name',)
+        ordering = ('id',)
         verbose_name_plural = 'Categories'
 
     def __str__(self):
@@ -57,13 +57,13 @@ class FoodItems(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False)
     description = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(upload_to='admin/item', null=True, blank=True)
-    price = models.FloatField(null=False, blank=False)
-    tag = models.CharField(max_length=128, null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
+    tag = models.ManyToManyField('FoodTags')
     published = models.BooleanField(default=True)
     foodcategory = models.ForeignKey(FoodCategories, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('id',)
         verbose_name_plural = 'Items'
 
     def __str__(self):
@@ -105,3 +105,13 @@ class OrderTables(models.Model):
     def __str__(self):
         return self.name
         # return self.name + ' ' + self.description + ' ' + self.image + self.foodcategory + self.price + self.tag + str(self.published)
+
+class FoodTags(models.Model):
+    name = models.CharField(max_length=50)
+    
+    class Meta:
+        ordering = ('name',)
+        verbose_name_plural = 'Tags'
+
+    def __str__(self):
+        return self.name
