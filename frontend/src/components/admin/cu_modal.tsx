@@ -44,7 +44,9 @@ const CU_Modal = ({
       data-modal-backdrop="static"
       tabIndex={-1}
       aria-hidden="true"
-      className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-full bg-black bg-opacity-50"
+      className={`flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 items-center w-full md:inset-0 h-full bg-black bg-opacity-50 ${
+        page == "Item" ? "" : "justify-center"
+      }`}
     >
       <div className="relative p-4 w-full max-w-2xl">
         {/* <!-- Modal content --> */}
@@ -81,7 +83,7 @@ const CU_Modal = ({
             <div className="grid gap-4 mb-4 sm:grid-cols-2">
               <div
                 className={`${
-                  page === "Menu" || page === "Category"
+                  page == "Menu" || page == "Category"
                     ? "col-span-2"
                     : "col-span-1"
                 }`}
@@ -110,7 +112,7 @@ const CU_Modal = ({
                 {nameAlert && <ErrorMessage message={nameAlert} />}
               </div>
 
-              {page === "Item" && (
+              {page == "Item" && (
                 <div className="col-span-1">
                   <label
                     htmlFor="price"
@@ -153,7 +155,7 @@ const CU_Modal = ({
                 ></textarea>
               </div>
 
-              {page === "Item" && (
+              {page == "Item" && (
                 <div className="col-span-2">
                   <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Tags
@@ -167,12 +169,12 @@ const CU_Modal = ({
                           type="checkbox"
                           value={list.tag}
                           checked={
-                            name === "Create"
+                            name == "Create"
                               ? list.tag.includes(item.id)
                               : list.tag.toString().includes(item.id)
                           } // checks if item.label inside newItem.tag, if not then uncheck
                           onChange={
-                            name === "Create"
+                            name == "Create"
                               ? () => handleTagChange(item.id)
                               : () => handleTagChange(item.id)
                           }
@@ -199,7 +201,7 @@ const CU_Modal = ({
                 </div>
               )}
 
-              {(page === "Category" || page === "Item") && (
+              {(page == "Category" || page == "Item") && (
                 <div className="relative col-span-2 sm:col-span-1">
                   <label
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -227,12 +229,12 @@ const CU_Modal = ({
 
               <div
                 className={`${
-                  page === "Category" || page === "Item"
+                  page == "Category" || page == "Item"
                     ? "col-span-1"
                     : "col-span-2"
                 }`}
               >
-                {page === "Menu" ? (
+                {page == "Menu" ? (
                   <label className="inline-flex items-center mb-4 cursor-pointer select-none">
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-300">
                       Published
@@ -274,7 +276,7 @@ const CU_Modal = ({
 
                 <div
                   className={`text-sm text-gray-500 ${
-                    page === "Category" || page === "Item" ? "mt-1 sm:mt-0" : ""
+                    page == "Category" || page == "Item" ? "mt-1 sm:mt-0" : ""
                   }`}
                 >
                   <div className={`${isChecked ? "hidden" : ""}`}>
@@ -293,7 +295,7 @@ const CU_Modal = ({
                 type="submit"
                 className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {page === "Menu" || name === "Edit" ? (
+                {page == "Menu" || name == "Edit" ? (
                   <>
                     {name} {page}
                   </>

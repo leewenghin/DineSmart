@@ -71,7 +71,6 @@ interface submitItem {
 const Card = ({
   item,
   index,
-  foodcategory_id,
   toggleUpdateModal,
   toggleDeleteModal,
   handlePublished,
@@ -113,7 +112,7 @@ const Card = ({
   }, [isOptionModalOpen]);
 
   return (
-    <div className="dine-method text-xl" key={index}>
+    <div className="dine-method text-xl relative" key={index}>
       <div className="absolute top-0 right-0 z-20">
         <div className="w-24 flex justify-end">
           <button
