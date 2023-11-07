@@ -126,7 +126,7 @@ class FoodItemsView(viewsets.ModelViewSet):
                 # If there are errors, return them in a single response
                 return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-            tags = FoodTags.objects.filter(name__in=tag_names)
+            tags = FoodTags.objects.filter(id__in=tag_names)
 
             if image is None or image == "":
                 image = None  # Set it to 'null' in the database

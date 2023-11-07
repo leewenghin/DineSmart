@@ -23,22 +23,25 @@ interface changeIP {
 }
 
 function App() {
-  const changeip = "192.168.1.46"; // Zhen Xun
+  // const changeip = "192.168.1.46"; // Zhen Xun
   // const changeip = "192.168.0.5"; //Zhen Xun Home
   // const changeip = "192.168.0.206"; //Zhen Xun Kenny
-  // const changeip = "192.168.1.24"; // DomDom
-  
+  const changeip = "192.168.1.103"; // DomDom
+
   // http:// 192.168:8000/menu/1 // dine in (Table order)
-  // http:// 192.168:8000/menu/2 // delively 
+  // http:// 192.168:8000/menu/2 // delively
 
   // http:// 192.168:8000/menu/1/?table_id={1}/
-  // 
+  //
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Menu changeIP={changeip} />}></Route>
 
-        <Route path="/department" element={<Menu changeIP={changeip} />}></Route>
+        <Route
+          path="/department"
+          element={<Menu changeIP={changeip} />}
+        ></Route>
         <Route path="/menu" element={<Menu changeIP={changeip} />}></Route>
 
         <Route path="/paymentdetail" element={<Payment_detail />}></Route>
@@ -52,7 +55,10 @@ function App() {
           element={<Admin_panel changeIP={changeip} />}
         >
           <Route path="menu" element={<Admin_method changeIP={changeip} />} />
-          <Route path="qrtable" element={<Admin_qrtable changeIP={changeip} />} />
+          <Route
+            path="qrtable"
+            element={<Admin_qrtable changeIP={changeip} />}
+          />
           <Route
             path="category/:foodmenu_id"
             element={<Admin_category changeIP={changeip} />}

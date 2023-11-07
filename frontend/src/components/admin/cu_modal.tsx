@@ -1,19 +1,19 @@
 const tags = [
-  { id: "spicy", label: "spicy", icon: "/src/assets/img/admin/chili.png" },
-  { id: "vegan", label: "vegan", icon: "/src/assets/img/admin/vegan.png" },
-  { id: "halal", label: "halal", icon: "/src/assets/img/admin/halal.png" },
-  { id: "new", label: "new", icon: "/src/assets/img/admin/new.png" },
+  { id: 1, label: "spicy", icon: "/src/assets/img/admin/chili.png" },
+  { id: 2, label: "new", icon: "/src/assets/img/admin/new.png" },
+  { id: 3, label: "vegan", icon: "/src/assets/img/admin/vegan.png" },
+  { id: 4, label: "halal", icon: "/src/assets/img/admin/halal.png" },
   {
-    id: "signature",
+    id: 5,
     label: "signature",
     icon: "/src/assets/img/admin/signature.png",
   },
   {
-    id: "promotion",
+    id: 6,
     label: "promotion",
     icon: "/src/assets/img/admin/promotion.png",
   },
-  { id: "hot", label: "hot", icon: "/src/assets/img/admin/hot.png" },
+  { id: 7, label: "hot", icon: "/src/assets/img/admin/hot.png" },
 ];
 
 const ErrorMessage = ({ message }: any) => {
@@ -145,7 +145,7 @@ const CU_Modal = ({
                 <textarea
                   id="description"
                   name="description"
-                  value={list.description}
+                  value={list.description !== null ? list.description : ""}
                   onChange={handleInputChange}
                   rows={5}
                   className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
@@ -163,15 +163,23 @@ const CU_Modal = ({
                     {tags.map((item, index) => (
                       <li key={index}>
                         <input
-                          id={item.id}
+                          id={item.label}
                           type="checkbox"
                           value={list.tag}
-                          checked={list.tag.includes(item.label)} // checks if item.label inside newItem.tag, if not then uncheck
-                          onChange={() => handleTagChange(item.label)}
+                          checked={
+                            name === "Create"
+                              ? list.tag.includes(item.id)
+                              : list.tag.toString().includes(item.id)
+                          } // checks if item.label inside newItem.tag, if not then uncheck
+                          onChange={
+                            name === "Create"
+                              ? () => handleTagChange(item.id)
+                              : () => handleTagChange(item.id)
+                          }
                           className="hidden peer"
                         />
                         <label
-                          htmlFor={item.id}
+                          htmlFor={item.label}
                           className="inline-flex justify-center items-center w-full p-3 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-orange-500 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
                         >
                           <div className="flex flex-col items-center text-center capitalize">

@@ -63,7 +63,7 @@ interface submitItem {
   description: string;
   image: File | null;
   price: number | null;
-  tag: string[];
+  tag: number[];
   published: boolean;
   foodcategory_id: number;
 }
@@ -310,13 +310,15 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         "price",
         newItem.price !== null ? newItem.price.toString() : ""
       );
+
       newItem.tag.forEach((tag) => {
-        formData.append("tag", tag);
+        formData.append("tag", tag.toString());
         console.log("Tags: ", tag);
       });
 
       console.log("This is price: ", newItem.price);
       console.log("This is tag: ", newItem.tag);
+      console.log("This is published: ", newItem.published);
       formData.append("description", newItem.description);
       formData.append("published", newItem.published.toString());
       formData.append("foodcategory_id", newItem.foodcategory_id.toString());
@@ -404,12 +406,14 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     console.log("Fetch index: ", itemIndex);
 
     return new Promise((resolve, reject) => {
+      const updateItemList = updateItem[itemIndex ?? 0];
+
       event.preventDefault();
 
       const formData = new FormData();
-      if (updateItem[itemIndex ?? 0].image) {
+      if (updateItemList.image) {
         // Ensure that the 'image' field is a valid File
-        const image = updateItem[itemIndex ?? 0].image;
+        const image = updateItemList.image;
 
         if (image instanceof File) {
           formData.append("image", image);
@@ -420,32 +424,31 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         formData.append("image", "");
       }
 
-      formData.append("name", updateItem[itemIndex ?? 0].name);
-      formData.append("description", updateItem[itemIndex ?? 0].description);
+      formData.append("name", updateItemList.name);
+      formData.append("description", updateItemList.description);
       formData.append(
         "price",
         updateItem?.[itemIndex ?? 0]?.price?.toString() ?? ""
       );
 
-      formData.append(
-        "published",
-        updateItem[itemIndex ?? 0].published.toString()
-      );
+      updateItemList.tag.forEach((tag) => {
+        formData.append("tag", tag.toString());
+        console.log("Tags: ", tag);
+      });
+
+      formData.append("published", updateItemList.published.toString());
       formData.append(
         "foodcategory_id",
-        updateItem[itemIndex ?? 0].foodcategory_id.toString()
+        updateItemList.foodcategory_id.toString()
       );
 
-      console.log("Name: ", updateItem[itemIndex ?? 0].name);
-      console.log("description: ", updateItem[itemIndex ?? 0].description);
+      console.log("Name: ", updateItemList.name);
+      console.log("description: ", updateItemList.description);
       console.log("Price: ", updateItem?.[itemIndex ?? 0]?.price?.toString());
-      console.log(
-        "published: ",
-        updateItem[itemIndex ?? 0].published.toString()
-      );
+      console.log("published: ", updateItemList.published.toString());
       console.log(
         "foodcategory_id: ",
-        updateItem[itemIndex ?? 0].foodcategory_id.toString()
+        updateItemList.foodcategory_id.toString()
       );
 
       fetch(`${setItemLink}${itemID}/`, {
@@ -517,27 +520,104 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     fetchSetItemIDList(ItemID, index, updatedCategoryList);
   };
 
-  const handleTagChangeWithParameter = (tagValue: string) => {
+  const handleTagChangeWithParameter = (tagValue: number) => {
     handleTagChange(tagValue);
   };
 
-  const handleTagChange = (tagValue: string) => {
+  const handleTagChangeWithParameterEdit = (tagValue: number) => {
+    handleTagChangeEdit(tagValue);
+  };
+
+  const handleTagChange = (tagValue: number) => {
     const { tag } = newItem;
+    let createdArray = { ...newItem };
 
     if (tag.includes(tagValue)) {
       // If the tag is already in the list, remove it
-      setNewItem({
+      createdArray = {
         ...newItem,
         tag: tag.filter((item) => item !== tagValue),
-      });
+      };
     } else {
       // If the tag is not in the list, add it
-      setNewItem({
+      createdArray = {
         ...newItem,
         tag: [...tag, tagValue],
-      });
+      };
     }
+    setNewItem(createdArray);
   };
+
+  const handleTagChangeEdit = (tagValue: number) => {
+    const index = itemIndex ?? 0;
+    const updatedArray = [...updateItem];
+    const existingTags = updatedArray[index].tag;
+
+    // Check if the tagValue is not already in the existing tags
+    if (existingTags.includes(tagValue)) {
+      updatedArray[index] = {
+        ...updatedArray[index],
+        tag: existingTags.filter((item) => item !== tagValue),
+      };
+    } else {
+      updatedArray[index] = {
+        ...updatedArray[index],
+        tag: [...existingTags, tagValue],
+      };
+
+      console.log("index:", index);
+      console.log("tagValue:", tagValue);
+      console.log("updatedArray:", updatedArray);
+    }
+
+    // Update the state with the new array
+    setUpdateItem(updatedArray);
+  };
+
+  // const handleTagChangeEdit = (tagValue: string, index: number) => {
+  //   const { tag } = newItem;
+
+  //   // Clone the existing tag array to avoid modifying it directly
+  //   const updatedTag = [...newItem.tag];
+
+  //   // Check if the index is within bounds
+  //   updatedTag[index] = tagValue; // Update the tag at the specified index
+  //   setUpdateItem([{...tag, tagValue}]);
+  // };
+
+  // const handleTagChangeEdit = (tagValue: string) => {
+  //   const updatedItems = updateItem.map((item) => {
+  //     const tagIndex = item.tag.indexOf(tagValue);
+
+  //     if (tagIndex !== -1) {
+  //       // If the tag is found in the list, remove it by creating a new array
+  //       const updatedTag = item.tag.filter((itemTag) => itemTag !== tagValue);
+  //       return { ...item, tag: updatedTag };
+  //     } else {
+  //       // If the tag is not in the list, add it by creating a new array
+  //       const updatedTag = [...item.tag, tagValue];
+  //       return { ...item, tag: updatedTag };
+  //     }
+  //   });
+
+  //   setUpdateItem(updatedItems);
+  // };
+
+  // const handleTagChange = (tagValue: string) => {
+  //   // Clone the list.tag array to avoid modifying the original array directly
+  //   const updatedTags = [...updateItem.tag];
+
+  //   if (updatedTags.includes(tagValue)) {
+  //     // If the tag is already in the list, remove it (uncheck)
+  //     updatedTags.splice(updatedTags.indexOf(tagValue), 1);
+  //   } else {
+  //     // If the tag is not in the list, add it (check)
+  //     updatedTags.push(tagValue);
+  //   }
+
+  //   // Update the list.tag array with the new values
+  //   setUpdateItem({ ...updateItem, tag: updatedTags });
+  // };
 
   const handleInputChangeCreate = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -836,7 +916,6 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
               key={item.id}
               item={item}
               index={index}
-              foodmenu_id={foodmenu_id}
               toggleUpdateModal={() =>
                 toggleIDModal(
                   isUpdateModalOpen,
@@ -892,6 +971,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
             handleInputChangeEdit(event, itemIndex ?? 0)
           }
+          handleTagChange={handleTagChangeWithParameterEdit}
           isChecked={isChecked}
           nameAlert={nameAlert}
           priceAlert={priceAlert}
