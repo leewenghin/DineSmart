@@ -398,6 +398,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       })
       .then(() => {
         fetchList(getItemLink, setItemList);
+        fetchList(getItemLink, setUpdateItem);
       })
       .catch((error) => console.error("Error updating status: ", error));
   };
@@ -438,6 +439,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       });
 
       console.log("Test", updateItemList.tag);
+      console.log("Test2", updateItemList);
+      console.log("Test3", formData);
 
       formData.append("published", updateItemList.published.toString());
       formData.append(
@@ -514,13 +517,13 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     }
   };
 
-  const handlePublished = (ItemID: number, index: number) => {
+  const handlePublished = (itemID: number, index: number) => {
     const updatedCategoryList = [...itemList];
     updatedCategoryList[index].published =
       !updatedCategoryList[index].published;
 
     // Call the fetchSetItemIDList method to perform the PATCH request
-    fetchSetItemIDList(ItemID, index, updatedCategoryList);
+    fetchSetItemIDList(itemID, index, updatedCategoryList);
   };
 
   const handleTagChangeWithParameter = (tagValue: number) => {

@@ -76,8 +76,8 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
         
 
 class FoodItemsView(viewsets.ModelViewSet):
-    serializer_class = FoodItemsSerializer
     queryset = FoodItems.objects.all()
+    serializer_class = FoodItemsSerializer
 
     def get_queryset(self):
         queryset = FoodItems.objects.all()  # Make a copy of the initial queryset
@@ -149,75 +149,28 @@ class FoodItemsView(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the ManyToManyField should be cleared
-        if request.data.getlist('tag') == []:
-            instance.tag.clear()
-        else:
-            print("tag_id:", request.data.getlist('tag'))
-            serializer.save()
+            print("request.data:", request.data)
 
-        return Response(serializer.data)
+            if len(request.data) == 1 and 'published' in request.data:
+                serializer.save()
 
-    # def update(self, request, *args, **kwargs):
-    #         name = request.data['name']
-    #         price_str = request.data['price']
-    #         description = request.data['description']
-    #         tag_names = request.data.getlist("tag") 
-    #         image = request.data['image']
-    #         published = request.data['published']
-    #         foodcategory_id = request.data['foodcategory_id']
+            else:
+                if 'tag' not in request.data:
+                    instance.tag.clear()
+                    print("Instance tag:", instance.tag)
+                else:
+                    serializer.save()
+
             
-    #         errors = {}
-    #         print("tag_names:", tag_names)
 
-
-    #         if published.lower() == 'true':
-    #             published = True
-    #         elif published.lower() == 'false':
-    #             published = False
-
-    #         if not name:
-    #             errors["name"] = ["Name field must not be empty."]
-
-    #         if price_str is None or price_str == "":
-    #             errors["price"] = ["Price field must not be empty."]
-    #         else:
-    #             try:
-    #                 price = Decimal(price_str)
-    #             except ValueError:
-    #                 errors["price"] = ["Invalid price format."]
-
-    #         if errors:
-    #             # If there are errors, return them in a single response
-    #             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-
-    #         tags = FoodTags.objects.filter(name__in=tag_names)
-
-    #         if image is None or image == "":
-    #             image = None  # Set it to 'null' in the database
-
-
-    #         item = FoodItems.objects.create(
-    #             name=name, 
-    #             price=price,
-    #             description=description, 
-    #             image=image, 
-    #             published=published, 
-    #             foodcategory_id = foodcategory_id,
-    #             )
-
-    #         item.tag.set(tags)
-
-    #         print("tag_names:", tags)
-            
-    #         serializer = FoodItemsSerializer(item)
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data)
+    
 
 class OrderTablesView(viewsets.ModelViewSet):
     serializer_class = OrderTablesSerializer
@@ -263,9 +216,6 @@ class OrderTablesView(viewsets.ModelViewSet):
 
             serializer = OrderTablesSerializer(item)
             return Response(serializer.data, status=201)
-
-            
-
 
 class FoodTagsView(viewsets.ModelViewSet):
     serializer_class = FoodTagsSerializer
