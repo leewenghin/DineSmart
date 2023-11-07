@@ -10,6 +10,8 @@ import { ModalProps } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
 import CU_Modal from "../../components/admin/cu_modal";
+import DeleteModal from "../../components/admin/delete_modal";
+import { faPlugCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 const items = [
   { label: "black pepper prawn", items: "20" },
@@ -435,6 +437,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         console.log("Tags: ", tag);
       });
 
+      console.log("Test", updateItemList.tag);
+
       formData.append("published", updateItemList.published.toString());
       formData.append(
         "foodcategory_id",
@@ -572,51 +576,6 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     // Update the state with the new array
     setUpdateItem(updatedArray);
   };
-
-  // const handleTagChangeEdit = (tagValue: string, index: number) => {
-  //   const { tag } = newItem;
-
-  //   // Clone the existing tag array to avoid modifying it directly
-  //   const updatedTag = [...newItem.tag];
-
-  //   // Check if the index is within bounds
-  //   updatedTag[index] = tagValue; // Update the tag at the specified index
-  //   setUpdateItem([{...tag, tagValue}]);
-  // };
-
-  // const handleTagChangeEdit = (tagValue: string) => {
-  //   const updatedItems = updateItem.map((item) => {
-  //     const tagIndex = item.tag.indexOf(tagValue);
-
-  //     if (tagIndex !== -1) {
-  //       // If the tag is found in the list, remove it by creating a new array
-  //       const updatedTag = item.tag.filter((itemTag) => itemTag !== tagValue);
-  //       return { ...item, tag: updatedTag };
-  //     } else {
-  //       // If the tag is not in the list, add it by creating a new array
-  //       const updatedTag = [...item.tag, tagValue];
-  //       return { ...item, tag: updatedTag };
-  //     }
-  //   });
-
-  //   setUpdateItem(updatedItems);
-  // };
-
-  // const handleTagChange = (tagValue: string) => {
-  //   // Clone the list.tag array to avoid modifying the original array directly
-  //   const updatedTags = [...updateItem.tag];
-
-  //   if (updatedTags.includes(tagValue)) {
-  //     // If the tag is already in the list, remove it (uncheck)
-  //     updatedTags.splice(updatedTags.indexOf(tagValue), 1);
-  //   } else {
-  //     // If the tag is not in the list, add it (check)
-  //     updatedTags.push(tagValue);
-  //   }
-
-  //   // Update the list.tag array with the new values
-  //   setUpdateItem({ ...updateItem, tag: updatedTags });
-  // };
 
   const handleInputChangeCreate = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -761,6 +720,46 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       console.error("Error:", error);
     }
   };
+
+  const fetchDeleteItemIDList = (itemID: number) => {
+    return new Promise((resolve, reject) => {
+      fetch(`${setItemLink}${itemID}/`, { method: "DELETE" })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          if (response.status === 204) {
+            resolve(true);
+            return;
+          }
+          return response.json;
+        })
+        .then(() => {
+          fetchList(getItemLink, setItemList);
+          fetchList(getItemLink, setUpdateItem);
+        })
+        .catch((error) => {
+          console.error("Error deleting task: ", error);
+          reject(error); // Reject the Promise with the error
+        });
+    });
+  };
+
+  const handleDelete = async (itemID: number) => {
+    try {
+      await fetchDeleteItemIDList(itemID); // Wait for fetchSetMenuList to complete
+      if (!nameAlert && !priceAlert) {
+        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false);
+        // Exit modal
+        console.log(alertMessage);
+        setAlertMessage("Successful Deleted"); // Make sure this code is executed
+      }
+    } catch (error) {
+      // Handle any errors that occur during the fetchSetMenuList operation
+      console.error("Error:", error);
+    }
+  };
+
   const handleSave = () => {
     setSave(true);
   };
@@ -975,6 +974,16 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           nameAlert={nameAlert}
           priceAlert={priceAlert}
         ></CU_Modal>
+      )}
+
+      {/* Delete modal */}
+      {isDeleteModalOpen && (
+        <DeleteModal
+          handleCancel={() =>
+            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false)
+          }
+          handleDelete={() => handleDelete(itemID ?? 0)}
+        ></DeleteModal>
       )}
 
       {/* Alert Message */}

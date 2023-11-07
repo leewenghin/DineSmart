@@ -148,6 +148,22 @@ class FoodItemsView(viewsets.ModelViewSet):
             serializer = FoodItemsSerializer(item)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        # Check if the ManyToManyField should be cleared
+        if request.data.getlist('tag') == []:
+            instance.tag.clear()
+        else:
+            print("tag_id:", request.data.getlist('tag'))
+            serializer.save()
+
+        return Response(serializer.data)
+
     # def update(self, request, *args, **kwargs):
     #         name = request.data['name']
     #         price_str = request.data['price']

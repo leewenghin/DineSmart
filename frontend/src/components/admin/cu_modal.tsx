@@ -170,14 +170,10 @@ const CU_Modal = ({
                           value={list.tag}
                           checked={
                             name == "Create"
-                              ? list.tag.includes(item.id)
+                              ? list.tag.toString().includes(item.id)
                               : list.tag.toString().includes(item.id)
                           } // checks if item.label inside newItem.tag, if not then uncheck
-                          onChange={
-                            name == "Create"
-                              ? () => handleTagChange(item.id)
-                              : () => handleTagChange(item.id)
-                          }
+                          onChange={() => handleTagChange(item.id)}
                           className="hidden peer"
                         />
                         <label
