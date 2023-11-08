@@ -541,10 +541,11 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   const handleCancel = (
     isModalOpen: boolean,
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    reset: boolean
+    resetNewCategory?: boolean,
+    resetUpdateCategory?: boolean
   ) => {
     // Clear the form data by setting it to its initial state
-    if (reset) {
+    if (resetNewCategory) {
       setNewCategory({
         name: "",
         description: "",
@@ -552,6 +553,10 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         published: false,
         foodmenu_id: FoodMenuId,
       });
+    }
+
+    if (resetUpdateCategory) {
+      fetchList(getCategoryLink, setUpdateCategory);
     }
 
     toggleModal(isModalOpen, setIsModalOpen);
@@ -579,7 +584,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     try {
       await fetchUpdateCategoryIDList(event); // Wait for fetchSetMenuList to complete
       if (!formAlert) {
-        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false); // Reset the field list and exit modal
+        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen); // Reset the field list and exit modal
         console.log(alertMessage);
         setAlertMessage("Successful Updated"); // Make sure this code is executed
       }
@@ -593,7 +598,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     try {
       await fetchDeleteCategoryIDList(categoryID);
       if (!formAlert) {
-        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false);
+        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen);
         console.log(alertMessage);
         setAlertMessage("Successful Deleted");
       }
@@ -771,7 +776,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
           list={updateCategory[selectedItemIndex ?? 0]}
           fileInputRef={fileInputRef}
           handleCancel={() =>
-            toggleModal(isUpdateModalOpen, setIsUpdateModalOpen)
+            handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)
           }
           handleSubmit={handleUpdate}
           handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -785,7 +790,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
       {isDeleteModalOpen && (
         <DeleteModal
           handleCancel={() =>
-            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false)
+            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen)
           }
           handleDelete={() => handleDelete(categoryID ?? 0)}
         ></DeleteModal>

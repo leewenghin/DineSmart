@@ -43,36 +43,6 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
             # Filter records based on the menu_id parameter
             return queryset.filter(foodmenu_id=foodmenu_id) # Only filter instances inside FoodCategories with 'foodmenu_id'
         return queryset
-
-
-    def create(self, request, *args, **kwargs):
-            name = request.data['name']
-            description = request.data['description']
-            published = request.data['published']
-            image = request.data['image']
-            foodmenu_id = request.data['foodmenu_id']
-            
-            if published.lower() == 'true':
-                published = True
-            elif published.lower() == 'false':
-                published = False
-
-            if not name:
-                return Response({"name": ["Name field must not be empty."]}, status=status.HTTP_400_BAD_REQUEST)
-
-            if image is None or image == "":
-                image = None  # Set it to 'null' in the database
-
-            category = FoodCategories.objects.create(
-                name=name, 
-                description=description, 
-                published=published, 
-                image=image, 
-                foodmenu_id = foodmenu_id
-                )
-
-            serializer = FoodCategoriesSerializer(category)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
         
 
 class FoodItemsView(viewsets.ModelViewSet):

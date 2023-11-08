@@ -39,7 +39,7 @@ class FoodCategories(models.Model):
     description = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(upload_to=upload_to, null=True, blank=True)    
     published = models.BooleanField(default=False)
-    foodmenu = models.ForeignKey(FoodMenus, on_delete=models.CASCADE)
+    foodmenu_id = models.ForeignKey(FoodMenus, on_delete=models.CASCADE)
     
     def clean(self):
         if not self.name:

@@ -599,22 +599,18 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       setNewItem({ ...newItem, [name]: value });
     }
     if (name == "price" && value !== null) {
-      const decimalCount = (value.split(".")[1] || []).length;
-
-      if (decimalCount < 3) {
-        try {
-          const numericValue = parseFloat(value);
-          if (!isNaN(numericValue)) {
-            setNewItem({ ...newItem, [name]: numericValue });
-            hideFormAlert(setPriceAlert);
-            console.log("price: ", value);
-          } else {
-            setNewItem({ ...newItem, [name]: null });
-            console.error("Invalid numeric value:", value);
-          }
-        } catch (error) {
-          console.error("Error while parsing numeric value:", error);
+      try {
+        const numericValue = parseFloat(value);
+        if (!isNaN(numericValue)) {
+          setNewItem({ ...newItem, [name]: numericValue });
+          hideFormAlert(setPriceAlert);
+          console.log("price: ", value);
+        } else {
+          setNewItem({ ...newItem, [name]: null });
+          console.error("Invalid numeric value:", value);
         }
+      } catch (error) {
+        console.error("Error while parsing numeric value:", error);
       }
     }
     if (name == "published") {
@@ -655,13 +651,9 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       }
     }
     if (name === "price" && value !== null) {
-      const decimalCount = (value.split(".")[1] || []).length;
-
-      if (decimalCount < 3) {
-        const numericValue = parseFloat(value);
-        assignInput(numericValue);
-        hideFormAlert(setPriceAlert); // Remove alert when there's a value
-      }
+      const numericValue = parseFloat(value);
+      assignInput(numericValue);
+      hideFormAlert(setPriceAlert); // Remove alert when there's a value
     }
     if (name === "published") {
       assignInput(checked);
@@ -683,10 +675,11 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const handleCancel = (
     isModalOpen: boolean,
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    reset: boolean
+    resetNewItem?: boolean,
+    resetUpdateItem?: boolean
   ) => {
     // Clear the form data by setting it to its initial state
-    if (reset) {
+    if (resetNewItem) {
       setNewItem({
         name: "",
         description: "",
@@ -696,6 +689,9 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         published: false,
         foodcategory_id: FoodCategoryId,
       });
+    }
+    if (resetUpdateItem) {
+      fetchList(getItemLink, setUpdateItem);
     }
 
     toggleModal(isModalOpen, setIsModalOpen);
@@ -725,7 +721,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     try {
       await fetchUpdateItemIDList(event); // Wait for fetchSetMenuList to complete
       if (!nameAlert || !priceAlert) {
-        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false); // Reset the field list and exit modal
+        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen); // Reset the field list and exit modal
         console.log(alertMessage);
         setAlertMessage("Successful Updated"); // Make sure this code is executed
       }
@@ -763,7 +759,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     try {
       await fetchDeleteItemIDList(itemID); // Wait for fetchSetMenuList to complete
       if (!nameAlert && !priceAlert) {
-        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false);
+        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen);
         // Exit modal
         console.log(alertMessage);
         setAlertMessage("Successful Deleted"); // Make sure this code is executed
@@ -979,7 +975,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           list={updateItem[selectedItemIndex ?? 0]}
           fileInputRef={fileInputRef}
           handleCancel={() =>
-            toggleModal(isUpdateModalOpen, setIsUpdateModalOpen)
+            handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)
           }
           handleSubmit={handleUpdate}
           handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -996,7 +992,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       {isDeleteModalOpen && (
         <DeleteModal
           handleCancel={() =>
-            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false)
+            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen)
           }
           handleDelete={() => handleDelete(itemID ?? 0)}
         ></DeleteModal>

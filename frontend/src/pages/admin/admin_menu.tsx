@@ -438,15 +438,20 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
   const handleCancel = (
     isModalOpen: boolean,
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    reset: boolean
+    resetNewMenu?: boolean,
+    resetUpdateMenu?: boolean
   ) => {
     // Clear the form data by setting it to its initial state
-    if (reset) {
+    if (resetNewMenu) {
       setNewMenu({
         name: "",
         description: "",
         published: false,
       });
+    }
+    // Clear the form data by setting it to its initial state
+    if (resetUpdateMenu) {
+      fetchList(getMenuLink, setUpdateMenu);
     }
 
     toggleModal(isModalOpen, setIsModalOpen);
@@ -471,7 +476,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
     try {
       await fetchUpdateMenuIDList(event); // Wait for fetchSetMenuList to complete
       if (!formAlert) {
-        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false); // Reset the field list and exit modal
+        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen); // Reset the field list and exit modal
         console.log(alertMessage);
         setAlertMessage("Successful Updated"); // Make sure this code is executed
       }
@@ -485,7 +490,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
     try {
       await fetchDeleteMenuIDList(menuID); // Wait for fetchSetMenuList to complete
       if (!formAlert) {
-        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false);
+        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen);
         // Exit modal
         console.log(alertMessage);
         setAlertMessage("Successful Deleted"); // Make sure this code is executed
@@ -612,7 +617,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
           name={"Edit"}
           list={updateMenu[selectedItemIndex ?? 0]}
           handleCancel={() =>
-            toggleModal(isUpdateModalOpen, setIsUpdateModalOpen)
+            handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)
           }
           handleSubmit={handleUpdate}
           handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -627,7 +632,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
       {isDeleteModalOpen && (
         <DeleteModal
           handleCancel={() =>
-            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false)
+            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen)
           }
           handleDelete={() => handleDelete(menuID ?? 0)}
         ></DeleteModal>
