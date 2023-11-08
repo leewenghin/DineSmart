@@ -309,7 +309,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       formData.append("name", newItem.name);
       formData.append(
         "price",
-        newItem.price !== null ? newItem.price.toString() : ""
+        (newItem.price !== null && !Number.isNaN(newItem.price)) ||
+          newItem.price == 0
+          ? newItem.price.toString()
+          : ""
       );
 
       newItem.tag.forEach((tag) => {
@@ -318,7 +321,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       });
 
       console.log("This is price: ", newItem.price);
-      console.log("This is tag: ", newItem.tag);
+      console.log("This is tags : ", newItem.tag);
       console.log("This is published: ", newItem.published);
       formData.append("description", newItem.description);
       formData.append("published", newItem.published.toString());
@@ -438,7 +441,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         console.log("Tags: ", tag);
       });
 
-      console.log("Test", updateItemList.tag);
+      console.log("This is tags: : ", updateItemList.tag);
       console.log("Test2", updateItemList);
       console.log("Test3", formData);
 
@@ -587,20 +590,26 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
     setIsChecked(event.target.checked);
 
-    if (name == "name" || "description") {
-      if (value !== null || value !== "") {
-        setNewItem({ ...newItem, [name]: value });
-        hideFormAlert(setNameAlert); // Remove alert when there's a value
-      }
+    if (name == "name" && value !== null) {
+      setNewItem({ ...newItem, [name]: value });
+      hideFormAlert(setNameAlert); // Remove alert when there's a value
+      console.log("name: ", value);
     }
-    if (name == "price") {
-      if (value !== null) {
+    if (name == "description") {
+      setNewItem({ ...newItem, [name]: value });
+    }
+    if (name == "price" && value !== null) {
+      const decimalCount = (value.split(".")[1] || []).length;
+
+      if (decimalCount < 3) {
         try {
           const numericValue = parseFloat(value);
           if (!isNaN(numericValue)) {
             setNewItem({ ...newItem, [name]: numericValue });
-            hideFormAlert(setPriceAlert); // Remove alert when there's a value
+            hideFormAlert(setPriceAlert);
+            console.log("price: ", value);
           } else {
+            setNewItem({ ...newItem, [name]: null });
             console.error("Invalid numeric value:", value);
           }
         } catch (error) {
@@ -645,8 +654,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         hideFormAlert(setNameAlert);
       }
     }
-    if (name === "price") {
-      if (value !== null) {
+    if (name === "price" && value !== null) {
+      const decimalCount = (value.split(".")[1] || []).length;
+
+      if (decimalCount < 3) {
         const numericValue = parseFloat(value);
         assignInput(numericValue);
         hideFormAlert(setPriceAlert); // Remove alert when there's a value
@@ -768,7 +779,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   };
 
   const handleOverflow = () => {
-    if (isCreateModalOpen) {
+    if (isCreateModalOpen || isUpdateModalOpen || isDeleteModalOpen) {
       document.body.classList.add("overflow-hidden");
     } else {
       document.body.classList.remove("overflow-hidden");
@@ -817,7 +828,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
     handleOverflow();
-  }, [isCreateModalOpen]);
+  }, [isCreateModalOpen, isUpdateModalOpen, isDeleteModalOpen]);
 
   return (
     <div className="content px-10">
@@ -956,6 +967,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           }
           handleSubmit={handleSubmit}
           handleSave={handleSave}
+          nameAlert={nameAlert}
+          priceAlert={priceAlert}
         ></CU_Modal>
       )}
 

@@ -94,59 +94,97 @@ class FoodItemsView(viewsets.ModelViewSet):
         return queryset  # Return the filtered or unfiltered queryset
 
     def create(self, request, *args, **kwargs):
-            name = request.data['name']
-            price_str = request.data['price']
-            description = request.data['description']
-            tag_names = request.data.getlist("tag") 
+            serializer = self.get_serializer(data=request.data)
+
             image = request.data['image']
-            published = request.data['published']
-            foodcategory_id = request.data['foodcategory_id']
-            
-            errors = {}
-            print("tag_names:", tag_names)
+            if image == "":
+                image = None
 
+            if "tag" in request.data and request.data.getlist("tag") == []:
+                food_item.tag.clear()
 
-            if published.lower() == 'true':
-                published = True
-            elif published.lower() == 'false':
-                published = False
+            # serializer = FoodItemsSerializer(data={
+            #     'image': image,
+            #     'name': request.data['name'],
+            #     'price': request.data['price'],
+            #     'tag': request.data.getlist('tag'),
+            #     'description': request.data['description'],
+            #     'published': request.data['published'],
+            #     'foodcategory_id': request.data['foodcategory_id'],  # Use the converted integer value
+            # })
 
-            if not name:
-                errors["name"] = ["Name field must not be empty."]
+            print("request.data:", request.data)      
 
-            if price_str is None or price_str == "":
-                errors["price"] = ["Price field must not be empty."]
+            if serializer.is_valid():
+                # Save the new instance
+                serializer.save()
+                print("Request data success:", request.data)
+
+                # Return a success response with the serialized instance
+                return Response(serializer.data, status=201)  # HTTP 201 Created
             else:
-                try:
-                    price = Decimal(price_str)
-                except ValueError:
-                    errors["price"] = ["Invalid price format."]
+                # Return an error response with validation errors
+                print("Request data fail:", request.data)
+                print("Request serializer:", serializer.data)
+                print("Request serializer:", serializer.data['tag'])
+                
+                return Response(serializer.errors, status=400)  # HTTP 400 Bad Request
 
-            if errors:
-                # If there are errors, return them in a single response
-                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-
-            tags = FoodTags.objects.filter(id__in=tag_names)
-
-            if image is None or image == "":
-                image = None  # Set it to 'null' in the database
-
-
-            item = FoodItems.objects.create(
-                name=name, 
-                price=price,
-                description=description, 
-                image=image, 
-                published=published, 
-                foodcategory_id = foodcategory_id,
-                )
-
-            item.tag.set(tags)
-
-            print("tag_names:", tags)
+            # Method 2 =========================================
+            # name = request.data['name']
+            # price_str = request.data['price']
+            # description = request.data['description']
+            # tag_names = request.data.getlist("tag") 
+            # image = request.data['image']
+            # published = request.data['published']
+            # foodcategory_id = request.data['foodcategory_id']
             
-            serializer = FoodItemsSerializer(item)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # errors = {}
+            # print("tag_names:", tag_names)
+            # print("Requested data: ", request.data)
+
+
+            # if published.lower() == 'true':
+            #     published = True
+            # elif published.lower() == 'false':
+            #     published = False
+
+            # if not name:
+            #     errors["name"] = ["Name field must not be empty."]
+
+            # if price_str is None or price_str == "":
+            #     errors["price"] = ["Price field must not be empty."]
+            # else:
+            #     try:
+            #         price = Decimal(price_str)
+            #     except ValueError:
+            #         errors["price"] = ["Invalid price format."]
+
+            # if errors:
+            #     # If there are errors, return them in a single response
+            #     return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+            # tags = FoodTags.objects.filter(id__in=tag_names)
+
+            # if image is None or image == "":
+            #     image = None  # Set it to 'null' in the database
+
+
+            # item = FoodItems.objects.create(
+            #     name=name, 
+            #     price=price,
+            #     description=description, 
+            #     image=image, 
+            #     published=published, 
+            #     foodcategory_id = foodcategory_id,
+            #     )
+
+            # item.tag.set(tags)
+
+            # print("tag_names:", tags)
+            
+            # serializer = FoodItemsSerializer(item)
+            # return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
             instance = self.get_object()
@@ -163,11 +201,10 @@ class FoodItemsView(viewsets.ModelViewSet):
             else:
                 if 'tag' not in request.data:
                     instance.tag.clear()
+                    serializer.save()
                     print("Instance tag:", instance.tag)
                 else:
                     serializer.save()
-
-            
 
             return Response(serializer.data)
     

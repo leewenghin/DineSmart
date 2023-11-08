@@ -607,7 +607,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   };
 
   const handleOverflow = () => {
-    if (isCreateModalOpen) {
+    if (isCreateModalOpen || isUpdateModalOpen || isDeleteModalOpen) {
       document.body.classList.add("overflow-hidden");
     } else {
       document.body.classList.remove("overflow-hidden");
@@ -649,7 +649,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
   useEffect(() => {
     handleOverflow();
-  }, [isCreateModalOpen]);
+  }, [isCreateModalOpen, isUpdateModalOpen, isDeleteModalOpen]);
 
   return (
     <div className="content px-10">
@@ -760,6 +760,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
           }
           handleSubmit={handleSubmit}
           handleSave={handleSave}
+          nameAlert={formAlert}
         ></CU_Modal>
       )}
 
