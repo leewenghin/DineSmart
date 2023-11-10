@@ -1,34 +1,17 @@
-import React, {
-  ChangeEvent,
-  FormEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
 import CU_Modal from "../../components/admin/cu_modal";
 import DeleteModal from "../../components/admin/delete_modal";
 
-const cards = [
-  { label: "Dine In", items: "20" },
-  { label: "Delivery", items: "50" },
-  { label: "Take Away", items: "100" },
-  { label: "DineConnect Alah hua gua", items: "100" },
-];
-
-interface Menu {
+type TMenu = {
   id: number;
   name: string;
   description: string;
   published: boolean;
-}
+};
 
-interface submitMenu {
-  name: string;
-  description: string;
-  published: boolean;
-}
+type TSubmitMenu = Omit<TMenu, "id">;
 
 const Card = ({
   item,
@@ -177,21 +160,17 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // For create toggle modal purpose
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // For update toggle modal purpose
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // For Delete toggle modal purpose
-  const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(
-    null
-  );
-  const [menuList, setMenuList] = useState<Menu[]>([]); // List for store data from menu table
-  const [newMenu, setNewMenu] = useState<submitMenu>({
+  const [menuList, setMenuList] = useState<TMenu[]>([]); // List for store data from menu table
+  const [newMenu, setNewMenu] = useState<TSubmitMenu>({
     name: "",
     description: "",
     published: false,
   });
-  const [updateMenu, setUpdateMenu] = useState<submitMenu[]>([]);
+  const [updateMenu, setUpdateMenu] = useState<TSubmitMenu[]>([]);
   const [menuID, setMenuID] = useState<number | null>(null); // Keep the menuID when press edit button
   const [menuIndex, setMenuIndex] = useState<number | null>(null); // Keep the menuIndex when press edit button
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
   const [formAlert, setFormAlert] = useState(null); // For form warning message
-  const [nameAlert, setNameAlert] = useState<string | null>(null); // For form warning message
   const [alertMessage, setAlertMessage] = useState<string | null>(null); // For success alert message
 
   // ==================== Toggle Method ====================
@@ -209,7 +188,6 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
     index: number
   ) => {
     setIsModalOpen(!isModalOpen);
-    setSelectedItemIndex(index);
     setMenuID(menuID);
     setMenuIndex(index);
   };
@@ -275,7 +253,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
   const fetchSetMenuPublishedIDList = (
     menuID: number,
     index: number,
-    updatePublishedList: Menu[]
+    updatePublishedList: TMenu[]
   ) => {
     fetch(`${getMenuLink}${menuID}/`, {
       method: "PATCH",
@@ -615,7 +593,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
         <CU_Modal
           page="Menu"
           name={"Edit"}
-          list={updateMenu[selectedItemIndex ?? 0]}
+          list={updateMenu[menuIndex ?? 0]}
           handleCancel={() =>
             handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)
           }

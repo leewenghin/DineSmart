@@ -1,66 +1,11 @@
-import {
-  ChangeEvent,
-  Component,
-  FormEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { ModalProps } from "react-bootstrap";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
 import CU_Modal from "../../components/admin/cu_modal";
 import DeleteModal from "../../components/admin/delete_modal";
-import { faPlugCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
-const items = [
-  { label: "black pepper prawn", items: "20" },
-  { label: "butter prawn", items: "50" },
-  { label: "cereal prawn", items: "100" },
-  { label: "kam heong prawn", items: "100" },
-  { label: "kung po prawn", items: "100" },
-  { label: "salted egg prawn", items: "100" },
-  { label: "sambal prawn", items: "100" },
-  { label: "sweet & sour prawn", items: "100" },
-];
-
-const tags = [
-  { id: "spicy", label: "spicy", icon: "/src/assets/img/admin/chili.png" },
-  { id: "vegan", label: "vegan", icon: "/src/assets/img/admin/vegan.png" },
-  { id: "halal", label: "halal", icon: "/src/assets/img/admin/halal.png" },
-  { id: "new", label: "new", icon: "/src/assets/img/admin/new.png" },
-  {
-    id: "signature",
-    label: "signature",
-    icon: "/src/assets/img/admin/signature.png",
-  },
-  {
-    id: "promotion",
-    label: "promotion",
-    icon: "/src/assets/img/admin/promotion.png",
-  },
-  { id: "hot", label: "hot", icon: "/src/assets/img/admin/hot.png" },
-];
-
-// Define the Item type
-interface Category {
+type TField = {
   id: number;
-  name: string;
-}
-
-// Define the Item type
-interface Item {
-  id: number;
-  name: string;
-  description: string;
-  image: File | null;
-  price: number | null;
-  tag: string[];
-  published: boolean;
-}
-
-// Define the submitItem type
-interface submitItem {
   name: string;
   description: string;
   image: File | null;
@@ -68,7 +13,12 @@ interface submitItem {
   tag: number[];
   published: boolean;
   foodcategory_id: number;
-}
+};
+
+// Define the Item type
+type TCategory = Pick<TField, "id" | "name">;
+type TItem = Omit<TField, "foodcategory_id">;
+type TSubmitItem = Omit<TField, "id">;
 
 const Card = ({
   item,
@@ -222,10 +172,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const getItemLink = `http://${changeIP}:8000/api/fooditems/?foodcategory_id=${foodcategory_id}`;
   const setItemLink = `http://${changeIP}:8000/api/fooditems/`;
 
-  const [menuList, setMenuList] = useState<Category[]>([]);
-  const [categoryList, setCategoryList] = useState<Category[]>([]);
-  const [itemList, setItemList] = useState<Item[]>([]); // Provide type annotation for taskList
-  const [newItem, setNewItem] = useState<submitItem>({
+  const [menuList, setMenuList] = useState<TCategory[]>([]);
+  const [categoryList, setCategoryList] = useState<TCategory[]>([]);
+  const [itemList, setItemList] = useState<TItem[]>([]); // Provide type annotation for taskList
+  const [newItem, setNewItem] = useState<TSubmitItem>({
     // For reset the field
     name: "",
     description: "",
@@ -242,7 +192,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(
     null
   );
-  const [updateItem, setUpdateItem] = useState<submitItem[]>([]);
+  const [updateItem, setUpdateItem] = useState<TSubmitItem[]>([]);
   const [itemID, setItemID] = useState<number | null>(null); // Keep the menuID when press edit button
   const [itemIndex, setItemIndex] = useState<number | null>(null); // Keep the menuIndex when press edit button
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
@@ -278,11 +228,18 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
   // ==================== Fetch Method ====================
   // Fetch data array from table method
-  const fetchList = (getLink: string, setList: any) => {
+  const fetchList = (
+    getLink: string,
+    setList: any,
+    setList2?: (data: any) => void
+  ) => {
     fetch(getLink)
       .then((response) => response.json())
       .then((data) => {
         setList(data);
+        if (setList2) {
+          setList2(data);
+        }
       })
       .catch((error) => console.error("Error fetching data: ", error));
   };
@@ -383,7 +340,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const fetchSetItemIDList = (
     itemID: number,
     index: number,
-    updatedCategoryList: Item[]
+    updatedCategoryList: TItem[]
   ) => {
     fetch(`${setItemLink}${itemID}/`, {
       method: "PATCH",
@@ -511,13 +468,6 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
   const hideAlert = () => {
     setAlertMessage(null);
-  };
-
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target && e.target.files) {
-      const selectedImage = e.target.files[0];
-      setImage(selectedImage);
-    }
   };
 
   const handlePublished = (itemID: number, index: number) => {
@@ -803,25 +753,22 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     fetchList(getMenuLink, setMenuList);
   }, []);
 
-  // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
     fetchList(getCategoryLink, setCategoryList);
   }, []);
 
-  // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
-    fetchList(getItemLink, setItemList);
-  }, []);
-  // Use useEffect to trigger modal open when the component is mounted
-  useEffect(() => {
-    fetchList(getItemLink, setUpdateItem);
+    fetchList(getItemLink, setItemList, setUpdateItem);
   }, []);
 
-  // Use useEffect to trigger modal open when the component is mounted
+  // useEffect(() => {
+  //   fetchList(getItemLink, setUpdateItem);
+  // }, [getItemLink, setUpdateItem]);
+
   useEffect(() => {
     alertMessageTime();
   }, [alertMessage]);
-  // Use useEffect to trigger modal open when the component is mounted
+
   useEffect(() => {
     handleOverflow();
   }, [isCreateModalOpen, isUpdateModalOpen, isDeleteModalOpen]);
@@ -972,7 +919,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         <CU_Modal
           page="Item"
           name="Edit"
-          list={updateItem[selectedItemIndex ?? 0]}
+          list={updateItem[itemIndex ?? 0]}
           fileInputRef={fileInputRef}
           handleCancel={() =>
             handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)

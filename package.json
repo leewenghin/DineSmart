@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "html-to-image": "^1.11.11"
+    "html-to-image": "^1.11.11",
+    "react-image-crop": "^10.1.8"
   }
 }

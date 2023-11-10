@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 
 // ===== Customer Site =====
@@ -33,11 +33,15 @@ function App() {
 
   // http:// 192.168:8000/menu/1/?table_id={1}/
   //
+  const NotFound = () => {
+    return <h1>404 - Not Found</h1>;
+  };
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Menu changeIP={changeip} />}></Route>
-
+        <Route path="/*" element={<Navigate to="/not-found" />} />
+        <Route path="/table/:id" element={<NotFound />} />
         <Route
           path="/department"
           element={<Menu changeIP={changeip} />}
@@ -46,6 +50,7 @@ function App() {
 
         <Route path="/paymentdetail" element={<Payment_detail />}></Route>
         <Route path="/cashpayment" element={<Cash_payment />}></Route>
+        <Route path="/card_payment" element={<Card_payment />}></Route>
         <Route path="/testing" element={<Testing />}></Route>
         <Route path="/testing1" element={<Testing1 />}></Route>
         <Route path="/components/qr_modal" element={<QRModal />} />

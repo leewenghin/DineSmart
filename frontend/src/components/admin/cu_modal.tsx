@@ -38,6 +38,8 @@ const CU_Modal = ({
   nameAlert,
   priceAlert = false,
 }: any) => {
+  console.log("testing", list ?? 0);
+
   return (
     <div
       id="updateProductModal"
