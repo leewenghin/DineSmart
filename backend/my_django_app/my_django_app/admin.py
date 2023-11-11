@@ -27,6 +27,12 @@ class FoodItemsAdmin(admin.ModelAdmin):
 # Register model
 admin.site.register(FoodItems, FoodItemsAdmin)
 
+class OrderTablesAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)
+    list_display = ("id", "image", "published","status")
+    
+admin.site.register(OrderTables, OrderTablesAdmin)
+
 class FoodTagsAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
     list_display = ("id", "name")

@@ -250,13 +250,12 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   //     state: { printqr },
   //   });
   // };
-  const element = useRef<HTMLFormElement[] | null []>([]);
+  const element = useRef<HTMLFormElement[] | null[]>([]);
 
   const elementRef = useRef<any>([]);
   // console.log(elementRef.current[index]);
   const htmlToImageConvert = (img: any) => {
-    const element = elementRef.current[selectedItemId.id -1 ];
-    console.log(element);
+    const element = elementRef.current[selectedItemId.id];
     if (element) {
       toPng(element)
         .then((dataUrl) => {
@@ -288,10 +287,10 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   //   htmlToImageConvert();
   // };
 
-  const image = (item:any) => {
-      setSelectedItemId(item);
+  const image = (item: any) => {
+    setSelectedItemId(item);
   };
-  
+
   const delay = (ms: any) => new Promise((res) => setTimeout(res, ms));
   useEffect(() => {
     const abc = async () => {
@@ -300,17 +299,18 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
         selectedItemId.image != undefined &&
         elementRef.current
       ) {
-        const element = elementRef.current[selectedItemId.id -1 ]
-        console.log(element);
+        const element = elementRef.current[selectedItemId.id];
         element!.style.display = "block";
         const img = document.createElement("img");
         img.src = selectedItemId.image;
         img.alt = "Dynamic Image";
-        
+
         await element!.appendChild(img);
         // await image(selectedItemId);
-        await delay(20);
+        await delay(2000);
         htmlToImageConvert(img);
+      } else {
+        console.log("asd");
       }
     };
     abc();
@@ -335,29 +335,15 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
       </div>
       <div className="content-box w-full py-8 px-8 shadow-sm rounded-xl">
         {/* <p className="subtitle pb-3 text-2xl font-bold  ">Dine Method</p> */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 font-medium">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 font-medium h-full">
           {sortedMenuList.map((items, index) => (
-            <div key={index}>
-              <form
-                action="#"
-                encType="multipart/form-data"
-                ref={(el) => elementRef.current[index] = el}
-                className=""
-              >
-                {/* {sortedMenuList.map((item) => {
-              if (item.id === selectedItemId) {
-                return (
-                  <div key={item.id}>
-                    <img src={item.image} alt=""/>
-                  </div>
-                );
-              }
-              return null;
-            })} */}
-              </form>
-              <div className="flex items-center bg-white border border-gray-200 rounded-lg shadow flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
-                <div className="object-cover w-1/6 rounded-l-lg  h-full bg-primaryColor flex items-center justify-center">
-                  <p className="text-2xl font-semibold ">{items.id}</p>
+            <div
+              key={index}
+              className="h-full bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
+            >
+              <div className="flex items-center flex-row md:max-w-xl">
+                <div className="object-cover w-1/6 rounded-l-lg h-full bg-primaryColor flex items-center justify-center">
+                  <p className="text-2xl font-semibold ">{items.name}</p>
                 </div>
                 <div className="flex flex-col justify-between p-3 leading-relaxed  w-5/6">
                   <div className="flex justify-between items-center">
@@ -385,6 +371,12 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                       refresh
                     </span>
                   </div>
+                  <form
+                action="#"
+                encType="multipart/form-data"
+                ref={(el) => (elementRef.current[items.id] = el)}
+                className=""
+              ></form>
                 </div>
               </div>
             </div>
