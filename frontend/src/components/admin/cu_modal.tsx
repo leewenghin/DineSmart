@@ -1,19 +1,19 @@
 const tags = [
-  { id: "spicy", label: "spicy", icon: "/src/assets/img/admin/chili.png" },
-  { id: "vegan", label: "vegan", icon: "/src/assets/img/admin/vegan.png" },
-  { id: "halal", label: "halal", icon: "/src/assets/img/admin/halal.png" },
-  { id: "new", label: "new", icon: "/src/assets/img/admin/new.png" },
+  { id: 1, label: "spicy", icon: "/src/assets/img/admin/chili.png" },
+  { id: 2, label: "new", icon: "/src/assets/img/admin/new.png" },
+  { id: 3, label: "vegan", icon: "/src/assets/img/admin/vegan.png" },
+  { id: 4, label: "halal", icon: "/src/assets/img/admin/halal.png" },
   {
-    id: "signature",
+    id: 5,
     label: "signature",
     icon: "/src/assets/img/admin/signature.png",
   },
   {
-    id: "promotion",
+    id: 6,
     label: "promotion",
     icon: "/src/assets/img/admin/promotion.png",
   },
-  { id: "hot", label: "hot", icon: "/src/assets/img/admin/hot.png" },
+  { id: 7, label: "hot", icon: "/src/assets/img/admin/hot.png" },
 ];
 
 const ErrorMessage = ({ message }: any) => {
@@ -38,13 +38,17 @@ const CU_Modal = ({
   nameAlert,
   priceAlert = false,
 }: any) => {
+  console.log("testing", list ?? 0);
+
   return (
     <div
       id="updateProductModal"
       data-modal-backdrop="static"
       tabIndex={-1}
       aria-hidden="true"
-      className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-full bg-black bg-opacity-50"
+      className={`flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 items-center w-full md:inset-0 h-full bg-black bg-opacity-50 ${
+        page == "Item" ? "" : "justify-center"
+      }`}
     >
       <div className="relative p-4 w-full max-w-2xl">
         {/* <!-- Modal content --> */}
@@ -81,7 +85,7 @@ const CU_Modal = ({
             <div className="grid gap-4 mb-4 sm:grid-cols-2">
               <div
                 className={`${
-                  page === "Menu" || page === "Category"
+                  page == "Menu" || page == "Category"
                     ? "col-span-2"
                     : "col-span-1"
                 }`}
@@ -110,7 +114,7 @@ const CU_Modal = ({
                 {nameAlert && <ErrorMessage message={nameAlert} />}
               </div>
 
-              {page === "Item" && (
+              {page == "Item" && (
                 <div className="col-span-1">
                   <label
                     htmlFor="price"
@@ -119,11 +123,11 @@ const CU_Modal = ({
                     Price
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     id="price"
                     name="price"
-                    pattern="[0-9]+(\.[0-9]{2})?"
-                    value={list.price ? list.price : ""}
+                    step="0.01"
+                    value={list.price || list.price == 0 ? list.price : ""}
                     onChange={handleInputChange}
                     className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
                       priceAlert ? "border-red-500" : "border-gray-300"
@@ -145,7 +149,7 @@ const CU_Modal = ({
                 <textarea
                   id="description"
                   name="description"
-                  value={list.description}
+                  value={list.description !== null ? list.description : ""}
                   onChange={handleInputChange}
                   rows={5}
                   className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
@@ -153,7 +157,7 @@ const CU_Modal = ({
                 ></textarea>
               </div>
 
-              {page === "Item" && (
+              {page == "Item" && (
                 <div className="col-span-2">
                   <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Tags
@@ -163,15 +167,19 @@ const CU_Modal = ({
                     {tags.map((item, index) => (
                       <li key={index}>
                         <input
-                          id={item.id}
+                          id={item.label}
                           type="checkbox"
                           value={list.tag}
-                          checked={list.tag.includes(item.label)} // checks if item.label inside newItem.tag, if not then uncheck
-                          onChange={() => handleTagChange(item.label)}
+                          checked={
+                            name == "Create"
+                              ? list.tag.toString().includes(item.id)
+                              : list.tag.toString().includes(item.id)
+                          } // checks if item.label inside newItem.tag, if not then uncheck
+                          onChange={() => handleTagChange(item.id)}
                           className="hidden peer"
                         />
                         <label
-                          htmlFor={item.id}
+                          htmlFor={item.label}
                           className="inline-flex justify-center items-center w-full p-3 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-orange-500 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
                         >
                           <div className="flex flex-col items-center text-center capitalize">
@@ -191,7 +199,7 @@ const CU_Modal = ({
                 </div>
               )}
 
-              {(page === "Category" || page === "Item") && (
+              {(page == "Category" || page == "Item") && (
                 <div className="relative col-span-2 sm:col-span-1">
                   <label
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -219,12 +227,12 @@ const CU_Modal = ({
 
               <div
                 className={`${
-                  page === "Category" || page === "Item"
+                  page == "Category" || page == "Item"
                     ? "col-span-1"
                     : "col-span-2"
                 }`}
               >
-                {page === "Menu" ? (
+                {page == "Menu" ? (
                   <label className="inline-flex items-center mb-4 cursor-pointer select-none">
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-300">
                       Published
@@ -266,7 +274,7 @@ const CU_Modal = ({
 
                 <div
                   className={`text-sm text-gray-500 ${
-                    page === "Category" || page === "Item" ? "mt-1 sm:mt-0" : ""
+                    page == "Category" || page == "Item" ? "mt-1 sm:mt-0" : ""
                   }`}
                 >
                   <div className={`${isChecked ? "hidden" : ""}`}>
@@ -285,7 +293,7 @@ const CU_Modal = ({
                 type="submit"
                 className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {page === "Menu" || name === "Edit" ? (
+                {page == "Menu" || name == "Edit" ? (
                   <>
                     {name} {page}
                   </>

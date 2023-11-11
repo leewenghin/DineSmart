@@ -1,49 +1,24 @@
-import {
-  ChangeEvent,
-  Component,
-  FormEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
 import CU_Modal from "../../components/admin/cu_modal";
 import DeleteModal from "../../components/admin/delete_modal";
 
-const categories = [
-  { label: "Prawn", items: "20" },
-  { label: "Crab", items: "50" },
-  { label: "Deep Fried Fish", items: "100" },
-  { label: "Chicken", items: "100" },
-  { label: "Soups", items: "100" },
-  { label: "Vegetables", items: "100" },
-  { label: "Milks", items: "100" },
-  { label: "Appetizers", items: "100" },
-];
-
 // ==================== Interfaces  ====================
-interface Menu {
+type TField = {
   id: number;
-  name: string;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  description: string;
-  image: File | null;
-  published: boolean;
-}
-
-interface submitCategory {
   name: string;
   description: string;
   image: File | null;
   published: boolean;
   foodmenu_id: number;
-}
+};
+
+// Remove properties from type
+type TMenu = Pick<TField, "id" | "name">;
+type TCategory = Omit<TField, "foodmenu_id">;
+type TSubmitCategory = Omit<TField, "id">;
 
 const Card = ({
   item,
@@ -208,12 +183,10 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // For toggle modal purpose
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // For toggle modal purpose
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // For toggle modal purpose
-  const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(
-    null
-  );
-  const [menuList, setMenuList] = useState<Menu[]>([]); // List for store data from menu table
-  const [categoryList, setCategoryList] = useState<Category[]>([]); // List for store data from category table
-  const [newCategory, setNewCategory] = useState<submitCategory>({
+
+  const [menuList, setMenuList] = useState<TMenu[]>([]); // List for store data from menu table
+  const [categoryList, setCategoryList] = useState<TCategory[]>([]); // List for store data from category table
+  const [newCategory, setNewCategory] = useState<TSubmitCategory>({
     // For save input value
     // Initial value
     name: "",
@@ -222,7 +195,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     published: false,
     foodmenu_id: FoodMenuId,
   });
-  const [updateCategory, setUpdateCategory] = useState<submitCategory[]>([]);
+  const [updateCategory, setUpdateCategory] = useState<TSubmitCategory[]>([]);
   const [categoryID, setCategoryID] = useState<number | null>(null); // Keep the menuID when press edit button
   const [categoryIndex, setCategoryIndex] = useState<number | null>(null); // Keep the menuIndex when press edit button
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
@@ -248,7 +221,6 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     index: number
   ) => {
     setIsModalOpen(!isModalOpen);
-    setSelectedItemIndex(index);
     setCategoryID(categoryID);
     setCategoryIndex(index);
   };
@@ -256,11 +228,18 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
   // ==================== Fetch Method ====================
   // Fetch data array from table method
-  const fetchList = (getLink: string, setList: any) => {
+  const fetchList = (
+    getLink: string,
+    setList: any,
+    setList2?: (data: any) => void
+  ) => {
     fetch(getLink)
       .then((response) => response.json())
       .then((data) => {
         setList(data);
+        if (setList2) {
+          setList2(data);
+        }
       })
       .catch((error) => console.error("Error fetching data: ", error));
   };
@@ -313,8 +292,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
           }
         })
         .then(() => {
-          fetchList(getCategoryLink, setCategoryList);
-          fetchList(getCategoryLink, setUpdateCategory);
+          fetchList(getCategoryLink, setCategoryList, setUpdateCategory);
           setNewCategory({
             name: "",
             description: "",
@@ -336,7 +314,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   const fetchSetCategoryPublishedIDList = (
     categoryId: number,
     index: number,
-    updatedCategoryList: Category[]
+    updatedCategoryList: TCategory[]
   ) => {
     fetch(`${setCategoryLink}${categoryId}/`, {
       method: "PATCH",
@@ -353,8 +331,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         }
       })
       .then(() => {
-        fetchList(getCategoryLink, setCategoryList);
-        fetchList(getCategoryLink, setUpdateCategory);
+        fetchList(getCategoryLink, setCategoryList, setUpdateCategory);
       })
       .catch((error) => console.error("Error updating status: ", error));
   };
@@ -416,8 +393,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
           }
         })
         .then(() => {
-          fetchList(getCategoryLink, setCategoryList);
-          fetchList(getCategoryLink, setUpdateCategory);
+          fetchList(getCategoryLink, setCategoryList, setUpdateCategory);
         })
         .catch((error) => {
           console.error("Error creating task: ", error);
@@ -440,8 +416,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
           return response.json;
         })
         .then(() => {
-          fetchList(getCategoryLink, setCategoryList);
-          fetchList(getCategoryLink, setUpdateCategory);
+          fetchList(getCategoryLink, setCategoryList, setUpdateCategory);
         })
         .catch((error) => {
           console.error("Error deleting task: ", error);
@@ -541,10 +516,11 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   const handleCancel = (
     isModalOpen: boolean,
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    reset: boolean
+    resetNewCategory?: boolean,
+    resetUpdateCategory?: boolean
   ) => {
     // Clear the form data by setting it to its initial state
-    if (reset) {
+    if (resetNewCategory) {
       setNewCategory({
         name: "",
         description: "",
@@ -552,6 +528,10 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         published: false,
         foodmenu_id: FoodMenuId,
       });
+    }
+
+    if (resetUpdateCategory) {
+      fetchList(getCategoryLink, setUpdateCategory);
     }
 
     toggleModal(isModalOpen, setIsModalOpen);
@@ -579,7 +559,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     try {
       await fetchUpdateCategoryIDList(event); // Wait for fetchSetMenuList to complete
       if (!formAlert) {
-        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false); // Reset the field list and exit modal
+        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen); // Reset the field list and exit modal
         console.log(alertMessage);
         setAlertMessage("Successful Updated"); // Make sure this code is executed
       }
@@ -593,7 +573,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     try {
       await fetchDeleteCategoryIDList(categoryID);
       if (!formAlert) {
-        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false);
+        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen);
         console.log(alertMessage);
         setAlertMessage("Successful Deleted");
       }
@@ -607,7 +587,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   };
 
   const handleOverflow = () => {
-    if (isCreateModalOpen) {
+    if (isCreateModalOpen || isUpdateModalOpen || isDeleteModalOpen) {
       document.body.classList.add("overflow-hidden");
     } else {
       document.body.classList.remove("overflow-hidden");
@@ -636,11 +616,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   }, []);
 
   useEffect(() => {
-    fetchList(getCategoryLink, setCategoryList);
-  }, []);
-
-  useEffect(() => {
-    fetchList(getCategoryLink, setUpdateCategory);
+    fetchList(getCategoryLink, setCategoryList, setUpdateCategory);
   }, []);
 
   useEffect(() => {
@@ -649,7 +625,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
   useEffect(() => {
     handleOverflow();
-  }, [isCreateModalOpen]);
+  }, [isCreateModalOpen, isUpdateModalOpen, isDeleteModalOpen]);
 
   return (
     <div className="content px-10">
@@ -760,17 +736,18 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
           }
           handleSubmit={handleSubmit}
           handleSave={handleSave}
+          nameAlert={formAlert}
         ></CU_Modal>
       )}
 
       {isUpdateModalOpen && (
         <CU_Modal
           page="Category"
-          name={"Edit"}
-          list={updateCategory[selectedItemIndex ?? 0]}
+          name="Edit"
+          list={updateCategory[categoryIndex ?? 0]}
           fileInputRef={fileInputRef}
           handleCancel={() =>
-            toggleModal(isUpdateModalOpen, setIsUpdateModalOpen)
+            handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)
           }
           handleSubmit={handleUpdate}
           handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -784,7 +761,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
       {isDeleteModalOpen && (
         <DeleteModal
           handleCancel={() =>
-            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen, false)
+            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen)
           }
           handleDelete={() => handleDelete(categoryID ?? 0)}
         ></DeleteModal>

@@ -23,30 +23,32 @@ interface changeIP {
 }
 
 function App() {
-  // const changeip = "192.168.1.46"; // Zhen Xun
-  // const changeip = "192.168.0.9"; //Zhen Xun Home
-  const changeip = "192.168.0.206"; //Zhen Xun Kenny
+  const changeip = "192.168.1.46"; // Zhen Xun
+  // const changeip = "192.168.0.5"; //Zhen Xun Home
+  // const changeip = "192.168.0.206"; //Zhen Xun Kenny
   // const changeip = "192.168.1.24"; // DomDom
 
   // http:// 192.168:8000/menu/1 // dine in (Table order)
   // http:// 192.168:8000/menu/2 // delively
 
-  // http:// 192.168:8000/menu/1/cashpayment
+  // http:// 192.168:8000/menu/1/?table_id={1}/
   //
-
   return (
     <BrowserRouter>
       <Routes>
         {/* <Route path="*" element={<Navigate to="/not-found" />} /> */}
-        <Route path="table/:tableqrid" >
-          <Route index element={<Menu changeIP={changeip}/>} />
+        <Route path="table/:tableqrid">
+          <Route index element={<Menu changeIP={changeip} />} />
           <Route path="paymentdetail" element={<Payment_detail />} />
           <Route path="cashpayment" element={<Cash_payment />} />
           <Route path="testing" element={<Testing />} />
           <Route path="testing1" element={<Testing1 />} />
           <Route path="qr_modal" element={<QRModal />} />
-          <Route path="order_detail" element={<OrderDetailPage changeIP={changeip} />} />
-      </Route>
+          <Route
+            path="order_detail"
+            element={<OrderDetailPage changeIP={changeip} />}
+          />
+        </Route>
         <Route path="admin_panel" element={<Admin_panel changeIP={changeip} />}>
           <Route path="menu" element={<Admin_method changeIP={changeip} />} />
           <Route
@@ -62,7 +64,6 @@ function App() {
             element={<Admin_item changeIP={changeip} />}
           />
         </Route>
-
       </Routes>
     </BrowserRouter>
   );

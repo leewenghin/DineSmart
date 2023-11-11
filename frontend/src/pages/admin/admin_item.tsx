@@ -1,77 +1,28 @@
-import {
-  ChangeEvent,
-  Component,
-  FormEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { ModalProps } from "react-bootstrap";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
 import CU_Modal from "../../components/admin/cu_modal";
+import DeleteModal from "../../components/admin/delete_modal";
 
-const items = [
-  { label: "black pepper prawn", items: "20" },
-  { label: "butter prawn", items: "50" },
-  { label: "cereal prawn", items: "100" },
-  { label: "kam heong prawn", items: "100" },
-  { label: "kung po prawn", items: "100" },
-  { label: "salted egg prawn", items: "100" },
-  { label: "sambal prawn", items: "100" },
-  { label: "sweet & sour prawn", items: "100" },
-];
-
-const tags = [
-  { id: "spicy", label: "spicy", icon: "/src/assets/img/admin/chili.png" },
-  { id: "vegan", label: "vegan", icon: "/src/assets/img/admin/vegan.png" },
-  { id: "halal", label: "halal", icon: "/src/assets/img/admin/halal.png" },
-  { id: "new", label: "new", icon: "/src/assets/img/admin/new.png" },
-  {
-    id: "signature",
-    label: "signature",
-    icon: "/src/assets/img/admin/signature.png",
-  },
-  {
-    id: "promotion",
-    label: "promotion",
-    icon: "/src/assets/img/admin/promotion.png",
-  },
-  { id: "hot", label: "hot", icon: "/src/assets/img/admin/hot.png" },
-];
-
-// Define the Item type
-interface Category {
-  id: number;
-  name: string;
-}
-
-// Define the Item type
-interface Item {
+type TField = {
   id: number;
   name: string;
   description: string;
   image: File | null;
   price: number | null;
-  tag: string[];
-  published: boolean;
-}
-
-// Define the submitItem type
-interface submitItem {
-  name: string;
-  description: string;
-  image: File | null;
-  price: number | null;
-  tag: string[];
+  tag: number[];
   published: boolean;
   foodcategory_id: number;
-}
+};
+
+// Define the Item type
+type TCategory = Pick<TField, "id" | "name">;
+type TItem = Omit<TField, "foodcategory_id">;
+type TSubmitItem = Omit<TField, "id">;
 
 const Card = ({
   item,
   index,
-  foodcategory_id,
   toggleUpdateModal,
   toggleDeleteModal,
   handlePublished,
@@ -113,7 +64,7 @@ const Card = ({
   }, [isOptionModalOpen]);
 
   return (
-    <div className="dine-method text-xl" key={index}>
+    <div className="dine-method text-xl relative" key={index}>
       <div className="absolute top-0 right-0 z-20">
         <div className="w-24 flex justify-end">
           <button
@@ -220,10 +171,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const getItemLink = `http://${changeIP}:8000/api/fooditems/?foodcategory_id=${foodcategory_id}`;
   const setItemLink = `http://${changeIP}:8000/api/fooditems/`;
 
-  const [menuList, setMenuList] = useState<Category[]>([]);
-  const [categoryList, setCategoryList] = useState<Category[]>([]);
-  const [itemList, setItemList] = useState<Item[]>([]); // Provide type annotation for taskList
-  const [newItem, setNewItem] = useState<submitItem>({
+  const [menuList, setMenuList] = useState<TCategory[]>([]);
+  const [categoryList, setCategoryList] = useState<TCategory[]>([]);
+  const [itemList, setItemList] = useState<TItem[]>([]); // Provide type annotation for taskList
+  const [newItem, setNewItem] = useState<TSubmitItem>({
     // For reset the field
     name: "",
     description: "",
@@ -240,7 +191,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(
     null
   );
-  const [updateItem, setUpdateItem] = useState<submitItem[]>([]);
+  const [updateItem, setUpdateItem] = useState<TSubmitItem[]>([]);
   const [itemID, setItemID] = useState<number | null>(null); // Keep the menuID when press edit button
   const [itemIndex, setItemIndex] = useState<number | null>(null); // Keep the menuIndex when press edit button
   const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
@@ -276,11 +227,18 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
   // ==================== Fetch Method ====================
   // Fetch data array from table method
-  const fetchList = (getLink: string, setList: any) => {
+  const fetchList = (
+    getLink: string,
+    setList: any,
+    setList2?: (data: any) => void
+  ) => {
     fetch(getLink)
       .then((response) => response.json())
       .then((data) => {
         setList(data);
+        if (setList2) {
+          setList2(data);
+        }
       })
       .catch((error) => console.error("Error fetching data: ", error));
   };
@@ -307,15 +265,20 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       formData.append("name", newItem.name);
       formData.append(
         "price",
-        newItem.price !== null ? newItem.price.toString() : ""
+        (newItem.price !== null && !Number.isNaN(newItem.price)) ||
+          newItem.price == 0
+          ? newItem.price.toString()
+          : ""
       );
+
       newItem.tag.forEach((tag) => {
-        formData.append("tag", tag);
+        formData.append("tag", tag.toString());
         console.log("Tags: ", tag);
       });
 
       console.log("This is price: ", newItem.price);
-      console.log("This is tag: ", newItem.tag);
+      console.log("This is tags : ", newItem.tag);
+      console.log("This is published: ", newItem.published);
       formData.append("description", newItem.description);
       formData.append("published", newItem.published.toString());
       formData.append("foodcategory_id", newItem.foodcategory_id.toString());
@@ -376,7 +339,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const fetchSetItemIDList = (
     itemID: number,
     index: number,
-    updatedCategoryList: Item[]
+    updatedCategoryList: TItem[]
   ) => {
     fetch(`${setItemLink}${itemID}/`, {
       method: "PATCH",
@@ -394,6 +357,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       })
       .then(() => {
         fetchList(getItemLink, setItemList);
+        fetchList(getItemLink, setUpdateItem);
       })
       .catch((error) => console.error("Error updating status: ", error));
   };
@@ -403,12 +367,14 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     console.log("Fetch index: ", itemIndex);
 
     return new Promise((resolve, reject) => {
+      const updateItemList = updateItem[itemIndex ?? 0];
+
       event.preventDefault();
 
       const formData = new FormData();
-      if (updateItem[itemIndex ?? 0].image) {
+      if (updateItemList.image) {
         // Ensure that the 'image' field is a valid File
-        const image = updateItem[itemIndex ?? 0].image;
+        const image = updateItemList.image;
 
         if (image instanceof File) {
           formData.append("image", image);
@@ -419,32 +385,35 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         formData.append("image", "");
       }
 
-      formData.append("name", updateItem[itemIndex ?? 0].name);
-      formData.append("description", updateItem[itemIndex ?? 0].description);
+      formData.append("name", updateItemList.name);
+      formData.append("description", updateItemList.description);
       formData.append(
         "price",
         updateItem?.[itemIndex ?? 0]?.price?.toString() ?? ""
       );
 
-      formData.append(
-        "published",
-        updateItem[itemIndex ?? 0].published.toString()
-      );
+      updateItemList.tag.forEach((tag) => {
+        formData.append("tag", tag.toString());
+        console.log("Tags: ", tag);
+      });
+
+      console.log("This is tags: : ", updateItemList.tag);
+      console.log("Test2", updateItemList);
+      console.log("Test3", formData);
+
+      formData.append("published", updateItemList.published.toString());
       formData.append(
         "foodcategory_id",
-        updateItem[itemIndex ?? 0].foodcategory_id.toString()
+        updateItemList.foodcategory_id.toString()
       );
 
-      console.log("Name: ", updateItem[itemIndex ?? 0].name);
-      console.log("description: ", updateItem[itemIndex ?? 0].description);
+      console.log("Name: ", updateItemList.name);
+      console.log("description: ", updateItemList.description);
       console.log("Price: ", updateItem?.[itemIndex ?? 0]?.price?.toString());
-      console.log(
-        "published: ",
-        updateItem[itemIndex ?? 0].published.toString()
-      );
+      console.log("published: ", updateItemList.published.toString());
       console.log(
         "foodcategory_id: ",
-        updateItem[itemIndex ?? 0].foodcategory_id.toString()
+        updateItemList.foodcategory_id.toString()
       );
 
       fetch(`${setItemLink}${itemID}/`, {
@@ -500,42 +469,67 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     setAlertMessage(null);
   };
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target && e.target.files) {
-      const selectedImage = e.target.files[0];
-      setImage(selectedImage);
-    }
-  };
-
-  const handlePublished = (ItemID: number, index: number) => {
+  const handlePublished = (itemID: number, index: number) => {
     const updatedCategoryList = [...itemList];
     updatedCategoryList[index].published =
       !updatedCategoryList[index].published;
 
     // Call the fetchSetItemIDList method to perform the PATCH request
-    fetchSetItemIDList(ItemID, index, updatedCategoryList);
+    fetchSetItemIDList(itemID, index, updatedCategoryList);
   };
 
-  const handleTagChangeWithParameter = (tagValue: string) => {
+  const handleTagChangeWithParameter = (tagValue: number) => {
     handleTagChange(tagValue);
   };
 
-  const handleTagChange = (tagValue: string) => {
+  const handleTagChangeWithParameterEdit = (tagValue: number) => {
+    handleTagChangeEdit(tagValue);
+  };
+
+  const handleTagChange = (tagValue: number) => {
     const { tag } = newItem;
+    let createdArray = { ...newItem };
 
     if (tag.includes(tagValue)) {
       // If the tag is already in the list, remove it
-      setNewItem({
+      createdArray = {
         ...newItem,
         tag: tag.filter((item) => item !== tagValue),
-      });
+      };
     } else {
       // If the tag is not in the list, add it
-      setNewItem({
+      createdArray = {
         ...newItem,
         tag: [...tag, tagValue],
-      });
+      };
     }
+    setNewItem(createdArray);
+  };
+
+  const handleTagChangeEdit = (tagValue: number) => {
+    const index = itemIndex ?? 0;
+    const updatedArray = [...updateItem];
+    const existingTags = updatedArray[index].tag;
+
+    // Check if the tagValue is not already in the existing tags
+    if (existingTags.includes(tagValue)) {
+      updatedArray[index] = {
+        ...updatedArray[index],
+        tag: existingTags.filter((item) => item !== tagValue),
+      };
+    } else {
+      updatedArray[index] = {
+        ...updatedArray[index],
+        tag: [...existingTags, tagValue],
+      };
+
+      console.log("index:", index);
+      console.log("tagValue:", tagValue);
+      console.log("updatedArray:", updatedArray);
+    }
+
+    // Update the state with the new array
+    setUpdateItem(updatedArray);
   };
 
   const handleInputChangeCreate = (
@@ -545,25 +539,27 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
     setIsChecked(event.target.checked);
 
-    if (name == "name" || "description") {
-      if (value !== null || value !== "") {
-        setNewItem({ ...newItem, [name]: value });
-        hideFormAlert(setNameAlert); // Remove alert when there's a value
-      }
+    if (name == "name" && value !== null) {
+      setNewItem({ ...newItem, [name]: value });
+      hideFormAlert(setNameAlert); // Remove alert when there's a value
+      console.log("name: ", value);
     }
-    if (name == "price") {
-      if (value !== null) {
-        try {
-          const numericValue = parseFloat(value);
-          if (!isNaN(numericValue)) {
-            setNewItem({ ...newItem, [name]: numericValue });
-            hideFormAlert(setPriceAlert); // Remove alert when there's a value
-          } else {
-            console.error("Invalid numeric value:", value);
-          }
-        } catch (error) {
-          console.error("Error while parsing numeric value:", error);
+    if (name == "description") {
+      setNewItem({ ...newItem, [name]: value });
+    }
+    if (name == "price" && value !== null) {
+      try {
+        const numericValue = parseFloat(value);
+        if (!isNaN(numericValue)) {
+          setNewItem({ ...newItem, [name]: numericValue });
+          hideFormAlert(setPriceAlert);
+          console.log("price: ", value);
+        } else {
+          setNewItem({ ...newItem, [name]: null });
+          console.error("Invalid numeric value:", value);
         }
+      } catch (error) {
+        console.error("Error while parsing numeric value:", error);
       }
     }
     if (name == "published") {
@@ -603,12 +599,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         hideFormAlert(setNameAlert);
       }
     }
-    if (name === "price") {
-      if (value !== null) {
-        const numericValue = parseFloat(value);
-        assignInput(numericValue);
-        hideFormAlert(setPriceAlert); // Remove alert when there's a value
-      }
+    if (name === "price" && value !== null) {
+      const numericValue = parseFloat(value);
+      assignInput(numericValue);
+      hideFormAlert(setPriceAlert); // Remove alert when there's a value
     }
     if (name === "published") {
       assignInput(checked);
@@ -630,10 +624,11 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const handleCancel = (
     isModalOpen: boolean,
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    reset: boolean
+    resetNewItem?: boolean,
+    resetUpdateItem?: boolean
   ) => {
     // Clear the form data by setting it to its initial state
-    if (reset) {
+    if (resetNewItem) {
       setNewItem({
         name: "",
         description: "",
@@ -643,6 +638,9 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         published: false,
         foodcategory_id: FoodCategoryId,
       });
+    }
+    if (resetUpdateItem) {
+      fetchList(getItemLink, setUpdateItem);
     }
 
     toggleModal(isModalOpen, setIsModalOpen);
@@ -672,7 +670,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     try {
       await fetchUpdateItemIDList(event); // Wait for fetchSetMenuList to complete
       if (!nameAlert || !priceAlert) {
-        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false); // Reset the field list and exit modal
+        handleCancel(isUpdateModalOpen, setIsUpdateModalOpen); // Reset the field list and exit modal
         console.log(alertMessage);
         setAlertMessage("Successful Updated"); // Make sure this code is executed
       }
@@ -681,12 +679,52 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       console.error("Error:", error);
     }
   };
+
+  const fetchDeleteItemIDList = (itemID: number) => {
+    return new Promise((resolve, reject) => {
+      fetch(`${setItemLink}${itemID}/`, { method: "DELETE" })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          if (response.status === 204) {
+            resolve(true);
+            return;
+          }
+          return response.json;
+        })
+        .then(() => {
+          fetchList(getItemLink, setItemList);
+          fetchList(getItemLink, setUpdateItem);
+        })
+        .catch((error) => {
+          console.error("Error deleting task: ", error);
+          reject(error); // Reject the Promise with the error
+        });
+    });
+  };
+
+  const handleDelete = async (itemID: number) => {
+    try {
+      await fetchDeleteItemIDList(itemID); // Wait for fetchSetMenuList to complete
+      if (!nameAlert && !priceAlert) {
+        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen);
+        // Exit modal
+        console.log(alertMessage);
+        setAlertMessage("Successful Deleted"); // Make sure this code is executed
+      }
+    } catch (error) {
+      // Handle any errors that occur during the fetchSetMenuList operation
+      console.error("Error:", error);
+    }
+  };
+
   const handleSave = () => {
     setSave(true);
   };
 
   const handleOverflow = () => {
-    if (isCreateModalOpen) {
+    if (isCreateModalOpen || isUpdateModalOpen || isDeleteModalOpen) {
       document.body.classList.add("overflow-hidden");
     } else {
       document.body.classList.remove("overflow-hidden");
@@ -714,28 +752,25 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     fetchList(getMenuLink, setMenuList);
   }, []);
 
-  // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
     fetchList(getCategoryLink, setCategoryList);
   }, []);
 
-  // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
-    fetchList(getItemLink, setItemList);
-  }, []);
-  // Use useEffect to trigger modal open when the component is mounted
-  useEffect(() => {
-    fetchList(getItemLink, setUpdateItem);
+    fetchList(getItemLink, setItemList, setUpdateItem);
   }, []);
 
-  // Use useEffect to trigger modal open when the component is mounted
+  // useEffect(() => {
+  //   fetchList(getItemLink, setUpdateItem);
+  // }, [getItemLink, setUpdateItem]);
+
   useEffect(() => {
     alertMessageTime();
   }, [alertMessage]);
-  // Use useEffect to trigger modal open when the component is mounted
+
   useEffect(() => {
     handleOverflow();
-  }, [isCreateModalOpen]);
+  }, [isCreateModalOpen, isUpdateModalOpen, isDeleteModalOpen]);
 
   return (
     <div className="content px-10">
@@ -835,7 +870,6 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
               key={item.id}
               item={item}
               index={index}
-              foodmenu_id={foodmenu_id}
               toggleUpdateModal={() =>
                 toggleIDModal(
                   isUpdateModalOpen,
@@ -875,6 +909,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           }
           handleSubmit={handleSubmit}
           handleSave={handleSave}
+          nameAlert={nameAlert}
+          priceAlert={priceAlert}
         ></CU_Modal>
       )}
 
@@ -882,19 +918,30 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         <CU_Modal
           page="Item"
           name="Edit"
-          list={updateItem[selectedItemIndex ?? 0]}
+          list={updateItem[itemIndex ?? 0]}
           fileInputRef={fileInputRef}
           handleCancel={() =>
-            toggleModal(isUpdateModalOpen, setIsUpdateModalOpen)
+            handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)
           }
           handleSubmit={handleUpdate}
           handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
             handleInputChangeEdit(event, itemIndex ?? 0)
           }
+          handleTagChange={handleTagChangeWithParameterEdit}
           isChecked={isChecked}
           nameAlert={nameAlert}
           priceAlert={priceAlert}
         ></CU_Modal>
+      )}
+
+      {/* Delete modal */}
+      {isDeleteModalOpen && (
+        <DeleteModal
+          handleCancel={() =>
+            handleCancel(isDeleteModalOpen, setIsDeleteModalOpen)
+          }
+          handleDelete={() => handleDelete(itemID ?? 0)}
+        ></DeleteModal>
       )}
 
       {/* Alert Message */}
