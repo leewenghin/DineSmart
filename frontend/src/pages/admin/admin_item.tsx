@@ -117,7 +117,7 @@ const Card = ({
                   ? item.image.toString()
                   : "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
               }
-              alt="Sunset in the moufntains"
+              alt={item.name}
             />
           </div>
           <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">

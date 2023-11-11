@@ -73,6 +73,7 @@ class FoodItemsView(viewsets.ModelViewSet):
             if "tag" in request.data and request.data.getlist("tag") == []:
                 food_item.tag.clear()
 
+
             # serializer = FoodItemsSerializer(data={
             #     'image': image,
             #     'name': request.data['name'],

@@ -94,7 +94,7 @@ const CU_Modal = ({
                   htmlFor="name"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none"
                 >
-                  Name
+                  Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="name"
@@ -120,7 +120,7 @@ const CU_Modal = ({
                     htmlFor="price"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                   >
-                    Price
+                    Price <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"

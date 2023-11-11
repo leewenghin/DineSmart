@@ -14,6 +14,8 @@ import Admin_method from "./pages/admin/admin_menu";
 import Admin_category from "./pages/admin/admin_category";
 import Admin_item from "./pages/admin/admin_item";
 import Admin_qrtable from "./pages/admin/admin_qrtable";
+import Admin_variant_group from "./pages/admin/admin_variant_group";
+import Admin_variant_value from "./pages/admin/admin_variant_value";
 import Testing from "./pages/testing";
 import Testing1 from "./pages/testing copy";
 import QRModal from "./components/qr_modal";
@@ -72,6 +74,8 @@ function App() {
             path="category/:foodmenu_id/:foodcategory_id"
             element={<Admin_item changeIP={changeip} />}
           />
+          <Route path="variant_group" element={<Admin_variant_group />} />
+          <Route path="variant_value" element={<Admin_variant_value />} />
         </Route>
       </Routes>
     </BrowserRouter>

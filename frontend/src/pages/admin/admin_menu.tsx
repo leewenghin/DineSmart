@@ -103,7 +103,7 @@ const Card = ({
           <img
             className="image-img w-full p-4 cursor-pointer bg-imageColor"
             src="../src/assets/img/admin/tableware.png"
-            alt="Sunset in the mountains"
+            alt={item.name}
           />
           <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
             <Link to={`/admin_panel/category/${item.id}`}>
