@@ -12,7 +12,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { RadioGroup, Radio } from "../components/radio_button";
 import "../assets/css/order_detail.css";
 import { useParams, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import React from "react";
 
 const data = [
   {
@@ -98,93 +99,133 @@ const dataArray: any[] = [
         price: "12.99",
       },
     ],
-
   },
 ];
 
-const OrderDetailPage = () => {
+const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
   const location = useLocation();
-  const orderData: any[] = location.state;
 
-  // Create a set to keep track of displayed item ids
-  const displayedItems = new Set();
+  const data: any[] = location.state;
+  const [orderedItems, setOrderedItems] = useState<any[]>([]); // show data
+  console.log(data);
+  const [orderData, setOrderData] = useState(data);
 
-  // Create an array to store filtered and mapped data
-  const filteredData: any[] = [];
-
-  // Iterate through orderData
-  orderData.forEach((orderItem) => {
-    // Iterate through dataArray categories
-    for (let category in dataArray[0]) {
-      // Find the corresponding item in the category based on id
-      const foundItem = dataArray[0][category].find(
-        (item: { id: any }) => item.id === orderItem.id
-      );
-
-      // If the item is found and not already displayed, add it to filteredData with quantity information
-      if (foundItem && !displayedItems.has(foundItem.id)) {
-        filteredData.push({
-          ...foundItem,
-          quantity: orderItem.quantity,
-          category: category,
-        });
-
-        // Add the displayed item id to the set
-        displayedItems.add(foundItem.id);
-      }
-    }
-  });
-
-
-    // Count Order Items 
-    const [orderedItems, setOrderedItems] = useState<any[]>(filteredData);
-  
-    // When click one of the items then add new label (quantity) and output to order list 
-    const handleOrderClick = (filteredData: any) => {
-      const existingItemIndex = orderedItems.findIndex(
-        (orderedItem) => orderedItem.id === filteredData.id
-      );
-      if (existingItemIndex !== -1) {
-        // If the item exists, update its quantity by adding 1
-        const updatedItems = [...orderedItems];
-        updatedItems[existingItemIndex].quantity += 1;
-        setOrderedItems(updatedItems);
-      } else {
-        // If the item doesn't exist, add it to the orderedItems array with a quantity of 1
-        setOrderedItems([...orderedItems, { ...filteredData, quantity: 1 }]);
-      }
+  useEffect(() => {
+    const handleBeforeUnload = (event:any) => {
+      event.preventDefault();
+      setOrderData(orderedItems);
     };
-  
-    // Minus quantity 
-    const handleMinusClick = (filteredData: any) => {
-      const existingItemIndex = orderedItems.findIndex(
-        (orderedItem) => orderedItem.id === filteredData.id
-      );
-  
-      if (existingItemIndex !== -1) {
-        // If the item exists, update its quantity by subtracting 1
-        const updatedItems = [...orderedItems];
-        updatedItems[existingItemIndex].quantity = Math.max(
-          0,
-          updatedItems[existingItemIndex].quantity - 1
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    // handleBeforeUnload()
+  }, []);
+  // useEffect(() => {
+  //   // Save orderData to localStorage whenever it changes
+  //   localStorage.setItem("orderData", JSON.stringify(orderData));
+  // }, [orderData]);
+
+
+  // Get items from API
+  const [foodItems, setFoodItems] = useState<any>([]);
+  const [foodCategory, setFoodCategory] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response_category = await fetch(
+          `http://${changeIP}:8000/api/foodcategories/`
         );
-        setOrderedItems(updatedItems);
+        const response_items = await fetch(
+          `http://${changeIP}:8000/api/fooditems/`
+        );
+        if (response_items.ok && response_category.ok) {
+          const data_items = await response_items.json();
+          const data_category = await response_category.json();
+          setFoodItems(data_items);
+          setFoodCategory(data_category);
+        } else {
+          console.error("Failed to fetch data");
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-    }; 
-  
-    // Cancel order items
-    const handleCancelClick = (filteredData: any) => {
-      // Remove the item from the orderedItems array
-      const updatedItems = orderedItems.filter(
-        (orderedItem) => orderedItem.id !== filteredData.id
-      );
-      setOrderedItems(updatedItems);
     };
-  
-    // Count all order items
-    const totalPrice = orderedItems.reduce((acc, currentItem) => {
-      return acc + currentItem.price * currentItem.quantity;
-    }, 0);
+    fetchData();
+  }, []);
+
+  const delay = (ms: any) => new Promise((res) => setTimeout(res, ms));
+  useEffect(() => {
+    // Function to combine orderData with itemData based on matching IDs
+    const combineOrderAndItemData = () => {
+      const combinedItems: any[] = [];
+      orderData.forEach((orderItem) => {
+        const matchingItem = foodItems.find(
+          (item: { id: any }) => item.id === orderItem.id
+        );
+        if (matchingItem) {
+          combinedItems.push({ ...matchingItem, quantity: orderItem.quantity });
+        }
+      });
+      setOrderedItems(combinedItems);
+    };
+
+    // Call the function when itemData or orderData changes
+    if (foodItems.length > 0 && orderData.length > 0) {
+      combineOrderAndItemData();
+    }
+  }, [foodItems, orderData]);
+
+  // When click one of the items then add new label (quantity) and output to order list
+  const handleOrderClick = (filteredData: any) => {
+    const existingItemIndex = orderedItems.findIndex(
+      (orderedItem) => orderedItem.id === filteredData.id
+    );
+    if (existingItemIndex !== -1) {
+      // If the item exists, update its quantity by adding 1
+      const updatedItems = [...orderedItems];
+      updatedItems[existingItemIndex].quantity += 1;
+      setOrderedItems(updatedItems);
+    } else {
+      // If the item doesn't exist, add it to the orderedItems array with a quantity of 1
+      setOrderedItems([...orderedItems, { ...filteredData, quantity: 1 }]);
+    }
+  };
+
+  // Minus quantity
+  const handleMinusClick = (filteredData: any) => {
+    const existingItemIndex = orderedItems.findIndex(
+      (orderedItem) => orderedItem.id === filteredData.id
+    );
+
+    if (existingItemIndex !== -1) {
+      // If the item exists, update its quantity by subtracting 1
+      const updatedItems = [...orderedItems];
+      updatedItems[existingItemIndex].quantity = Math.max(
+        0,
+        updatedItems[existingItemIndex].quantity - 1
+      );
+
+      // Filter out items with quantity zero before updating the state
+      const filteredItems = updatedItems.filter((item) => item.quantity > 0);
+      setOrderedItems(filteredItems);
+      setOrderData(filteredItems);
+    }
+  };
+
+  // Cancel order items
+  const handleCancelClick = (filteredData: any) => {
+    // Remove the item from the orderedItems array
+    const updatedItems = orderedItems.filter(
+      (orderedItem) => orderedItem.id !== filteredData.id
+    );
+    setOrderedItems(updatedItems);
+    setOrderData(updatedItems);
+    console.log(location.state[0].status);
+  };
+
+  // console.log(orderedItems);
+  // Count all order items
+  const totalPrice = orderedItems.reduce((acc, currentItem) => {
+    return acc + currentItem.price * currentItem.quantity;
+  }, 0);
 
   // Now filteredData contains unique items with their quantities from dataArray
   return (
@@ -226,21 +267,21 @@ const OrderDetailPage = () => {
                     <Radio id="basic" name="radio" defaultChecked>
                       <img
                         className="card-payment w-12 h-12"
-                        src="../src/assets/img/card-payment.png"
+                        src="../../src/assets/img/card-payment.png"
                       />
                       <h3>Debit / Credit Card</h3>
                     </Radio>
                     <Radio id="advanced" name="radio" defaultChecked={false}>
                       <img
                         className="online-payment w-12 h-12"
-                        src="../src/assets/img/online-payment.png"
+                        src="../../src/assets/img/online-payment.png"
                       />
                       <h3>Online Banking</h3>
                     </Radio>
                     <Radio id="nice" name="radio" defaultChecked={false}>
                       <img
                         className="cash-payment w-12 h-12"
-                        src="../src/assets/img/cash-payment.png"
+                        src="../../src/assets/img/cash-payment.png"
                       />
                       <h3>Cash</h3>
                     </Radio>
@@ -280,13 +321,13 @@ const OrderDetailPage = () => {
                 {orderedItems.map((item: any, itemIndex: any) => (
                   <div className="border-b-2 pb-2" key={itemIndex}>
                     <div className="flex items-center justify-between">
-                      <p>{item.foodTitle}</p>
+                      <p>{item.name}</p>
                       <p className="whitespace-nowrap">{`RM ${item.price}`}</p>
                     </div>
                     <div className="flex items-center justify-between">
                       <p>{}</p>
                       <div className="quantity flex flex-1 items-center justify-end">
-                      <FontAwesomeIcon
+                        <FontAwesomeIcon
                           icon={faMinus}
                           className="cursor-pointer"
                           onClick={() => {
@@ -301,7 +342,7 @@ const OrderDetailPage = () => {
                           {orderedItems && <p>{item.quantity}</p>}
                         </div>
                         <FontAwesomeIcon
-                        className="cursor-pointer"
+                          className="cursor-pointer"
                           icon={faPlus}
                           style={{ color: "#eda345" }}
                           onClick={() => {

@@ -15,7 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Order_modal from "../components/order_modal";
 import "./menu.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 const categories = [
   "Appetizers",
   "Main Course",
@@ -155,6 +155,7 @@ const data2 = [
 ];
 
 const menu = ({ changeIP }: { changeIP: string }) => {
+  const { tableqrid } = useParams();
   // Button and Scroll Down Category List
   const [activeCategory, setActiveCategory] = useState<number>(0);
   const categories = Object.keys(dataArray[0]);
@@ -208,7 +209,7 @@ const menu = ({ changeIP }: { changeIP: string }) => {
   const handleCategoryClick = (index: number) => {
     setActiveCategory(index);
 
-    categoryRefs[index].current?.scrollIntoView({
+    categoryRefs[index].current?.scrollIntoView({ 
       behavior: "smooth",
       block: "center",
     });
@@ -305,15 +306,15 @@ const menu = ({ changeIP }: { changeIP: string }) => {
     const orderlist = orderedItems.map((item) => ({
       id: item.id,
       quantity: item.quantity,
+      status: "1",
     }));
-    navigate("/order_detail", {
+    navigate(`/table/${tableqrid}/order_detail`, {
       state: orderlist,
     });
   };
   const listRef = useRef<HTMLUListElement | null>(null);
   const [showLeftIcon, setShowLeftIcon] = useState(false);
   const [showRightIcon, setShowRightIcon] = useState(true);
-
   useEffect(() => {
     const handleScroll = () => {
       const listElement = listRef.current;
@@ -601,7 +602,7 @@ const menu = ({ changeIP }: { changeIP: string }) => {
             {/* Show Customer Order Cart When table screen size*/}
             <div className=" ms-1 md:!ms-5 w-1/3 hidden md:block relative">
               <div className="flex flex-col p-3 bg-white sticky top-20">
-                <p className="font-medium text-lg ">Table 1</p>
+                <p className="font-medium text-lg ">Table {tableqrid}</p>
                 <div className="my-1 border-b-2 pb-2">
                   <FontAwesomeIcon
                     icon={faUserGroup}
@@ -613,7 +614,7 @@ const menu = ({ changeIP }: { changeIP: string }) => {
                 {orderedItems.map((menuItem, index) => (
                   <div key={index} className="border-b-2 pb-2">
                     <div className="flex items-center justify-between">
-                      <p>{menuItem.foodTitle}</p>
+                      <p>{menuItem.name}</p>
                       <p className="whitespace-nowrap">RM {menuItem.price}</p>
                     </div>
                     <div className="flex items-center justify-between">
@@ -693,7 +694,7 @@ const menu = ({ changeIP }: { changeIP: string }) => {
             <div className="flex flex-col">
               <div className="my-1 border-b-2 px-4 py-2 flex items-center justify-between ">
                 <div className=" flex items-center">
-                  <p className="font-medium text-lg ">Table 1</p>
+                  <p className="font-medium text-lg ">Table {tableqrid}</p>
                   <FontAwesomeIcon
                     icon={faUserGroup}
                     style={{ color: "#eda345" }}
@@ -712,7 +713,7 @@ const menu = ({ changeIP }: { changeIP: string }) => {
                 {orderedItems.map((menuItem, index) => (
                   <div className="pb-2" key={index}>
                     <div className="flex items-center justify-between sm:text-base text-sm">
-                      <p>{menuItem.foodTitle}</p>
+                      <p>{menuItem.name}</p>
                       <p className="whitespace-nowrap">RM {menuItem.price}</p>
                     </div>
                     <div className="flex items-center justify-between">
