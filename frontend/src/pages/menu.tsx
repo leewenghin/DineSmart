@@ -154,7 +154,11 @@ const data2 = [
   },
 ];
 
-const menu = ({ changeIP }: { changeIP: string }) => {
+interface MenuProps {
+  changeIP: string;
+}
+
+const menu: React.FC<MenuProps> = ({ changeIP }) => {
   const { tableqrid } = useParams();
   // Button and Scroll Down Category List
   const [activeCategory, setActiveCategory] = useState<number>(0);

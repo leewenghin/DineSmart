@@ -19,7 +19,11 @@ const links = [
   { label: "Dashboard", url: "#", icon: "home", status: "" },
 ];
 
-const admin_menu = ({ changeIP }: { changeIP: string }) => {
+interface AdminPanelProps {
+  changeIP: string;
+}
+
+const admin_menu: React.FC<AdminPanelProps> = ({ changeIP }) => {
   // const [isClose, setIsClose] = useState(false);
 
   // const toggleNav = () => {
