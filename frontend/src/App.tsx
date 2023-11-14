@@ -32,10 +32,10 @@ interface changeIP {
 }
 
 function App() {
-  const changeip = "192.168.1.46"; // Zhen Xun
+  // const changeip = "192.168.1.46"; // Zhen Xun
   // const changeip = "192.168.0.5"; //Zhen Xun Home
   // const changeip = "192.168.0.206"; //Zhen Xun Kenny
-  // const changeip = "192.168.1.24"; // DomDom
+  const changeip = "192.168.1.108"; // DomDom
 
   const [color, setColor] = useState("#f2f2f2");
   const location = useLocation();
@@ -55,6 +55,7 @@ function App() {
   useEffect(() => {
     document.body.style.backgroundColor = color;
   }, [color]);
+
   return (
     <Routes>
       <Route path="*" element={<Navigate to="/not-found" />} />
