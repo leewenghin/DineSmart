@@ -114,8 +114,29 @@ class FoodTags(models.Model):
     name = models.CharField(max_length=50)
     
     class Meta:
-        ordering = ('name',)
+        ordering = ('id',)
         verbose_name_plural = 'Tags'
+
+    def __str__(self):
+        return self.name
+
+class Variants(models.Model):
+    name = models.CharField(max_length=128)
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name_plural = 'Variants'
+
+    def __str__(self):
+        return self.name
+
+class VariantValues(models.Model):
+    title = models.ManyToManyField('Variants', blank=True)
+    name = models.CharField(max_length=128)
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name_plural = 'Variants Value'
 
     def __str__(self):
         return self.name

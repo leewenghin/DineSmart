@@ -42,8 +42,7 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
         if foodmenu_id is not None:
             # Filter records based on the menu_id parameter
             return queryset.filter(foodmenu_id=foodmenu_id) # Only filter instances inside FoodCategories with 'foodmenu_id'
-        return queryset
-        
+        return queryset     
 
 class FoodItemsView(viewsets.ModelViewSet):
     queryset = FoodItems.objects.all()
@@ -178,7 +177,6 @@ class FoodItemsView(viewsets.ModelViewSet):
                     serializer.save()
 
             return Response(serializer.data)
-    
 
 class OrderTablesView(viewsets.ModelViewSet):
     serializer_class = OrderTablesSerializer
@@ -228,3 +226,8 @@ class OrderTablesView(viewsets.ModelViewSet):
 class FoodTagsView(viewsets.ModelViewSet):
     serializer_class = FoodTagsSerializer
     queryset = FoodTags.objects.all()
+
+class VariantsView(viewsets.ModelViewSet):
+    serializer_class = VariantsSerializer
+    queryset = Variants.objects.all()
+

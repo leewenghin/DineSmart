@@ -29,7 +29,7 @@ admin.site.register(FoodItems, FoodItemsAdmin)
 
 class OrderTablesAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
-    list_display = ("id", "image", "published","status")
+    list_display = ("id", "name", "image", "published","status")
     
 admin.site.register(OrderTables, OrderTablesAdmin)
 
@@ -38,3 +38,20 @@ class FoodTagsAdmin(admin.ModelAdmin):
     list_display = ("id", "name")
     
 admin.site.register(FoodTags, FoodTagsAdmin)
+
+class VariantsAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)
+    list_display = ("id", "name")
+    
+admin.site.register(Variants, VariantsAdmin)
+
+class VariantsValueAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)
+    list_display = ("id", "get_title","name")
+
+    def get_title(self, obj):
+        return ", ".join([title.name for title in obj.title.all()])
+
+    get_title.short_description = "title"
+    
+admin.site.register(VariantValues, VariantsValueAdmin)

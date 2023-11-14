@@ -24,8 +24,17 @@ class OrderTablesSerializer(serializers.ModelSerializer):
         model = OrderTables
         fields = ['id', 'name','status','image', 'published']
 
-
 class FoodTagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FoodTags
         fields = ['id', 'name']
+
+class VariantsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Variants
+        fields = ['id', 'name']
+
+class VariantsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VariantValues
+        fields = ['id', 'title', 'name']
