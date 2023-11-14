@@ -33,7 +33,7 @@ If you're not ready to commit your changes but want to temporarily save them, yo
 - git add .gitignore
 - git commit -m "Update .gitignore to ignore `__pycache__`"
 
-# Skills that has been used in this projects:
+### Skills that has been used in this projects:
 
 - React (Frontend)
 - Typescript (Frontend)
@@ -42,7 +42,7 @@ If you're not ready to commit your changes but want to temporarily save them, yo
 - Django (Backend)
 - Python (Backend)
 
-# Libraries that has been used in this projects:
+### Libraries that has been used in this projects:
 
 - flowbite
 - react-tailwindcss-select
