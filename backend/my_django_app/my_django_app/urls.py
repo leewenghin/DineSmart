@@ -27,7 +27,10 @@ router = routers.DefaultRouter()
 router.register(r'foodmenus', views.FoodMenusView, 'foodmenu')
 router.register(r'foodcategories', views.FoodCategoriesView, 'foodcategory')
 router.register(r'fooditems', views.FoodItemsView, 'fooditem')
+router.register(r'foodtag', views.FoodTagsView, 'foodtag')
 router.register(r'ordertables', views.OrderTablesView, 'ordertable')
+router.register(r'variantgroup', views.VariantGroupsView, 'variantgroup')
+router.register(r'variantvalue', views.VariantValuesView, 'variantvalue')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

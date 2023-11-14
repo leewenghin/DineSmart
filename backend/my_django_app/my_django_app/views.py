@@ -227,7 +227,11 @@ class FoodTagsView(viewsets.ModelViewSet):
     serializer_class = FoodTagsSerializer
     queryset = FoodTags.objects.all()
 
-class VariantsView(viewsets.ModelViewSet):
-    serializer_class = VariantsSerializer
-    queryset = Variants.objects.all()
+class VariantGroupsView(viewsets.ModelViewSet):
+    serializer_class = VariantGroupsSerializer
+    queryset = VariantGroups.objects.all()
+
+class VariantValuesView(viewsets.ModelViewSet):
+    serializer_class = VariantValuesSerializer
+    queryset = VariantValues.objects.all()
 

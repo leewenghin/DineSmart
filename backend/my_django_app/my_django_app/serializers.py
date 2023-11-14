@@ -29,12 +29,12 @@ class FoodTagsSerializer(serializers.ModelSerializer):
         model = FoodTags
         fields = ['id', 'name']
 
-class VariantsSerializer(serializers.ModelSerializer):
+class VariantGroupsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Variants
+        model = VariantGroups
         fields = ['id', 'name']
 
-class VariantsSerializer(serializers.ModelSerializer):
+class VariantValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariantValues
         fields = ['id', 'title', 'name']

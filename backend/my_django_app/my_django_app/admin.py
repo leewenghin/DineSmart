@@ -39,13 +39,13 @@ class FoodTagsAdmin(admin.ModelAdmin):
     
 admin.site.register(FoodTags, FoodTagsAdmin)
 
-class VariantsAdmin(admin.ModelAdmin):
+class VariantGroupsAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
     list_display = ("id", "name")
     
-admin.site.register(Variants, VariantsAdmin)
+admin.site.register(VariantGroups, VariantGroupsAdmin)
 
-class VariantsValueAdmin(admin.ModelAdmin):
+class VariantValuesAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
     list_display = ("id", "get_title","name")
 
@@ -54,4 +54,4 @@ class VariantsValueAdmin(admin.ModelAdmin):
 
     get_title.short_description = "title"
     
-admin.site.register(VariantValues, VariantsValueAdmin)
+admin.site.register(VariantValues, VariantValuesAdmin)

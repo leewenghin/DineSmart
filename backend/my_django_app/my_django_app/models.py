@@ -120,19 +120,19 @@ class FoodTags(models.Model):
     def __str__(self):
         return self.name
 
-class Variants(models.Model):
-    name = models.CharField(max_length=128)
+class VariantGroups(models.Model):
+    name = models.CharField(max_length=128, null=False, blank=False)
 
     class Meta:
         ordering = ('id',)
-        verbose_name_plural = 'Variants'
+        verbose_name_plural = 'Variant Group'
 
     def __str__(self):
         return self.name
 
 class VariantValues(models.Model):
-    title = models.ManyToManyField('Variants', blank=True)
-    name = models.CharField(max_length=128)
+    title = models.ManyToManyField('VariantGroups', blank=False)
+    name = models.CharField(max_length=128, null=False, blank=False)
 
     class Meta:
         ordering = ('id',)

@@ -47,3 +47,4 @@ If you're not ready to commit your changes but want to temporarily save them, yo
 - flowbite
 - react-tailwindcss-select
 - react-router-dom
+- shadcn/ui

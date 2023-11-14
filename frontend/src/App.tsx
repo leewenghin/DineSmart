@@ -82,7 +82,10 @@ function App() {
           path="category/:foodmenu_id/:foodcategory_id"
           element={<Admin_item changeIP={changeip} />}
         />
-        <Route path="variant_group" element={<Admin_variant_group />} />
+        <Route
+          path="variant_group"
+          element={<Admin_variant_group changeIP={changeip} />}
+        />
         <Route path="variant_value" element={<Admin_variant_value />} />
       </Route>
     </Routes>

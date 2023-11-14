@@ -91,36 +91,6 @@ const CU_Modal = ({
                 }`}
               >
                 <label
-                  htmlFor="title"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none"
-                >
-                  Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="title"
-                  name="title"
-                  type="text"
-                  value={list.name}
-                  onChange={handleInputChange}
-                  // value="iPad Air Gen 5th Wi-Fi"f
-                  className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
-                    nameAlert ? "border-red-500" : "border-gray-300"
-                  }`}
-                  placeholder="Ex. Apple iMac 27&ldquo;"
-                  autoFocus
-                  required
-                />
-                {nameAlert && <ErrorMessage message={nameAlert} />}
-              </div>
-
-              <div
-                className={`${
-                  page == "Menu" || page == "Category" || page == "Variant"
-                    ? "col-span-2"
-                    : "col-span-1"
-                }`}
-              >
-                <label
                   htmlFor="name"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none"
                 >
