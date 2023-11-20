@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
 import CU_Modal from "../../components/admin/cu_modal";
@@ -17,7 +17,7 @@ type TField = {
 
 // Define the Item type
 type TCategory = Pick<TField, "id" | "name">;
-type TItem = Omit<TField, "foodcategory_id">;
+type TItem = TField;
 type TSubmitItem = Omit<TField, "id">;
 
 const Card = ({
@@ -145,7 +145,7 @@ const Card = ({
                     name="published"
                     type="checkbox"
                     defaultChecked={item.published}
-                    onClick={() => handlePublished(item.id, index)}
+                    onChange={handlePublished}
                     value=""
                     className="sr-only peer"
                   />
@@ -188,9 +188,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // For toggle modal purpose
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // For toggle modal purpose
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // For toggle modal purpose
-  const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(
-    null
-  );
+
   const [updateItem, setUpdateItem] = useState<TSubmitItem[]>([]);
   const [itemID, setItemID] = useState<number | null>(null); // Keep the menuID when press edit button
   const [itemIndex, setItemIndex] = useState<number | null>(null); // Keep the menuIndex when press edit button
@@ -207,31 +205,20 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   // Modal toggler
   const toggleModal = (
     isModalOpen: boolean,
-    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    itemID?: number,
+    index?: number
   ) => {
     setIsModalOpen(!isModalOpen);
+    setItemID(itemID ?? null);
+    setItemIndex(index ?? null);
   };
 
-  const toggleIDModal = (
-    isModalOpen: boolean,
-    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    itemID: number,
-    index: number
-  ) => {
-    setIsModalOpen(!isModalOpen);
-    setSelectedItemIndex(index);
-    setItemID(itemID);
-    setItemIndex(index);
-  };
   // ==================== Toggle Method ====================
 
   // ==================== Fetch Method ====================
   // Fetch data array from table method
-  const fetchList = (
-    getLink: string,
-    setList: any,
-    setList2?: (data: any) => void
-  ) => {
+  const fetchList = (getLink: string, setList: any, setList2?: any) => {
     fetch(getLink)
       .then((response) => response.json())
       .then((data) => {
@@ -317,8 +304,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           }
         })
         .then(() => {
-          fetchList(getItemLink, setItemList);
-          fetchList(getItemLink, setUpdateItem);
+          fetchList(getItemLink, setItemList, setUpdateItem);
+
           setNewItem({
             name: "",
             description: "",
@@ -336,17 +323,13 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     });
   };
 
-  const fetchSetItemIDList = (
-    itemID: number,
-    index: number,
-    updatedCategoryList: TItem[]
-  ) => {
+  const fetchSetItemIDList = (itemID: number, isCardchecked: boolean) => {
     fetch(`${setItemLink}${itemID}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ published: updatedCategoryList[index].published }),
+      body: JSON.stringify({ published: isCardchecked }),
     })
       .then((response) => {
         if (response.ok) {
@@ -356,8 +339,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         }
       })
       .then(() => {
-        fetchList(getItemLink, setItemList);
-        fetchList(getItemLink, setUpdateItem);
+        fetchList(getItemLink, setItemList, setUpdateItem);
       })
       .catch((error) => console.error("Error updating status: ", error));
   };
@@ -367,9 +349,9 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     console.log("Fetch index: ", itemIndex);
 
     return new Promise((resolve, reject) => {
-      const updateItemList = updateItem[itemIndex ?? 0];
-
       event.preventDefault();
+
+      const updateItemList = updateItem[itemIndex ?? 0];
 
       const formData = new FormData();
       if (updateItemList.image) {
@@ -448,8 +430,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           }
         })
         .then(() => {
-          fetchList(getItemLink, setItemList);
-          fetchList(getItemLink, setUpdateItem);
+          fetchList(getItemLink, setItemList, setUpdateItem);
         })
         .catch((error) => {
           console.error("Error creating task: ", error);
@@ -469,13 +450,9 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     setAlertMessage(null);
   };
 
-  const handlePublished = (itemID: number, index: number) => {
-    const updatedCategoryList = [...itemList];
-    updatedCategoryList[index].published =
-      !updatedCategoryList[index].published;
-
-    // Call the fetchSetItemIDList method to perform the PATCH request
-    fetchSetItemIDList(itemID, index, updatedCategoryList);
+  const handlePublished = (itemID: number, isCardchecked: boolean) => {
+    // Call the fetchSetItemIDList method to perform the PATCH request]
+    fetchSetItemIDList(itemID, isCardchecked);
   };
 
   const handleTagChangeWithParameter = (tagValue: number) => {
@@ -640,7 +617,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       });
     }
     if (resetUpdateItem) {
-      fetchList(getItemLink, setUpdateItem);
+      setUpdateItem(itemList);
     }
 
     toggleModal(isModalOpen, setIsModalOpen);
@@ -662,7 +639,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       }
     } catch (error) {
       // Handle any errors that occur during the fetchSetCategoryList operation
-      console.error("Error:", error);
+      console.error("Error submitting data:", error);
     }
   };
 
@@ -694,8 +671,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           return response.json;
         })
         .then(() => {
-          fetchList(getItemLink, setItemList);
-          fetchList(getItemLink, setUpdateItem);
+          fetchList(getItemLink, setItemList, setUpdateItem);
         })
         .catch((error) => {
           console.error("Error deleting task: ", error);
@@ -759,10 +735,6 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   useEffect(() => {
     fetchList(getItemLink, setItemList, setUpdateItem);
   }, []);
-
-  // useEffect(() => {
-  //   fetchList(getItemLink, setUpdateItem);
-  // }, [getItemLink, setUpdateItem]);
 
   useEffect(() => {
     alertMessageTime();
@@ -871,7 +843,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
               item={item}
               index={index}
               toggleUpdateModal={() =>
-                toggleIDModal(
+                toggleModal(
                   isUpdateModalOpen,
                   setIsUpdateModalOpen,
                   item.id,
@@ -879,14 +851,16 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
                 )
               }
               toggleDeleteModal={() =>
-                toggleIDModal(
+                toggleModal(
                   isDeleteModalOpen,
                   setIsDeleteModalOpen,
                   item.id,
                   index
                 )
               }
-              handlePublished={() => handlePublished(item.id, index)}
+              handlePublished={(event: ChangeEvent<HTMLInputElement>) =>
+                handlePublished(item.id, event.target.checked)
+              }
             ></Card>
           ))}
         </div>

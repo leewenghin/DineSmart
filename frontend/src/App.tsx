@@ -20,7 +20,6 @@ import Admin_method from "./pages/admin/admin_menu";
 import Admin_category from "./pages/admin/admin_category";
 import Admin_item from "./pages/admin/admin_item";
 import Admin_qrtable from "./pages/admin/admin_qrtable";
-import VariantTest from "./pages/admin/page";
 import Admin_variant_group from "./pages/admin/admin_variant_group";
 import Admin_variant_value from "./pages/admin/admin_variant_value";
 import Testing from "./pages/testing";
@@ -32,10 +31,13 @@ interface changeIP {
   ip: string;
 }
 
+export const changeIP = "192.168.1.24"; // DomDom
+
 function App() {
   // const changeip = "192.168.1.46"; // Zhen Xun
   // const changeip = "192.168.0.5"; //Zhen Xun Home
   // const changeip = "192.168.0.206"; //Zhen Xun Kenny
+
   const changeip = "192.168.1.24"; // DomDom
 
   const [color, setColor] = useState("#f2f2f2");
@@ -83,12 +85,18 @@ function App() {
           path="category/:foodmenu_id/:foodcategory_id"
           element={<Admin_item changeIP={changeip} />}
         />
-        {/* <Route
+        <Route
           path="variant_group"
           element={<Admin_variant_group changeIP={changeip} />}
+        />
+        {/* <Route
+          path="variant_group"
+          element={<VariantTest changeIP={changeip} />}
         /> */}
-        <Route path="variant_group" element={<VariantTest />} />
-        <Route path="variant_value" element={<Admin_variant_value />} />
+        <Route
+          path="variant_value"
+          element={<Admin_variant_value changeIP={changeip} />}
+        />
       </Route>
     </Routes>
   );

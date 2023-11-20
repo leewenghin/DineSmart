@@ -12,6 +12,7 @@ type TMenu = {
 };
 
 type TSubmitMenu = Omit<TMenu, "id">;
+type TPublished = Pick<TMenu, "published">;
 
 const Card = ({
   item,
@@ -195,12 +196,12 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
   // ==================== Toggle Method ====================
 
   // ==================== Fetch Method ====================
-  const fetchList = (getLink: string, setList: any) => {
+  const fetchList = (getLink: string, setList: any, setList2?: any) => {
     fetch(getLink)
       .then((response) => response.json())
       .then((data) => {
         setList(data);
-        console.log("Execute times: ", +1);
+        setList2(data);
       })
       .catch((error) => console.error("Error fetching data: ", error));
   };
@@ -235,8 +236,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
           }
         })
         .then(() => {
-          fetchList(getMenuLink, setMenuList);
-          fetchList(getMenuLink, setUpdateMenu);
+          fetchList(getMenuLink, setMenuList, setUpdateMenu);
           setNewMenu({
             name: "",
             description: "",
@@ -270,8 +270,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
         }
       })
       .then(() => {
-        fetchList(getMenuLink, setMenuList);
-        fetchList(getMenuLink, setUpdateMenu);
+        fetchList(getMenuLink, setMenuList, setUpdateMenu);
       })
       .catch((error) => console.error("Error updating status: ", error));
   };
@@ -306,8 +305,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
           }
         })
         .then(() => {
-          fetchList(getMenuLink, setMenuList);
-          fetchList(getMenuLink, setUpdateMenu);
+          fetchList(getMenuLink, setMenuList, setUpdateMenu);
         })
         .catch((error) => {
           console.error("Error creating task: ", error);
@@ -337,8 +335,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
           return response.json(); // Parse the response if it's not empty
         })
         .then(() => {
-          fetchList(getMenuLink, setMenuList);
-          fetchList(getMenuLink, setUpdateMenu);
+          fetchList(getMenuLink, setMenuList, setUpdateMenu);
         })
         .catch((error) => {
           console.error("Error deleting task: ", error);
@@ -429,7 +426,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
     }
     // Clear the form data by setting it to its initial state
     if (resetUpdateMenu) {
-      fetchList(getMenuLink, setUpdateMenu);
+      setUpdateMenu(menuList);
     }
 
     toggleModal(isModalOpen, setIsModalOpen);
@@ -506,11 +503,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
 
   // ==================== Use Effect ====================
   useEffect(() => {
-    fetchList(getMenuLink, setMenuList);
-  }, []);
-
-  useEffect(() => {
-    fetchList(getMenuLink, setUpdateMenu);
+    fetchList(getMenuLink, setMenuList, setUpdateMenu);
   }, []);
 
   useEffect(() => {
