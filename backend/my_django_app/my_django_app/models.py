@@ -122,6 +122,7 @@ class FoodTags(models.Model):
 
 class VariantGroups(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False)
+    published = models.BooleanField(default=True)
 
     class Meta:
         ordering = ('id',)
@@ -131,12 +132,13 @@ class VariantGroups(models.Model):
         return self.name
 
 class VariantValues(models.Model):
-    title = models.ManyToManyField('VariantGroups', blank=False)
+    title = models.ForeignKey(VariantGroups, on_delete=models.CASCADE, null=False,blank=False)
     name = models.CharField(max_length=128, null=False, blank=False)
+    published = models.BooleanField(default=True)
 
     class Meta:
         ordering = ('id',)
-        verbose_name_plural = 'Variants Value'
+        verbose_name_plural = 'Variant Value'
 
     def __str__(self):
         return self.name

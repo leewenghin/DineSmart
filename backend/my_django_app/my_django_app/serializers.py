@@ -32,9 +32,9 @@ class FoodTagsSerializer(serializers.ModelSerializer):
 class VariantGroupsSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariantGroups
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'published']
 
 class VariantValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariantValues
-        fields = ['id', 'title', 'name']
+        fields = ['id', 'title', 'name', 'published']

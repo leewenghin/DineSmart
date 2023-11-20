@@ -41,17 +41,12 @@ admin.site.register(FoodTags, FoodTagsAdmin)
 
 class VariantGroupsAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
-    list_display = ("id", "name")
+    list_display = ("id", "name", "published")
     
 admin.site.register(VariantGroups, VariantGroupsAdmin)
 
 class VariantValuesAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
-    list_display = ("id", "get_title","name")
-
-    def get_title(self, obj):
-        return ", ".join([title.name for title in obj.title.all()])
-
-    get_title.short_description = "title"
+    list_display = ("id", "title","name", "published")
     
 admin.site.register(VariantValues, VariantValuesAdmin)
