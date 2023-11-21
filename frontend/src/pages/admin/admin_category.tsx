@@ -17,7 +17,7 @@ type TField = {
 
 // Remove properties from type
 type TMenu = Pick<TField, "id" | "name">;
-type TCategory = Omit<TField, "foodmenu_id">;
+type TCategory = TField;
 type TSubmitCategory = Omit<TField, "id">;
 
 const Card = ({
@@ -119,7 +119,7 @@ const Card = ({
                   : "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
               }
               // /src/assets/img/admin/tableware.png
-              alt="Sunset in the mountaines"
+              alt={item.name}
             />
           </div>
           <div className="image-overlay absolute w-full h-full top-0 left-0 flex flex-col items-center justify-center opacity-0 duration-300">
@@ -209,30 +209,19 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
   // ==================== Toggle Method ====================
   const toggleModal = (
     isModalOpen: boolean,
-    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const toggleIDModal = (
-    isModalOpen: boolean,
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    categoryID: number,
-    index: number
+    categoryID?: number,
+    index?: number
   ) => {
     setIsModalOpen(!isModalOpen);
-    setCategoryID(categoryID);
-    setCategoryIndex(index);
+    setCategoryID(categoryID ?? 0);
+    setCategoryIndex(index ?? 0);
   };
   // ==================== Toggle Method ====================
 
   // ==================== Fetch Method ====================
   // Fetch data array from table method
-  const fetchList = (
-    getLink: string,
-    setList: any,
-    setList2?: (data: any) => void
-  ) => {
+  const fetchList = (getLink: string, setList: any, setList2?: any) => {
     fetch(getLink)
       .then((response) => response.json())
       .then((data) => {
@@ -313,15 +302,14 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
   const fetchSetCategoryPublishedIDList = (
     categoryId: number,
-    index: number,
-    updatedCategoryList: TCategory[]
+    isCardChecked: boolean
   ) => {
     fetch(`${setCategoryLink}${categoryId}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ published: updatedCategoryList[index].published }),
+      body: JSON.stringify({ published: isCardChecked }),
     })
       .then((response) => {
         if (response.ok) {
@@ -437,13 +425,9 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     setAlertMessage(null);
   };
 
-  const handlePublished = (categoryId: number, index: number) => {
-    const updatedCategoryList = [...categoryList];
-    updatedCategoryList[index].published =
-      !updatedCategoryList[index].published;
-
+  const handlePublished = (categoryId: number, isCardChecked: boolean) => {
     // Call the fetchSetCategoryPublishedIDList method to perform the PATCH request
-    fetchSetCategoryPublishedIDList(categoryId, index, updatedCategoryList);
+    fetchSetCategoryPublishedIDList(categoryId, isCardChecked);
   };
 
   const handleInputChangeCreate = (
@@ -482,6 +466,8 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
     setIsChecked(event.target.checked);
 
+    const updatedInputValues = [...updateCategory];
+
     const assignInput = (valueType: string | boolean | File) => {
       updatedInputValues[index] = {
         ...updatedInputValues[index],
@@ -489,7 +475,6 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
       };
     };
 
-    const updatedInputValues = [...updateCategory];
     if (name === "name" || name === "description") {
       if (value !== null || value !== "") {
         assignInput(value);
@@ -531,7 +516,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     }
 
     if (resetUpdateCategory) {
-      fetchList(getCategoryLink, setUpdateCategory);
+      setUpdateCategory(categoryList);
     }
 
     toggleModal(isModalOpen, setIsModalOpen);
@@ -699,7 +684,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
               index={index}
               foodmenu_id={foodmenu_id}
               toggleUpdateModal={() =>
-                toggleIDModal(
+                toggleModal(
                   isUpdateModalOpen,
                   setIsUpdateModalOpen,
                   item.id,
@@ -707,14 +692,16 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
                 )
               }
               toggleDeleteModal={() =>
-                toggleIDModal(
+                toggleModal(
                   isDeleteModalOpen,
                   setIsDeleteModalOpen,
                   item.id,
                   index
                 )
               }
-              handlePublished={() => handlePublished(item.id, index)}
+              handlePublished={(event: React.ChangeEvent<HTMLInputElement>) =>
+                handlePublished(item.id, event.target.checked)
+              }
             ></Card>
           ))}
         </div>

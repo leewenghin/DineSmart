@@ -99,7 +99,7 @@
 /* ================= Theme Toggler ================= */
 
 .sidebar.close ~ .content {
-  margin-left: 88px !important;
+  margin-left: 70px !important;
 }
 
 .content {

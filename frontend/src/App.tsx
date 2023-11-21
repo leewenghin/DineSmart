@@ -21,6 +21,8 @@ import Admin_method from "./pages/admin/admin_menu";
 import Admin_category from "./pages/admin/admin_category";
 import Admin_item from "./pages/admin/admin_item";
 import Admin_qrtable from "./pages/admin/admin_qrtable";
+import Admin_variant_group from "./pages/admin/admin_variant_group";
+import Admin_variant_value from "./pages/admin/admin_variant_value";
 import Testing from "./pages/testing";
 import QRModal from "./components/qr_modal";
 import { useEffect, useState } from "react";
@@ -33,6 +35,8 @@ interface changeIP {
   ip: string;
 }
 
+export const changeIP = "192.168.1.24"; // DomDom
+
 export interface User {
   name: string;
 }
@@ -44,6 +48,7 @@ function App() {
   const changeip = "192.168.1.46"; // Zhen Xun
   // const changeip = "192.168.0.10"; //Zhen Xun Home
   // const changeip = "192.168.0.206"; //Zhen Xun Kenny
+
   // const changeip = "192.168.1.24"; // DomDom
   
   const [pathname, setPathname] = useState(window.location.pathname);
@@ -58,8 +63,6 @@ function App() {
         setColor("#f2f2f2"); // Set background color to #f2f2f2 for 'table'
       } else if (currentPath === "admin_panel") {
         setColor("#FFEADB"); // Set background color to #FFEADB for 'admin_panel'
-      } else {
-        setColor("#f2f2f2"); // Set background color to #f2f2f2 for any fisrt path url
       }
     };
     determineBackgroundColor();

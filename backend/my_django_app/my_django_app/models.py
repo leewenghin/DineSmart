@@ -110,8 +110,31 @@ class FoodTags(models.Model):
     name = models.CharField(max_length=50)
     
     class Meta:
-        ordering = ('name',)
+        ordering = ('id',)
         verbose_name_plural = 'Tags'
+
+    def __str__(self):
+        return self.name
+
+class VariantGroups(models.Model):
+    name = models.CharField(max_length=128, null=False, blank=False)
+    published = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name_plural = 'Variant Group'
+
+    def __str__(self):
+        return self.name
+
+class VariantValues(models.Model):
+    title = models.ForeignKey(VariantGroups, on_delete=models.CASCADE, null=False,blank=False)
+    name = models.CharField(max_length=128, null=False, blank=False)
+    published = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name_plural = 'Variant Value'
 
     def __str__(self):
         return self.name
