@@ -143,7 +143,7 @@ const card_payment = () => {
                     <div className="ps-2">
                       <img
                         className="w-4 h-4"
-                        src="./src/assets/img/pay.png"
+                        src="../../src/assets/img/pay.png"
                         alt=""
                       />
                     </div>

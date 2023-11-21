@@ -87,13 +87,9 @@ class OrderTables(models.Model):
             qrcode_img = qrcode.make(f'http://192.168.1.46/table/{self.name}')
             # Get the dimensions of the QR code image
             qr_width, qr_height = qrcode_img.size
-            
-            # Calculate the canvas size based on QR code dimensions (add padding if needed)
-            canvas_width = qr_width + 20  # Example: Add 20 pixels padding on both sides
-            canvas_height = qr_height + 20  # Example: Add 20 pixels padding on both top and bottom
-            
-            canvas = Image.new('RGB', (canvas_width, canvas_height), 'orange')  # Create a new canvas image
-            draw = ImageDraw.Draw(canvas)
+
+             # Create a new image with padding
+            canvas = Image.new('RGB', (qr_width + 20, qr_height + 20), 'orange')
             canvas.paste(qrcode_img, (10, 10))  # Paste the QR code image with padding
             
             sanitized_name = re.sub(r'[^\w\s.-]', '', self.name)
