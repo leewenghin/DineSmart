@@ -38,7 +38,7 @@ function App() {
   // const changeip = "192.168.0.5"; //Zhen Xun Home
   // const changeip = "192.168.0.206"; //Zhen Xun Kenny
 
-  const changeip = "192.168.1.24"; // DomDom
+  const changeip = "192.168.1.102"; // DomDom
 
   const [color, setColor] = useState("#f2f2f2");
   const location = useLocation();

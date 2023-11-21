@@ -36,6 +36,7 @@ const TSubmitVariant: TSubmitVariant = {
 
 const variant_group = ({ changeIP }: { changeIP: string }) => {
   const getVariantGroupLink = `http://${changeIP}:8000/api/variantgroup/`;
+  const searchPlaceholder = "title";
 
   return (
     <Table
@@ -46,6 +47,7 @@ const variant_group = ({ changeIP }: { changeIP: string }) => {
       columnTitle={columnTitle}
       TField={TField}
       TSubmitVariant={TSubmitVariant}
+      searchPlaceholder={searchPlaceholder}
     ></Table>
   );
 };
