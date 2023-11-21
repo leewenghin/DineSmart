@@ -12,10 +12,13 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Order_modal from "../components/order_modal";
 import "./menu.css";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import qrtable from "./admin/admin_qrtable";
+import {OrderProvider, useOrderContext, OrderContextProps, OrderList} from "./context";
+// import { OrderList } from "./context";
 const categories = [
   "Appetizers",
   "Main Course",
@@ -164,9 +167,53 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   const [activeCategory, setActiveCategory] = useState<number>(0);
   const categories = Object.keys(dataArray[0]);
   const categoryRefs: React.RefObject<HTMLDivElement>[] = categories.map(() =>
-    useRef(null)
+  useRef(null)
   );
-  window.addEventListener("resize", () => {});
+  const { orderList, setOrderList } = useOrderContext();
+  console.log(orderList);
+  const [foodItems, setFoodItems] = useState([]);
+  const [foodCategory, setFoodCategory] = useState([]);
+  const [orderData, setOrderData] = useState(() => {
+    const storedOrderData = localStorage.getItem('orderData');
+    const parsedOrderData =  storedOrderData ? JSON.parse(storedOrderData) : null;
+    if(orderList){
+      return orderList?.items;
+    }else{
+      return parsedOrderData?.items
+    }
+  });
+
+  console.log(orderData)
+
+  // Count Order Items
+  const [orderedItems, setOrderedItems] = useState<any[]>([]);
+  
+  useEffect(()=>{
+    const orderlistWithTimestamp = orderedItems.map((item) => ({
+      id: item.id,
+      quantity: item.quantity,
+    }));
+
+    const timestamp = new Date().toISOString();
+
+    const currentorderlist = {
+      // length: orderlistWithTimestamp.length,  // Add the length property
+      timestamp,
+      items: orderlistWithTimestamp,
+    };
+    console.log(currentorderlist);
+    const handleBeforeUnload = () => {
+      localStorage.setItem('orderData', JSON.stringify(currentorderlist));
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Detach the event listener when the component unmounts
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+    
+  },[orderedItems])
 
   const handleCategoryItemClick = (index: any) => {
     setActiveCategory(index);
@@ -210,10 +257,11 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
       handleCategoryClick(index);
     }
   };
+
+  
   const handleCategoryClick = (index: number) => {
     setActiveCategory(index);
-
-    categoryRefs[index].current?.scrollIntoView({ 
+    categoryRefs[index].current?.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
@@ -226,8 +274,6 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   };
 
   // Get items from API
-  const [foodItems, setFoodItems] = useState([]);
-  const [foodCategory, setFoodCategory] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -252,11 +298,33 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
     fetchData();
   }, []);
 
-  console.log(foodItems);
-  console.log(foodCategory);
+  useEffect(() => {
+    // console.log("foodItems:", foodItems);
+    // console.log("orderData:", orderData);
+    // Function to combine orderData with itemData based on matching IDs
+    const combineOrderAndItemData = () => {
+      if (orderData && orderData.length > 0) {
+        const combinedItems: any[] = [];
+        orderData.forEach((orderItem: { id: any; quantity: any; }) => {
+          const matchingItem:any = foodItems.find(
+            (item: { id: any }) => item.id === orderItem.id
+          );
+          if (matchingItem) {
+            combinedItems.push({
+              ...matchingItem,
+              quantity: orderItem.quantity,
+            });
+          }
+        });
+        setOrderedItems(combinedItems);
+      }
+    };
 
-  // Count Order Items
-  const [orderedItems, setOrderedItems] = useState<any[]>([]);
+    // Call the function when itemData or orderData changes
+    if (foodItems.length > 0) {
+      combineOrderAndItemData();
+    }
+  }, [foodItems, orderData]);
 
   // When click one of the items then add new label (quantity) and output to order list
   const handleOrderClick = (item: any) => {
@@ -307,15 +375,28 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   // Pass data to other page
   const navigate = useNavigate();
   const handleCheckOut = () => {
-    const orderlist = orderedItems.map((item) => ({
+    const orderlistWithTimestamp = orderedItems.map((item) => ({
       id: item.id,
       quantity: item.quantity,
-      status: "1",
     }));
+
+    const timestamp = new Date().toISOString();
+
+    const currentorderlist = {
+      // length: orderlistWithTimestamp.length,  // Add the length property
+      timestamp,
+      items: orderlistWithTimestamp,
+    };
+    // updateData(orderlist);
+    console.log(currentorderlist);
+    setOrderList(currentorderlist);
     navigate(`/table/${tableqrid}/order_detail`, {
-      state: orderlist,
+      state: { currentorderlist },
     });
   };
+
+
+
   const listRef = useRef<HTMLUListElement | null>(null);
   const [showLeftIcon, setShowLeftIcon] = useState(false);
   const [showRightIcon, setShowRightIcon] = useState(true);
@@ -420,29 +501,27 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
                   className="flex -mb-px md:text-base text-sm items-center font-medium text-center text-gray-500 dark:text-gray-400 overflow-x-auto no-scrollbar cursor-grabbing "
                   ref={listRef}
                 >
-                  {foodCategory.map((category:any, index) => {
-                    if(category.published == true){
-                      return(
-                    <li
-                      key={index}
-                      className={`mr-2 `}
-                      onClick={() => handleCategoryItemClick(index)}
-                    >
-                      <p
-                        className={`inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg group whitespace-nowrap ${
-                          activeCategory === index
-                            ? "text-primaryColor  !border-primaryColor"
-                            : "hover:text-gray-600 hover:border-gray-300"
-                        }`}
-                      >
-                        {category.name}
-                      </p>
-                    </li>
-
-                      )
+                  {foodCategory.map((category: any, index) => {
+                    if (category.published == true) {
+                      return (
+                        <li
+                          key={index}
+                          className={`mr-2 `}
+                          onClick={() => handleCategoryItemClick(index)}
+                        >
+                          <p
+                            className={`inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg group whitespace-nowrap ${
+                              activeCategory === index
+                                ? "text-primaryColor  !border-primaryColor"
+                                : "hover:text-gray-600 hover:border-gray-300"
+                            }`}
+                          >
+                            {category.name}
+                          </p>
+                        </li>
+                      );
                     }
-                  }
-                  )}
+                  })}
                   {/* {showLeftIcon && (
                     <button
                       className="bg-white border-b border-gray-200 px-2 py-4 cursor-pointer absolute "
@@ -492,76 +571,77 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
                   </div>
                 </div>
               </div> */}
-              
+
               {/* Grid layout  */}
               {foodCategory.map((category: any, categoryIndex) => {
-                if(category.published == true){
-                  return(
-                <div key={categoryIndex} ref={categoryRefs[categoryIndex]}>
-                  <div className="p-3 mt-2 flex items-center justify-center w-auto">
-                    <FontAwesomeIcon
-                      icon={faStar}
-                      style={{ color: "#eda345" }}
-                    />
-                    <hr className="w-1/6 mx-3 h-1 bg-gradient-to-r from-goldColor from-10% to-goldColor/[.5] rounded-full" />
-                    <p className="text-lg text-center font-semibold text-transparent bg-clip-text bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5]">
-                      {category.name}
-                    </p>
-                    <hr className="w-1/6 mx-3 h-1  bg-gradient-to-l from-goldColor from-10% to-goldColor/[.5]" />
-                    <FontAwesomeIcon
-                      icon={faStar}
-                      style={{ color: "#eda345" }}
-                    />
-                  </div>
-                  <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2">
-                    {foodItems.map((item: any, itemIndex) => {
-                      if (item.foodcategory_id === category.id && category.published == true) {
-                        return (
-                          <div
-                            key={itemIndex}
-                            className="bg-white sm:!p-2 p-0 sm:!rounded rounded-none shadow-md flex sm:flex-col  "
-                          >
-                            <div className="sm:!w-full xs:!w-1/3 w-2/5  sm:h-auto h-28  my-auto">
-                              <img
-                                src={item.image}
-                                alt=""
-                                className="w-full sm:!mb-2 mb-0 sm:!h-40  h-full object-cover"
-                              />
-                            </div>
-                            <div className="sm:!p-1 xs:p-4 p-3 sm:!w-full truncate xs:w-2/3 w-3/5  flex flex-col justify-between food-item-container ">
-                              <div className="truncate line-clamp-4 mb-2  whitespace-normal sm:!leading-none leading-none sm:!text-lg xs:!text-base text-sm  food-item-container">
-                                {item.name}
-                                <br />
-                                <div className="xs:text-sm text-xs">
-                                  {item.description}
+                if (category.published == true) {
+                  return (
+                    <div key={categoryIndex} ref={categoryRefs[categoryIndex]}>
+                      <div className="p-3 mt-2 flex items-center justify-center w-auto">
+                        <FontAwesomeIcon
+                          icon={faStar}
+                          style={{ color: "#eda345" }}
+                        />
+                        <hr className="w-1/6 mx-3 h-1 bg-gradient-to-r from-goldColor from-10% to-goldColor/[.5] rounded-full" />
+                        <p className="text-lg text-center font-semibold text-transparent bg-clip-text bg-gradient-to-t from-goldColor from-10% to-goldColor/[.5]">
+                          {category.name}
+                        </p>
+                        <hr className="w-1/6 mx-3 h-1  bg-gradient-to-l from-goldColor from-10% to-goldColor/[.5]" />
+                        <FontAwesomeIcon
+                          icon={faStar}
+                          style={{ color: "#eda345" }}
+                        />
+                      </div>
+                      <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2">
+                        {foodItems.map((item: any, itemIndex) => {
+                          if (
+                            item.foodcategory_id === category.id &&
+                            category.published == true
+                          ) {
+                            return (
+                              <div
+                                key={itemIndex}
+                                className="bg-white sm:!p-2 p-0 sm:!rounded rounded-none shadow-md flex sm:flex-col  "
+                              >
+                                <div className="sm:!w-full xs:!w-1/3 w-2/5  sm:h-auto h-28  my-auto">
+                                  <img
+                                    src={item.image}
+                                    alt=""
+                                    className="w-full sm:!mb-2 mb-0 sm:!h-40  h-full object-cover"
+                                  />
+                                </div>
+                                <div className="sm:!p-1 xs:p-4 p-3 sm:!w-full truncate xs:w-2/3 w-3/5  flex flex-col justify-between food-item-container ">
+                                  <div className="truncate line-clamp-4 mb-2  whitespace-normal sm:!leading-none leading-none sm:!text-lg xs:!text-base text-sm  food-item-container">
+                                    {item.name}
+                                    <br />
+                                    <div className="xs:text-sm text-xs">
+                                      {item.description}
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-end sm:justify-between items-center ">
+                                    <p className=" sm:!text-base xs:text-sm text-xs font-bold sm:!pe-0 pe-2 ">
+                                      RM {item.price}
+                                    </p>
+                                    <button
+                                      className="bg-primaryColor rounded "
+                                      onClick={() => handleOrderClick(item)}
+                                    >
+                                      <p className="text-white sm:!text-base xs:text-sm text-xs font-bold hover:bg-black/[.10] py-1 xs:!px-4 px-2 rounded">
+                                        Order
+                                      </p>
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="flex justify-end sm:justify-between items-center ">
-                                <p className=" sm:!text-base xs:text-sm text-xs font-bold sm:!pe-0 pe-2 ">
-                                  RM {item.price}
-                                </p>
-                                <button
-                                  className="bg-primaryColor rounded "
-                                  onClick={() => handleOrderClick(item)}
-                                >
-                                  <p className="text-white sm:!text-base xs:text-sm text-xs font-bold hover:bg-black/[.10] py-1 xs:!px-4 px-2 rounded">
-                                    Order
-                                  </p>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
-                  </div>
-                </div>
-
-                  )
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+                    </div>
+                  );
                 }
-              }
-              )}
+              })}
               {/* horizontal layout */}
               {/* {Object.keys(dataArray[0]).map((category) => (
                 <div key={category}>

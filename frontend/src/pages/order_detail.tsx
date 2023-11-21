@@ -11,9 +11,10 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { RadioGroup, Radio } from "../components/radio_button";
 import "../assets/css/order_detail.css";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import React from "react";
+import { OrderContextProps, OrderList, useOrderContext } from "./context";
 
 const data = [
   {
@@ -102,28 +103,30 @@ const dataArray: any[] = [
   },
 ];
 
+interface DataItem {
+  [x: string]: any;
+}
+
 const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
+
+  const { orderList, setOrderList } = useOrderContext();
+  console.log(orderList?.timestamp);
   const location = useLocation();
 
-  const data: any[] = location.state;
+  const time = orderList?.timestamp;
+
+  // const data = location.state?.orderlist;
+  
   const [orderedItems, setOrderedItems] = useState<any[]>([]); // show data
-  console.log(data);
-  const [orderData, setOrderData] = useState(data);
-
-  useEffect(() => {
-    const handleBeforeUnload = (event:any) => {
-      event.preventDefault();
-      setOrderData(orderedItems);
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    // handleBeforeUnload()
-  }, []);
-  // useEffect(() => {
-  //   // Save orderData to localStorage whenever it changes
-  //   localStorage.setItem("orderData", JSON.stringify(orderData));
-  // }, [orderData]);
-
-
+  const [orderData, setOrderData] = useState<any[]>(() => {
+    const storedOrderData = localStorage.getItem('orderData');
+    const parsedOrderData = storedOrderData ? JSON.parse(storedOrderData) : null;
+    if(orderList){
+      return orderList?.items;
+    }else{
+      return parsedOrderData?.items
+    }
+  });
   // Get items from API
   const [foodItems, setFoodItems] = useState<any>([]);
   const [foodCategory, setFoodCategory] = useState([]);
@@ -151,24 +154,30 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
     fetchData();
   }, []);
 
+
   const delay = (ms: any) => new Promise((res) => setTimeout(res, ms));
   useEffect(() => {
     // Function to combine orderData with itemData based on matching IDs
     const combineOrderAndItemData = () => {
-      const combinedItems: any[] = [];
-      orderData.forEach((orderItem) => {
-        const matchingItem = foodItems.find(
-          (item: { id: any }) => item.id === orderItem.id
-        );
-        if (matchingItem) {
-          combinedItems.push({ ...matchingItem, quantity: orderItem.quantity });
-        }
-      });
-      setOrderedItems(combinedItems);
+      if (orderData && orderData.length > 0) {
+        const combinedItems: any[] = [];
+        orderData.forEach((orderItem) => {
+          const matchingItem = foodItems.find(
+            (item: { id: any }) => item.id === orderItem.id
+          );
+          if (matchingItem) {
+            combinedItems.push({
+              ...matchingItem,
+              quantity: orderItem.quantity,
+            });
+          }
+        });
+        setOrderedItems(combinedItems);
+      }
     };
 
     // Call the function when itemData or orderData changes
-    if (foodItems.length > 0 && orderData.length > 0) {
+    if (foodItems.length > 0) {
       combineOrderAndItemData();
     }
   }, [foodItems, orderData]);
@@ -183,6 +192,7 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
       const updatedItems = [...orderedItems];
       updatedItems[existingItemIndex].quantity += 1;
       setOrderedItems(updatedItems);
+      setOrderData(updatedItems);
     } else {
       // If the item doesn't exist, add it to the orderedItems array with a quantity of 1
       setOrderedItems([...orderedItems, { ...filteredData, quantity: 1 }]);
@@ -218,14 +228,79 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
     );
     setOrderedItems(updatedItems);
     setOrderData(updatedItems);
-    console.log(location.state[0].status);
   };
 
-  // console.log(orderedItems);
   // Count all order items
   const totalPrice = orderedItems.reduce((acc, currentItem) => {
     return acc + currentItem.price * currentItem.quantity;
   }, 0);
+  
+  useEffect(()=>{
+    const timestamp = new Date().toISOString();
+    const transformedData = orderData.map(item => ({
+      id: item.id,
+      quantity: item.quantity,
+    }));
+  // console.log()
+    const dataWithTimestamp:OrderList= {
+      timestamp,
+      items: transformedData,
+    };
+    console.log(dataWithTimestamp);
+    setOrderList(dataWithTimestamp);
+    const handleBeforeUnload = () => {
+      localStorage.setItem('orderData', JSON.stringify(dataWithTimestamp));
+    };
+    console.log("asd");
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Detach the event listener when the component unmounts
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+    
+  },[orderData,setOrderList])
+  
+  const { tableqrid } = useParams();
+  const navigate = useNavigate();
+  // const handleCheckOut = () => {
+  //   const orderlistWithTimestamp = orderedItems.map((item) => ({
+  //     id: item.id,
+  //     quantity: item.quantity
+  //   }));
+  
+  //   const timestamp = new Date().toISOString();
+  
+  //   const orderlist = {
+  //     timestamp,
+  //     items: orderlistWithTimestamp
+  //   };
+  //   navigate(`/table/${tableqrid}/order_detail`, {
+  //     state: {orderlist},
+  //   });
+  // };
+
+
+
+  const handlePopState = () => {
+    // Check if the user has navigated back
+    if (window.history.state === null) {
+      console.log('User navigated back to the previous page');
+      // Perform additional actions as needed
+    }
+  };
+  // console.log("testing")
+  useEffect(() => {
+    // console.log("testing")
+    // Add event listener for the popstate event
+    window.addEventListener('popstate', handlePopState);
+
+    // Clean up the event listener when the component is unmounted
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   // Now filteredData contains unique items with their quantities from dataArray
   return (

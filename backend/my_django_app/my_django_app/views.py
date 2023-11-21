@@ -194,35 +194,26 @@ class OrderTablesView(viewsets.ModelViewSet):
         return queryset  # Return the filtered or unfiltered queryset
 
     def create(self, request, *args, **kwargs):
-        if request.method == 'POST':
-            name = request.data['name']
-            status = request.data['status']
-            published = request.data.get('published', False) 
-            
-            # Check if published is a string representing a boolean
-            if isinstance(published, str):
-                if published.lower() == 'true':
-                    published = True
-                elif published.lower() == 'false':
-                    published = False
-                else:
-                    return Response({"error": "'published' must be 'true' or 'false'."}, status=400)
+        serializer = self.get_serializer(data=request.data)
+        # name = request.data['name']
+        # status = request.data['status']
+        # published = request.data.get('published', False) 
+        if 'name' in request.data and not request.data['name'].isdigit():
+            return Response({'error': 'Name must contain only digits.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Handle the case where 'published' is a boolean
-            elif isinstance(published, bool):
-                pass  # No conversion needed for booleans
+        if 'status'in request.data == "":
+            status = "table"            
 
-            if not name:
-                return Response({"name": ["URL field must not be empty."]}, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            serializer.save()
+            print("Request data success:", request.data)
+            # Return a success response with the serialized instance
+            return Response(serializer.data, status=201)  # HTTP 201 Created
 
-            item = OrderTables.objects.create(
-                name=name, 
-                status=status, 
-                published=published, 
-                )
-
-            serializer = OrderTablesSerializer(item)
-            return Response(serializer.data, status=201)
+        else:
+            print("Request data fail:", request.data)
+            print("Request serializer:", serializer.data)
+            return Response(serializer.errors, status=400)   # HTTP 201 Created
 
 class FoodTagsView(viewsets.ModelViewSet):
     serializer_class = FoodTagsSerializer
