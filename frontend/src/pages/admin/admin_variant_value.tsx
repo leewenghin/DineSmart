@@ -29,16 +29,18 @@ const columnTitle = [
 
 const variant = ({ changeIP }: { changeIP: string }) => {
   const getVariantLink = `http://${changeIP}:8000/api/variantvalue/`;
-  const getVariantGroupLink = `http://192.168.1.24:8000/api/variantgroup/`;
+  const getVariantGroupLink = `http://${changeIP}:8000/api/variantgroup/`;
+  const searchPlaceholder = "value";
 
   return (
     <Table
       page={"Variant"}
       getLink={getVariantLink}
       setLink={getVariantLink}
+      getVariantLink={getVariantGroupLink}
       setIDLink={getVariantLink}
       columnTitle={columnTitle}
-      getVariantLink={getVariantGroupLink}
+      searchPlaceholder={searchPlaceholder}
     ></Table>
   );
 };

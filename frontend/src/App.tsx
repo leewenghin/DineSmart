@@ -135,6 +135,35 @@ function App() {
 
   }, []);
 
+  // useEffect(() => {
+  //   // Replace 'your-server-endpoint' with the actual endpoint on your server
+  //   const fetchList = () => {
+  //     fetch("http://127.0.0.1/api/ordertables")
+  //       .then(response => response.json()) // Convert the response to JSON
+  //       .then(data => {
+  //         const userIP = data.ip;
+  //         console.log(`User's IP address from server: ${userIP}`);
+  //         // Do something with the user's IP address
+  //       })
+  //       .catch(error => console.error("Error fetching data: ", error));
+  //   };
+
+  //   fetchList(); // Call the function to initiate the API request
+
+  // }, []);
+
+  // useEffect(() => {
+  //   // Replace 'your-server-endpoint' with the actual endpoint on your server
+  //   axios.get('http://127.0.0.1/')
+  //     .then(response => {
+  //       const userIP = response.data.ip;
+  //       console.log(`User's IP address from server: ${userIP}`);
+  //       // Do something with the user's IP address
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching user IP:', error);
+  //     });
+  // }, []);
 
   return (
     <Routes>

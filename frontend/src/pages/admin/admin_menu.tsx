@@ -602,6 +602,7 @@ const dineMethod = ({ changeIP }: { changeIP: string }) => {
       {/* Delete modal */}
       {isDeleteModalOpen && (
         <DeleteModal
+          page={"Menu"}
           handleCancel={() =>
             handleCancel(isDeleteModalOpen, setIsDeleteModalOpen)
           }

@@ -747,6 +747,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
       {isDeleteModalOpen && (
         <DeleteModal
+          page={"Category"}
           handleCancel={() =>
             handleCancel(isDeleteModalOpen, setIsDeleteModalOpen)
           }

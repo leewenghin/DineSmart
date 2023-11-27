@@ -911,6 +911,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       {/* Delete modal */}
       {isDeleteModalOpen && (
         <DeleteModal
+          page={"Item"}
           handleCancel={() =>
             handleCancel(isDeleteModalOpen, setIsDeleteModalOpen)
           }
