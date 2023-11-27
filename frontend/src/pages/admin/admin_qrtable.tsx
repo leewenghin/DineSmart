@@ -55,12 +55,8 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   const [isQRModalOpen, setIsQRModalOpen] = useState(false); // For toggle modal purpose
   const [selectedItemId, setSelectedItemId] = useState<any>([]);
   const [ImageResponsive, setImageResponsive] = useState<any>([]);
-<<<<<<< HEAD
-
-=======
   const navigate = useNavigate();
   
->>>>>>> 72fc3b9ed70df33193a3d6832b7415c7a5cf9c44
   // ==================== Toggle Method ====================
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
