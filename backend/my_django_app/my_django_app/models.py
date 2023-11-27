@@ -84,7 +84,7 @@ class OrderTables(models.Model):
     def save(self, *args, **kwargs):
         # other_table_data = FoodItems.objects.first() 
         # if other_table_data:
-            qrcode_img = qrcode.make(f'http://192.168.1.46/table/{self.name}')
+            qrcode_img = qrcode.make(f'http://192.168.1.102:5173/table/{self.name}')
             # Get the dimensions of the QR code image
             qr_width, qr_height = qrcode_img.size
 

@@ -598,9 +598,6 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
 
   useEffect(() => {
     fetchList(getMenuLink, setMenuList);
-  }, []);
-
-  useEffect(() => {
     fetchList(getCategoryLink, setCategoryList, setUpdateCategory);
   }, []);
 

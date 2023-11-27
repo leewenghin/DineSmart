@@ -19,6 +19,17 @@ type TField = {
 type TCategory = Pick<TField, "id" | "name">;
 type TItem = TField;
 type TSubmitItem = Omit<TField, "id">;
+type TVariantGroup = {
+  id: number;
+  name: string;
+  published: boolean;
+};
+type TVariantValue = {
+  id: number;
+  title: number;
+  name: string;
+  published: boolean;
+};
 
 const Card = ({
   item,
@@ -33,7 +44,7 @@ const Card = ({
     { name: "Delete", clickEvent: toggleDeleteModal },
   ];
 
-  const [isOptionModalOpen, setIsOptionModalOpen] = useState(false); // For toggle modal purpose
+  const [isOptionModalOpen, setIsOptionModalOpen] = useState(false); // htmlFor toggle modal purpose
 
   const toggleModal = () => {
     setIsOptionModalOpen(!isOptionModalOpen);
@@ -170,12 +181,16 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const getCategoryLink = `http://${changeIP}:8000/api/foodcategories/?id=${foodcategory_id}`;
   const getItemLink = `http://${changeIP}:8000/api/fooditems/?foodcategory_id=${foodcategory_id}`;
   const setItemLink = `http://${changeIP}:8000/api/fooditems/`;
+  const getVariantGroupLink = `http://${changeIP}:8000/api/variantgroup/`;
+  const getVariantValueLink = `http://${changeIP}:8000/api/variantvalue/`;
 
   const [menuList, setMenuList] = useState<TCategory[]>([]);
   const [categoryList, setCategoryList] = useState<TCategory[]>([]);
-  const [itemList, setItemList] = useState<TItem[]>([]); // Provide type annotation for taskList
+  const [variantGroupList, setVariantGroupList] = useState<TVariantGroup[]>([]);
+  const [variantValueList, setVariantValueList] = useState<TVariantValue[]>([]);
+  const [itemList, setItemList] = useState<TItem[]>([]); // Provide type annotation htmlFor taskList
   const [newItem, setNewItem] = useState<TSubmitItem>({
-    // For reset the field
+    // htmlFor reset the field
     name: "",
     description: "",
     image: null,
@@ -184,22 +199,44 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     published: false,
     foodcategory_id: FoodCategoryId,
   });
-
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // For toggle modal purpose
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // For toggle modal purpose
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // For toggle modal purpose
-
   const [updateItem, setUpdateItem] = useState<TSubmitItem[]>([]);
-  const [itemID, setItemID] = useState<number | null>(null); // Keep the menuID when press edit button
-  const [itemIndex, setItemIndex] = useState<number | null>(null); // Keep the menuIndex when press edit button
-  const [isChecked, setIsChecked] = useState(false); // For modal published checkbox purpose
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // htmlFor toggle create modal purpose
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // htmlFor toggle update modal purpose
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // htmlFor toggle delete modal purpose
+
+  const [itemID, setItemID] = useState<number | null>(null); // Keep the itemID when press edit button
+  const [itemIndex, setItemIndex] = useState<number | null>(null); // Keep the itemIndex when press edit button
+  const [isChecked, setIsChecked] = useState(false); // htmlFor modal published checkbox purpose
   const fileInputRef = useRef<HTMLInputElement | null>(null); // Specify the type as HTMLInputElement | null and initialize it with null
 
-  const [image, setImage] = useState<File | null>(null); // For modal image purpose
-  const [nameAlert, setNameAlert] = useState<string | null>(null); // For form warning message
-  const [priceAlert, setPriceAlert] = useState<string | null>(null); // For form warning message
-  const [alertMessage, setAlertMessage] = useState<string | null>(null); // For success alert message
+  const [image, setImage] = useState<File | null>(null); // htmlFor modal image purpose
+  const [nameAlert, setNameAlert] = useState<string | null>(null); // htmlFor form warning message
+  const [priceAlert, setPriceAlert] = useState<string | null>(null); // htmlFor form warning message
+  const [alertMessage, setAlertMessage] = useState<string | null>(null); // htmlFor success alert message
   const [isSave, setSave] = useState(false); // To detect whether press save button
+  const [variantGroup, setVariantGroup] = useState(null);
+  const [variantGroupID, setVariantGroupID] = useState(0);
+  const [matchVariant, setMatchVariant] = useState<any[]>([]);
+  const [selectedOption, setSelectedOption] = useState<any[]>([]);
+
+  // // Add value and label field htmlFor react-tailwind-select library purpose
+  // const newVariantGroupList = variantGroupList
+  //   .filter((item) => item.published) // Filter out items where published is false
+  //   .map((item) => ({
+  //     ...item,
+  //     value: item.name,
+  //     label: item.name,
+  //   }));
+
+  const newVariantGroupList = variantGroupList.map(
+    ({ id, name, published }) => ({
+      id: id,
+      value: name,
+      label: name,
+      disabled: !published,
+    })
+  );
 
   // ==================== Toggle Method ====================
   // Modal toggler
@@ -213,7 +250,6 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     setItemID(itemID ?? null);
     setItemIndex(index ?? null);
   };
-
   // ==================== Toggle Method ====================
 
   // ==================== Fetch Method ====================
@@ -438,6 +474,30 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         });
     });
   };
+
+  const fetchDeleteItemIDList = (itemID: number) => {
+    return new Promise((resolve, reject) => {
+      fetch(`${setItemLink}${itemID}/`, { method: "DELETE" })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          if (response.status === 204) {
+            resolve(true);
+            return;
+          }
+          return response.json;
+        })
+        .then(() => {
+          fetchList(getItemLink, setItemList, setUpdateItem);
+        })
+        .catch((error) => {
+          console.error("Error deleting task: ", error);
+          reject(error); // Reject the Promise with the error
+        });
+    });
+  };
+
   // ==================== Fetch Method ====================
 
   // ==================== Handle Method ====================
@@ -598,6 +658,64 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     setUpdateItem(updatedInputValues);
   };
 
+  const handleSelectChange = (value: any) => {
+    console.log("value:", value);
+    setVariantGroup(value);
+  };
+
+  const handleVariantChange = (variantGroupID: number) => {
+    const variantValueTitle = variantValueList
+      .filter(({ published }) => published !== false)
+      .map(({ title, name }) => ({
+        title: title,
+        name: name,
+      }));
+
+    const matchVariant = variantValueTitle.filter(
+      (item) => variantGroupID == item.title
+    );
+
+    setMatchVariant(matchVariant);
+
+    console.log("Match variants: ", matchVariant);
+  };
+
+  const handleRadioChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    console.log("Index ", index);
+    const value = event.target.value;
+
+    // Create a copy of the selectedOptions array
+    const updatedOptions = [...selectedOption];
+
+    // Check if the sub-array for the current index already exists
+    if (!updatedOptions[index]) {
+      // If it doesn't exist, create an empty array for the current index
+      updatedOptions[index] = [];
+    }
+
+    // Check if the option is already selected in the current index
+    const isSelected = updatedOptions[index].includes(value);
+
+    // Update the state based on whether the checkbox is checked or unchecked
+    if (isSelected) {
+      // If already selected, remove from the array
+      updatedOptions[index] = updatedOptions[index].filter(
+        (option: any) => option !== value
+      );
+    } else {
+      // If not selected, add to the array
+      updatedOptions[index] = [...updatedOptions[index], value];
+    }
+
+    // Update the state with the new array of arrays
+    setSelectedOption(updatedOptions);
+
+    console.log("Selected ", selectedOption);
+  };
+
   const handleCancel = (
     isModalOpen: boolean,
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>,
@@ -628,7 +746,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   // Submit form logic
   const handleSubmit = async (event: React.FormEvent) => {
     try {
-      await fetchSetItemList(event); // Wait for fetchSetCategoryList to complete
+      await fetchSetItemList(event); // Wait htmlFor fetchSetCategoryList to complete
       if (!nameAlert) {
         if (isSave) {
           handleCancel(isCreateModalOpen, setIsCreateModalOpen, true); // Reset the field list and exit modal
@@ -645,7 +763,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
   const handleUpdate = async (event: React.FormEvent) => {
     try {
-      await fetchUpdateItemIDList(event); // Wait for fetchSetMenuList to complete
+      await fetchUpdateItemIDList(event); // Wait htmlFor fetchSetMenuList to complete
       if (!nameAlert || !priceAlert) {
         handleCancel(isUpdateModalOpen, setIsUpdateModalOpen); // Reset the field list and exit modal
         console.log(alertMessage);
@@ -657,32 +775,9 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     }
   };
 
-  const fetchDeleteItemIDList = (itemID: number) => {
-    return new Promise((resolve, reject) => {
-      fetch(`${setItemLink}${itemID}/`, { method: "DELETE" })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          if (response.status === 204) {
-            resolve(true);
-            return;
-          }
-          return response.json;
-        })
-        .then(() => {
-          fetchList(getItemLink, setItemList, setUpdateItem);
-        })
-        .catch((error) => {
-          console.error("Error deleting task: ", error);
-          reject(error); // Reject the Promise with the error
-        });
-    });
-  };
-
   const handleDelete = async (itemID: number) => {
     try {
-      await fetchDeleteItemIDList(itemID); // Wait for fetchSetMenuList to complete
+      await fetchDeleteItemIDList(itemID); // Wait htmlFor fetchSetMenuList to complete
       if (!nameAlert && !priceAlert) {
         handleCancel(isDeleteModalOpen, setIsDeleteModalOpen);
         // Exit modal
@@ -726,14 +821,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
     fetchList(getMenuLink, setMenuList);
-  }, []);
-
-  useEffect(() => {
-    fetchList(getCategoryLink, setCategoryList);
-  }, []);
-
-  useEffect(() => {
     fetchList(getItemLink, setItemList, setUpdateItem);
+    fetchList(getCategoryLink, setCategoryList);
+    fetchList(getVariantGroupLink, setVariantGroupList);
+    fetchList(getVariantValueLink, setVariantValueList);
   }, []);
 
   useEffect(() => {
@@ -872,11 +963,18 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           page="Item"
           name="Create"
           list={newItem}
+          variantGroup={variantGroup}
+          variantGroupList={newVariantGroupList}
+          matchVariant={matchVariant}
+          selectedOption={selectedOption}
           fileInputRef={fileInputRef}
           handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
             handleInputChangeCreate(event)
           }
           handleTagChange={handleTagChangeWithParameter}
+          handleSelectChange={handleSelectChange}
+          handleVariantChange={handleVariantChange}
+          handleRadioChange={handleRadioChange}
           isChecked={isChecked}
           handleCancel={() =>
             handleCancel(isCreateModalOpen, setIsCreateModalOpen, true)

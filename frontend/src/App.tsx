@@ -27,15 +27,11 @@ import Testing from "./pages/testing";
 import QRModal from "./components/qr_modal";
 import { useEffect, useState } from "react";
 import Table from "./pages/table";
-import React from "react";
-import axios from "axios";
 // import { UserContext, OrderList } from './pages/context';
 
 interface changeIP {
   ip: string;
 }
-
-export const changeIP = "192.168.1.24"; // DomDom
 
 export interface User {
   name: string;
@@ -45,11 +41,11 @@ interface Pathname {
 }
 
 function App() {
-  const changeip = "192.168.1.46"; // Zhen Xun
+  // const changeip = "192.168.1.46"; // Zhen Xun
   // const changeip = "192.168.0.10"; //Zhen Xun Home
   // const changeip = "192.168.0.206"; //Zhen Xun Kenny
 
-  // const changeip = "192.168.1.24"; // DomDom
+  const changeip = "192.168.1.29"; // DomDom
 
   const [pathname, setPathname] = useState(window.location.pathname);
   const [color, setColor] = useState("#f2f2f2");
@@ -166,6 +162,14 @@ function App() {
         <Route
           path="category/:foodmenu_id/:foodcategory_id"
           element={<Admin_item changeIP={changeip} />}
+        />
+        <Route
+          path="variant_group"
+          element={<Admin_variant_group changeIP={changeip} />}
+        />
+        <Route
+          path="variant_value"
+          element={<Admin_variant_value changeIP={changeip} />}
         />
       </Route>
     </Routes>

@@ -10,8 +10,8 @@ import {
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import QRModal from "../../components/qr_modal";
-import * as htmlToImage from 'html-to-image'
-import imageCompression from 'browser-image-compression'
+import * as htmlToImage from "html-to-image";
+import imageCompression from "browser-image-compression";
 import { display } from "html2canvas/dist/types/css/property-descriptors/display";
 import "../../assets/css/admin/admin_panel.css";
 const cards = [
@@ -56,7 +56,6 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   const [selectedItemId, setSelectedItemId] = useState<any>([]);
   const [ImageResponsive, setImageResponsive] = useState<any>([]);
 
-  
   // ==================== Toggle Method ====================
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -243,33 +242,33 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   const delay = (ms: any) => new Promise((res) => setTimeout(res, ms));
   const elementRef = useRef<any>([]);
   // console.log(elementRef.current[index]);
-  useEffect(()=>{
+  useEffect(() => {
     console.log("sdasd");
-  },[])
+  }, []);
   const htmlToImageConvert = (img: any) => {
     const element = elementRef.current[selectedItemId.id];
     if (element) {
-      htmlToImage.toPng(element)
-      .then(async(dataUrl) => {
+      htmlToImage
+        .toPng(element)
+        .then(async (dataUrl) => {
           // console.log(element);
           // create Blob from node
           // const dataUrl = await htmlToImage.toPng(element);
           await delay(10);
           // console.log(dataUrl);
 
-              // // Convert the Data URL to a Blob
-              // const imageBlob = await fetch(dataUrl).then((response) => response.blob());
+          // // Convert the Data URL to a Blob
+          // const imageBlob = await fetch(dataUrl).then((response) => response.blob());
 
-              // // Create a File object with additional properties
-              // const compressedFile = new File([imageBlob], "my-image-name.png", {
-              //   type: "image/png",
-              //   lastModified: Date.now(),
-              // });
-        
-              // // Create a URL from the compressed Blob
-              // const imageUrl = window.URL.createObjectURL(compressedFile);
-        
-          
+          // // Create a File object with additional properties
+          // const compressedFile = new File([imageBlob], "my-image-name.png", {
+          //   type: "image/png",
+          //   lastModified: Date.now(),
+          // });
+
+          // // Create a URL from the compressed Blob
+          // const imageUrl = window.URL.createObjectURL(compressedFile);
+
           const link = document.createElement("a");
           link.download = "my-image-name.png";
           link.href = dataUrl;
@@ -278,24 +277,21 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
           element.style.display = "none";
           setSelectedItemId(null);
           console.log("Downloaded the Image");
-
         })
         .catch((err: any) => {
           console.log(err);
         });
-      } else {
-        console.error("Element is null. It might not be rendered yet.");
-      }
+    } else {
+      console.error("Element is null. It might not be rendered yet.");
+    }
   };
-
 
   const image = (item: any) => {
     setSelectedItemId(item);
   };
 
-
   useEffect(() => {
-    const handleImageConversion  = async () => {
+    const handleImageConversion = async () => {
       if (
         selectedItemId != null &&
         selectedItemId.image != undefined &&
@@ -344,14 +340,14 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
       </div>
       <div className="content-box w-full py-8 px-8 shadow-sm rounded-xl">
         {/* <p className="subtitle pb-3 text-2xl font-bold  ">Dine Method</p> */}
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 font-medium h-full">
           {sortedMenuList.map((items, index) => (
             <div
               key={index}
               className="h-full bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
-                  <form
+              <form
                 action="#"
                 encType="multipart/form-data"
                 ref={(el) => (elementRef.current[items.id] = el)}
@@ -360,33 +356,59 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
               {/* <div className={`${ImageResponsive == true ? "block" : "hidden"}`} >
                 test
               </div> */}
-              <div className={`flex items-center md:max-w-xl h-full ${ImageResponsive == items.id ? "flex-col" : "flex-row"}`}>
-                <div className={`object-cover h-full bg-primaryColor flex items-center justify-center ${ImageResponsive == items.id ? "w-full h-2/6 rounded-tl-lg" : "w-1/6 rounded-l-lg"}`}>
+              <div
+                className={`flex items-center md:max-w-xl h-full ${
+                  ImageResponsive == items.id ? "flex-col" : "flex-row"
+                }`}
+              >
+                <div
+                  className={`object-cover h-full bg-primaryColor flex items-center justify-center ${
+                    ImageResponsive == items.id
+                      ? "w-full h-2/6 rounded-tl-lg"
+                      : "w-1/6 rounded-l-lg"
+                  }`}
+                >
                   <p className="text-2xl font-semibold ">{items.name}</p>
                 </div>
-                <div className={`flex flex-col justify-between p-3 leading-relaxed  ${ImageResponsive == items.id ? "w-full h-4/6" : "w-5/6"}`}>
+                <div
+                  className={`flex flex-col justify-between p-3 leading-relaxed  ${
+                    ImageResponsive == items.id ? "w-full h-4/6" : "w-5/6"
+                  }`}
+                >
                   <div className="flex justify-between items-center">
                     <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                       Table
                     </h5>
-                    <label className={`relative ml-3 cursor-pointer ${ImageResponsive == items.id ? "hidden" : "block"}`}>
-                        <input
-                          id="modal-published"
-                          name="modal-published"
-                          type="checkbox"
-                          // defaultChecked={true}
-                          // onChange={}
-                          value=""
-                          className="toggle-switch sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
-                      </label>
+                    <label
+                      className={`relative ml-3 cursor-pointer ${
+                        ImageResponsive == items.id ? "hidden" : "block"
+                      }`}
+                    >
+                      <input
+                        id="modal-published"
+                        name="modal-published"
+                        type="checkbox"
+                        // defaultChecked={true}
+                        // onChange={}
+                        value=""
+                        className="toggle-switch sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                    </label>
                     <FontAwesomeIcon
                       icon={faEllipsisVertical}
-                      className={`pe-3 text-primaryColor fa-lg ${ImageResponsive == items.id ? "md:hidden block" : "block"}`}
+                      className={`pe-3 text-primaryColor fa-lg ${
+                        ImageResponsive == items.id
+                          ? "md:hidden block"
+                          : "block"
+                      }`}
                     />
                   </div>
-                  <div className={`flex items-center justify-end gap-4 ${ImageResponsive == items.id ? "md:hidden block" : "block"}`}>
+                  <div
+                    className={`flex items-center justify-end gap-4 ${
+                      ImageResponsive == items.id ? "md:hidden block" : "block"
+                    }`}
+                  >
                     <span className="material-symbols-outlined text-primaryColor">
                       captive_portal
                     </span>
@@ -404,9 +426,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                   </div>
                 </div>
               </div>
-
             </div>
-
           ))}
         </div>
       </div>
@@ -486,7 +506,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                       </p>
                     )}
                   </div>
-                {/* <div>
+                  {/* <div>
                   <label
                     htmlFor="brand"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -502,7 +522,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                     placeholder="Ex. Apple"
                   />
                 </div> */}
-                {/* <div>
+                  {/* <div>
                   <label
                     htmlFor="price"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -518,7 +538,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                     placeholder="$299"
                   />
                 </div> */}
-                {/* <div>
+                  {/* <div>
                   <label
                     htmlFor="category"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"

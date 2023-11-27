@@ -1,7 +1,9 @@
 {
   "dependencies": {
+    "browser-image-compression": "^2.0.2",
     "html-to-image": "^1.11.11",
     "qrcode.react": "^3.1.0",
-    "react-image-crop": "^10.1.8"
+    "react-image-crop": "^10.1.8",
+    "react-tailwindcss-select": "^1.8.5"
   }
 }
