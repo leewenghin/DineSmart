@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from my_django_app import views
 from rest_framework import routers
+from .views import LocalView
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -31,10 +32,13 @@ router.register(r'foodtag', views.FoodTagsView, 'foodtag')
 router.register(r'ordertables', views.OrderTablesView, 'ordertable')
 router.register(r'variantgroup', views.VariantGroupsView, 'variantgroup')
 router.register(r'variantvalue', views.VariantValuesView, 'variantvalue')
+# router.register(r'local', views.local, 'local')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('local/', LocalView.as_view(), name='local_ip'),
     # path('drinks/', views.drink_list),
     # path('drinks/<int:id>', views.drink_detail),
 ]

@@ -96,7 +96,7 @@ class OrderTables(models.Model):
         expiration_time = datetime.now() + timedelta(minutes=1)
 
         # Create QR code with expiration time encoded in the URL
-        url = f'http://192.168.1.8:5173/table/{quote(self.name)}-{unique_identifier}?expires={expiration_time.isoformat()}'
+        url = f'http://127.0.0.1:5173/table/{quote(self.name)}-{unique_identifier}?expires={expiration_time.isoformat()}'
         qrcode_img = qrcode.make(url)
 
         qr_width, qr_height = qrcode_img.size

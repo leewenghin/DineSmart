@@ -283,26 +283,28 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
 
 
 
-  const handlePopState = () => {
-    // Check if the user has navigated back
-    if (window.history.state === null) {
-      console.log('User navigated back to the previous page');
-      // Perform additional actions as needed
-    }
-  };
-  // console.log("testing")
-  useEffect(() => {
-    // console.log("testing")
-    // Add event listener for the popstate event
-    window.addEventListener('popstate', handlePopState);
+  // const handlePopState = () => {
+  //   // Check if the user has navigated back
+  //   if (window.history.state === null) {
+  //     console.log('User navigated back to the previous page');
+  //     // Perform additional actions as needed
+  //   }
+  // };
+  // // console.log("testing")
+  // useEffect(() => {
+  //   // console.log("testing")
+  //   // Add event listener for the popstate event
+  //   window.addEventListener('popstate', handlePopState);
 
-    // Clean up the event listener when the component is unmounted
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
+  //   // Clean up the event listener when the component is unmounted
+  //   return () => {
+  //     window.removeEventListener('popstate', handlePopState);
+  //   };
+  // }, []);
 
   // Now filteredData contains unique items with their quantities from dataArray
+
+  const [selectedOption, setSelectedOption] = useState('basic');
   return (
     <>
       <div className="full-content flex flex-col">
@@ -338,8 +340,8 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
                 <h2 className="text-lg font-medium my-2">Payment Method</h2>
                 {/* Payment Method */}
                 <div className="payment-method">
-                  <RadioGroup>
-                    <Radio id="basic" name="radio" defaultChecked>
+                  <RadioGroup >
+                    <Radio id="basic" name="radio" defaultChecked >
                       <img
                         className="card-payment w-12 h-12"
                         src="../../src/assets/img/card-payment.png"

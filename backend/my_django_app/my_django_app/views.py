@@ -9,6 +9,8 @@ from rest_framework import viewsets, permissions
 from rest_framework import status
 from decimal import Decimal
 from my_django_app.models import FoodTags
+import socket   
+from django.views import View
 
 
 class FoodMenusView(viewsets.ModelViewSet):
@@ -236,7 +238,6 @@ class VariantGroupsView(viewsets.ModelViewSet):
 class VariantValuesView(viewsets.ModelViewSet):
     serializer_class = VariantValuesSerializer
     queryset = VariantValues.objects.all()
-
     def get_queryset(self):
         queryset = VariantValues.objects.all()  # Make a copy of the initial queryset
 
@@ -245,4 +246,24 @@ class VariantValuesView(viewsets.ModelViewSet):
         if title is not None:
             queryset = queryset.filter(title=title)  # Apply the filter
         return queryset  # Return the filtered or unfiltered queryset
+
+
+class LocalView(View):
+    def get_local_ip(self):
+        try:
+            # Get the hostname
+            hostname = socket.gethostname()
+            # Get the local IP address using the hostname
+            local_ip = socket.gethostbyname(hostname)
+            return local_ip
+        except Exception as e:
+            return str(e)
+
+    def get(self, request, *args, **kwargs):
+        local_ip = self.get_local_ip()
+        return JsonResponse({'local_ip': local_ip}) 
+
+
+    # # Call the function and print the local IP
+    # print(get_local_ip())
 
