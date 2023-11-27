@@ -214,6 +214,17 @@ class OrderTablesView(viewsets.ModelViewSet):
             print("Request serializer:", serializer.data)
             return Response(serializer.errors, status=400)   # HTTP 201 Created
 
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else: 
+            serializer.save(image=None, link=None)
+        return Response(serializer.data)
+
 class FoodTagsView(viewsets.ModelViewSet):
     serializer_class = FoodTagsSerializer
     queryset = FoodTags.objects.all()

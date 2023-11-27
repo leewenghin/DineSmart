@@ -29,7 +29,7 @@ admin.site.register(FoodItems, FoodItemsAdmin)
 
 class OrderTablesAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
-    list_display = ("id", "name", "image", "published","status")
+    list_display = ("id", "name", "image", "published","status", "link")
     
 admin.site.register(OrderTables, OrderTablesAdmin)
 
