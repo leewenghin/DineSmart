@@ -52,7 +52,7 @@ function App () {
   const changeip = "192.168.1.18"; // Zhen Xun
   // const changeip = "192.168.0.12"; //Zhen Xun Home
   // const changeip = "192.168.0.207"; //Zhen Xun Kenny
-  
+
   // const changeip = "192.168.1.24"; // DomDom
   // `const yourModuleName = require('local-ip-addresses-and-hostnames');`
   // getLocalIpAddresses() = ['127.0.0.1', '192.168.1.101', '10.0.0.101']
@@ -115,42 +115,43 @@ function App () {
     console.log(localIPAddress);
   //Starting loop  website to do the checking
   useEffect(() => {
-
     const updatelocal = () => {
       const lastVisitTime = localStorage.getItem("lastVisitTime");
       const isMoreThanOneHourAgo =
-      lastVisitTime &&
-      new Date().getTime() - new Date(lastVisitTime).getTime() >
+        lastVisitTime &&
+        new Date().getTime() - new Date(lastVisitTime).getTime() >
           60 * 60 * 1000;
 
       if (isMoreThanOneHourAgo) {
         console.log("Creating new data or performing necessary actions...");
         localStorage.setItem("storedPathname", pathname);
-        localStorage.setItem("lastVisitTime", new Date().toISOString()) ;
+        localStorage.setItem("lastVisitTime", new Date().toISOString());
       }
     };
     const storedPathname = localStorage.getItem("storedPathname");
 
-    if(!demo){
-      if (storedPathname !== null) { // the url same with before access url
+    if (!demo) {
+      if (storedPathname !== null) {
+        // the url same with before access url
         // Check QR code expiration
-        if (expires) { // check qrcode have expired or not- means the qrcode have limit time
+        if (expires) {
+          // check qrcode have expired or not- means the qrcode have limit time
           const expirationTime = new Date(expires);
           const currentTime = new Date();
-          
+
           if (currentTime > expirationTime) {
             // QR code has expired, navigate to "/not-found"
             navigate("/not-found");
-          }else{
+          } else {
             updatelocal();
           }
         }
-      } else { // first time access this page
+      } else {
+        // first time access this page
         localStorage.setItem("storedPathname", pathname); // store path avoid user change the url to other page
         navigate(pathname);
       }
     }
-
   }, []);
 
 
@@ -199,6 +200,14 @@ function App () {
         <Route
           path="category/:foodmenu_id/:foodcategory_id"
           element={<Admin_item changeIP={changeip} />}
+        />
+        <Route
+          path="variant_group"
+          element={<Admin_variant_group changeIP={changeip} />}
+        />
+        <Route
+          path="variant_value"
+          element={<Admin_variant_value changeIP={changeip} />}
         />
       </Route>
     </Routes>

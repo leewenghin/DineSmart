@@ -10,8 +10,8 @@ import {
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import QRModal from "../../components/qr_modal";
-import * as htmlToImage from 'html-to-image'
-import imageCompression from 'browser-image-compression'
+import * as htmlToImage from "html-to-image";
+import imageCompression from "browser-image-compression";
 import { display } from "html2canvas/dist/types/css/property-descriptors/display";
 import "../../assets/css/admin/admin_panel.css";
 const cards = [
@@ -56,7 +56,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   const [selectedItemId, setSelectedItemId] = useState<any>([]);
   const [ImageResponsive, setImageResponsive] = useState<any>([]);
   const navigate = useNavigate();
-  
+
   // ==================== Toggle Method ====================
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -243,14 +243,15 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   const delay = (ms: any) => new Promise((res) => setTimeout(res, ms));
   const elementRef = useRef<any>([]);
   // console.log(elementRef.current[index]);
-  useEffect(()=>{
+  useEffect(() => {
     console.log("sdasd");
-  },[])
+  }, []);
   const htmlToImageConvert = (img: any) => {
     const element = elementRef.current[selectedItemId.id];
     if (element) {
-      htmlToImage.toPng(element)
-      .then(async(dataUrl) => {
+      htmlToImage
+        .toPng(element)
+        .then(async (dataUrl) => {
           await delay(10);
           const link = document.createElement("a");
           link.download = "my-image-name.png";
@@ -260,24 +261,21 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
           // element.style.display = "none";
           setSelectedItemId(null);
           console.log("Downloaded the Image");
-
         })
         .catch((err: any) => {
           console.log(err);
         });
-      } else {
-        console.error("Element is null. It might not be rendered yet.");
-      }
+    } else {
+      console.error("Element is null. It might not be rendered yet.");
+    }
   };
-
 
   const image = (item: any) => {
     setSelectedItemId(item);
   };
 
-
   useEffect(() => {
-    const handleImageConversion  = async () => {
+    const handleImageConversion = async () => {
       if (
         selectedItemId != null &&
         selectedItemId.image != undefined &&
@@ -300,41 +298,41 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
     handleImageConversion();
   }, [selectedItemId]);
 
-
-  const handleRefresh = async (itemid: number) =>{
+  const handleRefresh = async (itemid: number) => {
     try {
       // Make API call to update the item (remove the 'description' property)
       const response = await fetch(`${getMenuLink}${itemid}/`, {
-        method: 'PATCH', // Use the PATCH method for partial updates
+        method: "PATCH", // Use the PATCH method for partial updates
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           image: null, // or any value you want to set for the description
           link: null,
         }),
-      }).then((response) => {
-        if (response.ok) {
-          return response.json(); // Parse the JSON data if the response is valid
-        } else {
-          throw new Error(`Response not OK. Status: ${response.status}`);
-        }
       })
-      .then(() => {
-        fetchList(getMenuLink, setMenuList);
-      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json(); // Parse the JSON data if the response is valid
+          } else {
+            throw new Error(`Response not OK. Status: ${response.status}`);
+          }
+        })
+        .then(() => {
+          fetchList(getMenuLink, setMenuList);
+        });
       console.log("Delete complete");
     } catch (error) {
-      console.error('Error deleting description:', error);
+      console.error("Error deleting description:", error);
     }
-  }
+  };
 
-  const towebsite = (itemid:string): void => {
+  const towebsite = (itemid: string): void => {
     const url = `http://${changeIP}:5173/table/${itemid}?demo=true`;
-    console.log(itemid)
+    console.log(itemid);
     // Navigate to the URL
     window.location.href = url;
-    }
+  };
 
   return (
     <div className="content px-10">
@@ -355,14 +353,14 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
       </div>
       <div className="content-box w-full py-8 px-8 shadow-sm rounded-xl">
         {/* <p className="subtitle pb-3 text-2xl font-bold  ">Dine Method</p> */}
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 font-medium h-full">
           {sortedMenuList.map((items, index) => (
             <div
               key={index}
               className="h-full bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
-                  <form
+              <form
                 action="#"
                 encType="multipart/form-data"
                 ref={(el) => (elementRef.current[items.id] = el)}
@@ -371,11 +369,25 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
               {/* <div className={`${ImageResponsive == true ? "block" : "hidden"}`} >
                 test
               </div> */}
-              <div className={`flex items-center md:max-w-xl h-full ${ImageResponsive == items.id ? "flex-col" : "flex-row"}`}>
-                <div className={`object-cover h-full bg-primaryColor flex items-center justify-center ${ImageResponsive == items.id ? "w-full h-2/6 rounded-tl-lg" : "w-1/6 rounded-l-lg"}`}>
+              <div
+                className={`flex items-center md:max-w-xl h-full ${
+                  ImageResponsive == items.id ? "flex-col" : "flex-row"
+                }`}
+              >
+                <div
+                  className={`object-cover h-full bg-primaryColor flex items-center justify-center ${
+                    ImageResponsive == items.id
+                      ? "w-full h-2/6 rounded-tl-lg"
+                      : "w-1/6 rounded-l-lg"
+                  }`}
+                >
                   <p className="text-2xl font-semibold ">{items.name}</p>
                 </div>
-                <div className={`flex flex-col justify-between p-3 leading-relaxed  ${ImageResponsive == items.id ? "w-full h-4/6" : "w-5/6"}`}>
+                <div
+                  className={`flex flex-col justify-between p-3 leading-relaxed  ${
+                    ImageResponsive == items.id ? "w-full h-4/6" : "w-5/6"
+                  }`}
+                >
                   <div className="flex justify-between items-center">
                     <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                       Table
@@ -394,13 +406,22 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                       </label> */}
                     <FontAwesomeIcon
                       icon={faEllipsisVertical}
-                      className={`pe-3 text-primaryColor fa-lg ${ImageResponsive == items.id ? "md:hidden block" : "block"}`}
+                      className={`pe-3 text-primaryColor fa-lg ${
+                        ImageResponsive == items.id
+                          ? "md:hidden block"
+                          : "block"
+                      }`}
                     />
                   </div>
-                  <div className={`flex items-center justify-end gap-4 ${ImageResponsive == items.id ? "md:hidden block" : "block"}`}>
+                  <div
+                    className={`flex items-center justify-end gap-4 ${
+                      ImageResponsive == items.id ? "md:hidden block" : "block"
+                    }`}
+                  >
                     <button
-                      onClick={()=>towebsite(items.name)}
-                      className="flex items-center">
+                      onClick={() => towebsite(items.name)}
+                      className="flex items-center"
+                    >
                       <span className="material-symbols-outlined text-primaryColor">
                         captive_portal
                       </span>
@@ -413,7 +434,10 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                         print
                       </span>
                     </button>
-                    <button onClick={() => handleRefresh(items.id)}   className="flex items-center">
+                    <button
+                      onClick={() => handleRefresh(items.id)}
+                      className="flex items-center"
+                    >
                       <span className="material-symbols-outlined text-primaryColor">
                         refresh
                       </span>
@@ -421,9 +445,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                   </div>
                 </div>
               </div>
-
             </div>
-
           ))}
         </div>
       </div>
@@ -503,7 +525,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                       </p>
                     )}
                   </div>
-                {/* <div>
+                  {/* <div>
                   <label
                     htmlFor="brand"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -519,7 +541,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                     placeholder="Ex. Apple"
                   />
                 </div> */}
-                {/* <div>
+                  {/* <div>
                   <label
                     htmlFor="price"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -535,7 +557,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                     placeholder="$299"
                   />
                 </div> */}
-                {/* <div>
+                  {/* <div>
                   <label
                     htmlFor="category"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"

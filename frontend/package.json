@@ -29,6 +29,7 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.0",
     "react-dom": "^18.2.0",
+    "react-tailwindcss-select": "^1.8.5",
     "styled-components": "^6.0.8",
     "tw-elements-react": "^1.0.0-alpha1"
   },

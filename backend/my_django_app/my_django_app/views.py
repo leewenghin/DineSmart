@@ -238,6 +238,14 @@ class VariantGroupsView(viewsets.ModelViewSet):
 class VariantValuesView(viewsets.ModelViewSet):
     serializer_class = VariantValuesSerializer
     queryset = VariantValues.objects.all()
+    def get_queryset(self):
+        queryset = VariantValues.objects.all()  # Make a copy of the initial queryset
+
+        title = self.request.query_params.get('title_id')
+
+        if title is not None:
+            queryset = queryset.filter(title=title)  # Apply the filter
+        return queryset  # Return the filtered or unfiltered queryset
 
 
 class LocalView(View):
@@ -258,3 +266,4 @@ class LocalView(View):
 
     # # Call the function and print the local IP
     # print(get_local_ip())
+

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "browser-image-compression": "^2.0.2",
     "html-to-image": "^1.11.11",
     "internal-ip": "^8.0.0",
     "local-ip-address": "^1.0.0",
@@ -7,5 +8,6 @@
     "qrcode.react": "^3.1.0",
     "react-image-crop": "^10.1.8",
     "react-public-ip": "^1.0.0"
+    "react-tailwindcss-select": "^1.8.5"
   }
 }
