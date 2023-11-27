@@ -300,6 +300,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
     handleImageConversion();
   }, [selectedItemId]);
 
+
   const handleRefresh = async (itemid: number) =>{
     try {
       // Make API call to update the item (remove the 'description' property)

@@ -1,7 +1,11 @@
 {
   "dependencies": {
     "html-to-image": "^1.11.11",
+    "internal-ip": "^8.0.0",
+    "local-ip-address": "^1.0.0",
+    "local-ip-addresses-and-hostnames": "^0.2.0",
     "qrcode.react": "^3.1.0",
-    "react-image-crop": "^10.1.8"
+    "react-image-crop": "^10.1.8",
+    "react-public-ip": "^1.0.0"
   }
 }

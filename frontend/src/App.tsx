@@ -6,6 +6,7 @@ import {
   useLocation,
   Outlet,
   useNavigate,
+  useNavigation,
 } from "react-router-dom";
 import "./App.css";
 
@@ -30,13 +31,14 @@ import { useEffect, useState } from "react";
 import Table from "./pages/table";
 import React from "react";
 import axios from "axios";
+// import getLocalIpAddresses from "local-ip-addresses-and-hostnames";
 // import { UserContext, OrderList } from './pages/context';
 
 interface changeIP {
   ip: string;
 }
 
-export const changeIP = "192.168.1.24"; // DomDom
+// export const changeIP = "192.168.1.24"; // DomDom
 
 export interface User {
   name: string;
@@ -45,12 +47,15 @@ interface Pathname {
   pathname: string;
 }
 
-function App() {
-  const changeip = "192.168.1.8"; // Zhen Xun
+import {internalIpV6, internalIpV4} from 'internal-ip';
+function App () {
+  const changeip = "192.168.1.18"; // Zhen Xun
   // const changeip = "192.168.0.12"; //Zhen Xun Home
   // const changeip = "192.168.0.207"; //Zhen Xun Kenny
   
   // const changeip = "192.168.1.24"; // DomDom
+  // `const yourModuleName = require('local-ip-addresses-and-hostnames');`
+  // getLocalIpAddresses() = ['127.0.0.1', '192.168.1.101', '10.0.0.101']
   
   const [pathname, setPathname] = useState(window.location.pathname.split("-")[0]);
   const [color, setColor] = useState("#f2f2f2");  
@@ -59,7 +64,7 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const expires = urlParams.get("expires");
   const demo = urlParams.get("demo");
-  
+
   useEffect(() => {
     // Function to determine background color based on the URL
     const determineBackgroundColor = () => {
@@ -77,24 +82,37 @@ function App() {
     document.body.style.backgroundColor = color;
   }, [color]);
   
-  //Check the path have any changer
-  const ProtectedRoute = ({
-    pathname,
-    redirectPath = "/not-found",
-  }: any) => {
-    const storedPathname = localStorage.getItem("storedPathname");
-    console.log(storedPathname);
-    if(demo){
-      return <Outlet />
-    }else{
-      return pathname && pathname.startsWith(storedPathname) ? (
-      <Outlet />
-      ) : (
-        <Navigate to={redirectPath} replace />
-      );
-    }
-  };
+  const [localIPAddress, setLocalIPAddress] = useState<string|null>(null);
 
+    useEffect(() => {
+      const getLocalIPAddress = async () => {
+        try {
+          const { RTCPeerConnection } = window;
+          const peerConnection = new RTCPeerConnection({ iceServers: [] });
+          
+          // Handle the 'icecandidate' event to get the local IP address
+          peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+              const localIPAddressRegex = /(\d+\.\d+\.\d+\.\d+)/;
+              const match = localIPAddressRegex.exec(event.candidate.candidate);
+  
+              if (match) {
+                setLocalIPAddress(match[0]);
+              }
+            }
+          };
+  
+          // Create an offer and set localDescription
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+        } catch (error) {
+          console.error('Error fetching local IP address:', error);
+        }
+      };
+  
+      getLocalIPAddress();
+    }, []);
+    console.log(localIPAddress);
   //Starting loop  website to do the checking
   useEffect(() => {
 
@@ -135,36 +153,24 @@ function App() {
 
   }, []);
 
-  // useEffect(() => {
-  //   // Replace 'your-server-endpoint' with the actual endpoint on your server
-  //   const fetchList = () => {
-  //     fetch("http://127.0.0.1/api/ordertables")
-  //       .then(response => response.json()) // Convert the response to JSON
-  //       .then(data => {
-  //         const userIP = data.ip;
-  //         console.log(`User's IP address from server: ${userIP}`);
-  //         // Do something with the user's IP address
-  //       })
-  //       .catch(error => console.error("Error fetching data: ", error));
-  //   };
 
-  //   fetchList(); // Call the function to initiate the API request
-
-  // }, []);
-
-  // useEffect(() => {
-  //   // Replace 'your-server-endpoint' with the actual endpoint on your server
-  //   axios.get('http://127.0.0.1/')
-  //     .then(response => {
-  //       const userIP = response.data.ip;
-  //       console.log(`User's IP address from server: ${userIP}`);
-  //       // Do something with the user's IP address
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching user IP:', error);
-  //     });
-  // }, []);
-
+    //Check the path have any changer
+    const ProtectedRoute = ({
+      pathname,
+      redirectPath = "/not-found",
+    }: any) => {
+      const storedPathname = localStorage.getItem("storedPathname");
+      console.log(storedPathname);
+      if(demo){
+        return <Outlet />
+      }else{
+        return pathname && pathname.startsWith(storedPathname) ? (
+        <Outlet />
+        ) : (
+          <Navigate to={redirectPath} replace />
+        );
+      }
+    };
   return (
     <Routes>
       <Route path="*" element={<Navigate to="/not-found" />} />
@@ -196,7 +202,6 @@ function App() {
         />
       </Route>
     </Routes>
-    // </UserContext.Provider>
   );
 }
 // type OrderDetailRouteProps = {};
