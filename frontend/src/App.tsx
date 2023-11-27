@@ -42,11 +42,11 @@ interface Pathname {
 }
 
 function App() {
-  const changeip = "192.168.1.8"; // Zhen Xun
+  // const changeip = "192.168.1.8"; // Zhen Xun
   // const changeip = "192.168.0.12"; //Zhen Xun Home
   // const changeip = "192.168.0.207"; //Zhen Xun Kenny
 
-  // const changeip = "192.168.1.24"; // DomDom
+  const changeip = "192.168.1.16"; // DomDom
 
   const [pathname, setPathname] = useState(
     window.location.pathname.split("-")[0]

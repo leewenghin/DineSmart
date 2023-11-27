@@ -757,8 +757,7 @@ const CU_Modal = ({
                             htmlFor="name"
                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none"
                           >
-                            Variant Group{" "}
-                            <span className="text-red-500">*</span>
+                            Variant Group
                           </label>
                           <Select
                             primaryColor={"orange"}
@@ -777,7 +776,7 @@ const CU_Modal = ({
                               htmlFor="name"
                               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none"
                             >
-                              Variant <span className="text-red-500">*</span>
+                              Variant
                             </label>
                             {variantGroup &&
                               variantGroup.map(
