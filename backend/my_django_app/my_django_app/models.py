@@ -1,11 +1,14 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from PIL import Image, ImageDraw
+import hashlib
 import re
 import qrcode
+import uuid
 from io import BytesIO
 from django.core.files import File 
-
+from datetime import datetime, timedelta
+from urllib.parse import quote
 # instance represent the file is attached to
 # filename is the original name of the uploaded file
 def upload_to(instance, filename): 
@@ -73,6 +76,7 @@ class FoodItems(models.Model):
 
 class OrderTables(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False) # URL
+    link = models.CharField(max_length=128, null=True, blank=True) # URL
     image = models.ImageField(upload_to='table/qrcode', null=True, blank=True)
     status = models.CharField(max_length=128, null=False, blank=False)
     published = models.BooleanField(default=True)
@@ -84,21 +88,36 @@ class OrderTables(models.Model):
     def save(self, *args, **kwargs):
         # other_table_data = FoodItems.objects.first() 
         # if other_table_data:
-            qrcode_img = qrcode.make(f'http://192.168.1.102:5173/table/{self.name}')
-            # Get the dimensions of the QR code image
-            qr_width, qr_height = qrcode_img.size
+        # Remove existing QR code before saving the new one
 
-             # Create a new image with padding
-            canvas = Image.new('RGB', (qr_width + 20, qr_height + 20), 'orange')
-            canvas.paste(qrcode_img, (10, 10))  # Paste the QR code image with padding
-            
-            sanitized_name = re.sub(r'[^\w\s.-]', '', self.name)
-            fname = f'qr_code-{sanitized_name}.png'
-            buffer = BytesIO()
-            canvas.save(buffer, 'PNG')
-            self.image.save(fname, File(buffer), save=False)
-            buffer.close()
-            super().save(*args, **kwargs)
+        # Generate a unique identifier for the QR code (UUID)
+        unique_identifier = str(uuid.uuid4())
+        # Calculate expiration time (e.g., 1 day from now)
+        expiration_time = datetime.now() + timedelta(minutes=1)
+
+        # Create QR code with expiration time encoded in the URL
+        url = f'http://192.168.1.8:5173/table/{quote(self.name)}-{unique_identifier}?expires={expiration_time.isoformat()}'
+        qrcode_img = qrcode.make(url)
+
+        qr_width, qr_height = qrcode_img.size
+
+        # Create a new image with padding
+        canvas = Image.new('RGB', (qr_width + 20, qr_height + 20), 'orange')
+        canvas.paste(qrcode_img, (10, 10))
+
+        # Use a timestamp as a unique identifier for the file name
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        sanitized_name = re.sub(r'[^\w\s.-]', '', self.name)
+        fname = f'qr_code-{sanitized_name}.png'
+
+        # Save the image to the model
+        buffer = BytesIO()
+        canvas.save(buffer, 'PNG')
+        self.link = url
+        self.image.save(fname, File(buffer), save=False)
+        buffer.close()
+
+        super().save(*args, **kwargs)
         # else:
         #     print("error")
 

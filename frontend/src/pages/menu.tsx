@@ -182,9 +182,6 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
       return parsedOrderData?.items
     }
   });
-
-  console.log(orderData)
-
   // Count Order Items
   const [orderedItems, setOrderedItems] = useState<any[]>([]);
   
@@ -197,7 +194,6 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
     const timestamp = new Date().toISOString();
 
     const currentorderlist = {
-      // length: orderlistWithTimestamp.length,  // Add the length property
       timestamp,
       items: orderlistWithTimestamp,
     };
@@ -373,6 +369,8 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   }, 0);
 
   // Pass data to other page
+  const urlParams = new URLSearchParams(window.location.search);
+  const demo = urlParams.get("demo");
   const navigate = useNavigate();
   const handleCheckOut = () => {
     const orderlistWithTimestamp = orderedItems.map((item) => ({
@@ -388,11 +386,13 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
       items: orderlistWithTimestamp,
     };
     // updateData(orderlist);
-    console.log(currentorderlist);
+    console.log(tableqrid);
     setOrderList(currentorderlist);
-    navigate(`/table/${tableqrid}/order_detail`, {
-      state: { currentorderlist },
-    });
+    if(demo){
+      navigate(`/table/${tableqrid}/order_detail?demo=true`);
+    }else{
+      navigate(`/table/${tableqrid}/order_detail`);
+    }
   };
 
 

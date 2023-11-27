@@ -55,7 +55,12 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   const [isQRModalOpen, setIsQRModalOpen] = useState(false); // For toggle modal purpose
   const [selectedItemId, setSelectedItemId] = useState<any>([]);
   const [ImageResponsive, setImageResponsive] = useState<any>([]);
+<<<<<<< HEAD
 
+=======
+  const navigate = useNavigate();
+  
+>>>>>>> 72fc3b9ed70df33193a3d6832b7415c7a5cf9c44
   // ==================== Toggle Method ====================
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -248,6 +253,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   const htmlToImageConvert = (img: any) => {
     const element = elementRef.current[selectedItemId.id];
     if (element) {
+<<<<<<< HEAD
       htmlToImage
         .toPng(element)
         .then(async (dataUrl) => {
@@ -269,12 +275,17 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
           // // Create a URL from the compressed Blob
           // const imageUrl = window.URL.createObjectURL(compressedFile);
 
+=======
+      htmlToImage.toPng(element)
+      .then(async(dataUrl) => {
+          await delay(10);
+>>>>>>> 72fc3b9ed70df33193a3d6832b7415c7a5cf9c44
           const link = document.createElement("a");
           link.download = "my-image-name.png";
           link.href = dataUrl;
           link.click();
           element.removeChild(img);
-          element.style.display = "none";
+          // element.style.display = "none";
           setSelectedItemId(null);
           console.log("Downloaded the Image");
         })
@@ -298,28 +309,56 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
         elementRef.current
       ) {
         const element = elementRef.current[selectedItemId.id];
-        // element!.style.position = 'absolute';
-        // element!.style.padding = '10px';
-        // element!.style.margin = '10px';
-        // element!.style.bottom = '0';
-        // element!.style.right = '0';
         const img = document.createElement("img");
         img.src = selectedItemId.image;
         img.alt = "Dynamic Image";
         img.width = 120;
         await element!.appendChild(img);
-        // await image(selectedItemId);
         setImageResponsive(selectedItemId.id);
         await delay(20);
         htmlToImageConvert(img);
         console.log("Starting Covert to Image");
       } else {
-        // console.log("");
         setImageResponsive(null);
       }
     };
     handleImageConversion();
   }, [selectedItemId]);
+
+  const handleRefresh = async (itemid: number) =>{
+    try {
+      // Make API call to update the item (remove the 'description' property)
+      const response = await fetch(`${getMenuLink}${itemid}/`, {
+        method: 'PATCH', // Use the PATCH method for partial updates
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: null, // or any value you want to set for the description
+          link: null,
+        }),
+      }).then((response) => {
+        if (response.ok) {
+          return response.json(); // Parse the JSON data if the response is valid
+        } else {
+          throw new Error(`Response not OK. Status: ${response.status}`);
+        }
+      })
+      .then(() => {
+        fetchList(getMenuLink, setMenuList);
+      })
+      console.log("Delete complete");
+    } catch (error) {
+      console.error('Error deleting description:', error);
+    }
+  }
+
+  const towebsite = (itemid:string): void => {
+    const url = `http://${changeIP}:5173/table/${itemid}?demo=true`;
+    console.log(itemid)
+    // Navigate to the URL
+    window.location.href = url;
+    }
 
   return (
     <div className="content px-10">
@@ -379,6 +418,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                     <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                       Table
                     </h5>
+<<<<<<< HEAD
                     <label
                       className={`relative ml-3 cursor-pointer ${
                         ImageResponsive == items.id ? "hidden" : "block"
@@ -395,6 +435,20 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                       />
                       <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
                     </label>
+=======
+                    {/* <label className={`relative ml-3 cursor-pointer ${ImageResponsive == items.id ? "hidden" : "block"}`}>
+                        <input
+                          id="modal-published"
+                          name="modal-published"
+                          type="checkbox"
+                          // defaultChecked={true}
+                          // onChange={}
+                          value=""
+                          className="toggle-switch sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                      </label> */}
+>>>>>>> 72fc3b9ed70df33193a3d6832b7415c7a5cf9c44
                     <FontAwesomeIcon
                       icon={faEllipsisVertical}
                       className={`pe-3 text-primaryColor fa-lg ${
@@ -404,6 +458,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                       }`}
                     />
                   </div>
+<<<<<<< HEAD
                   <div
                     className={`flex items-center justify-end gap-4 ${
                       ImageResponsive == items.id ? "md:hidden block" : "block"
@@ -412,6 +467,16 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                     <span className="material-symbols-outlined text-primaryColor">
                       captive_portal
                     </span>
+=======
+                  <div className={`flex items-center justify-end gap-4 ${ImageResponsive == items.id ? "md:hidden block" : "block"}`}>
+                    <button
+                      onClick={()=>towebsite(items.name)}
+                      className="flex items-center">
+                      <span className="material-symbols-outlined text-primaryColor">
+                        captive_portal
+                      </span>
+                    </button>
+>>>>>>> 72fc3b9ed70df33193a3d6832b7415c7a5cf9c44
                     <button
                       onClick={() => image(items)}
                       className="flex items-center"
@@ -420,9 +485,11 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                         print
                       </span>
                     </button>
-                    <span className="material-symbols-outlined text-primaryColor">
-                      refresh
-                    </span>
+                    <button onClick={() => handleRefresh(items.id)}   className="flex items-center">
+                      <span className="material-symbols-outlined text-primaryColor">
+                        refresh
+                      </span>
+                    </button>
                   </div>
                 </div>
               </div>

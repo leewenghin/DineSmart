@@ -5,6 +5,7 @@ import {
   Navigate,
   useLocation,
   Outlet,
+  useNavigate,
 } from "react-router-dom";
 import "./App.css";
 
@@ -41,15 +42,22 @@ interface Pathname {
 }
 
 function App() {
-  // const changeip = "192.168.1.46"; // Zhen Xun
-  // const changeip = "192.168.0.10"; //Zhen Xun Home
-  // const changeip = "192.168.0.206"; //Zhen Xun Kenny
+  const changeip = "192.168.1.8"; // Zhen Xun
+  // const changeip = "192.168.0.12"; //Zhen Xun Home
+  // const changeip = "192.168.0.207"; //Zhen Xun Kenny
 
-  const changeip = "192.168.1.29"; // DomDom
+  // const changeip = "192.168.1.24"; // DomDom
 
-  const [pathname, setPathname] = useState(window.location.pathname);
+  const [pathname, setPathname] = useState(
+    window.location.pathname.split("-")[0]
+  );
   const [color, setColor] = useState("#f2f2f2");
   const location = useLocation();
+  const navigate = useNavigate();
+  const urlParams = new URLSearchParams(window.location.search);
+  const expires = urlParams.get("expires");
+  const demo = urlParams.get("demo");
+
   useEffect(() => {
     // Function to determine background color based on the URL
     const determineBackgroundColor = () => {
@@ -67,6 +75,22 @@ function App() {
     document.body.style.backgroundColor = color;
   }, [color]);
 
+  //Check the path have any changer
+  const ProtectedRoute = ({ pathname, redirectPath = "/not-found" }: any) => {
+    const storedPathname = localStorage.getItem("storedPathname");
+    console.log(storedPathname);
+    if (demo) {
+      return <Outlet />;
+    } else {
+      return pathname && pathname.startsWith(storedPathname) ? (
+        <Outlet />
+      ) : (
+        <Navigate to={redirectPath} replace />
+      );
+    }
+  };
+
+  //Starting loop  website to do the checking
   useEffect(() => {
     const updatelocal = () => {
       const lastVisitTime = localStorage.getItem("lastVisitTime");
@@ -83,10 +107,27 @@ function App() {
     };
     const storedPathname = localStorage.getItem("storedPathname");
 
-    if (storedPathname !== null) {
-      updatelocal();
-    } else {
-      localStorage.setItem("storedPathname", pathname);
+    if (!demo) {
+      if (storedPathname !== null) {
+        // the url same with before access url
+        // Check QR code expiration
+        if (expires) {
+          // check qrcode have expired or not- means the qrcode have limit time
+          const expirationTime = new Date(expires);
+          const currentTime = new Date();
+
+          if (currentTime > expirationTime) {
+            // QR code has expired, navigate to "/not-found"
+            navigate("/not-found");
+          } else {
+            updatelocal();
+          }
+        }
+      } else {
+        // first time access this page
+        localStorage.setItem("storedPathname", pathname); // store path avoid user change the url to other page
+        navigate(pathname);
+      }
     }
   }, []);
 
@@ -119,20 +160,6 @@ function App() {
   //       console.error('Error fetching user IP:', error);
   //     });
   // }, []);
-
-  const ProtectedRoute = ({
-    pathname,
-    redirectPath = "/not-found",
-    children,
-  }: any) => {
-    const storedPathname = localStorage.getItem("storedPathname");
-    console.log(storedPathname);
-    return pathname && pathname.startsWith(storedPathname) ? (
-      <Outlet />
-    ) : (
-      <Navigate to={redirectPath} replace />
-    );
-  };
 
   return (
     <Routes>

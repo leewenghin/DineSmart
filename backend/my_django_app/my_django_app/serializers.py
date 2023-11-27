@@ -22,7 +22,7 @@ class FoodItemsSerializer(serializers.ModelSerializer):
 class OrderTablesSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderTables
-        fields = ['id', 'name','status','image', 'published']
+        fields = ['id', 'name','status','image', 'published', "link"]
 
 class FoodTagsSerializer(serializers.ModelSerializer):
     class Meta:
