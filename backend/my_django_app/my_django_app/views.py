@@ -11,7 +11,8 @@ from decimal import Decimal
 from my_django_app.models import FoodTags
 import socket   
 from django.views import View
-
+import os
+import subprocess
 
 class FoodMenusView(viewsets.ModelViewSet):
     serializer_class = FoodMenusSerializer
@@ -35,15 +36,15 @@ class FoodCategoriesView(viewsets.ModelViewSet): # ModelViewSet provide CRUD ope
         queryset = FoodCategories.objects.all()
 
         id = self.request.query_params.get('id') # Endpoint
-        foodmenu_id = self.request.query_params.get('foodmenu_id') # Endpoint``
+        foodmenus = self.request.query_params.get('foodmenu_id') # Endpoint``
 
         if id is not None:
             # Filter records based on the menu_id parameter
-            return queryset.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu_id'
+            return queryset.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu'
             
-        if foodmenu_id is not None:
+        if foodmenus is not None:
             # Filter records based on the menu_id parameter
-            return queryset.filter(foodmenu_id=foodmenu_id) # Only filter instances inside FoodCategories with 'foodmenu_id'
+            return queryset.filter(foodmenus=foodmenus) # Only filter instances inside FoodCategories with 'foodmenu'
         return queryset     
 
 class FoodItemsView(viewsets.ModelViewSet):
@@ -54,14 +55,14 @@ class FoodItemsView(viewsets.ModelViewSet):
         queryset = FoodItems.objects.all()  # Make a copy of the initial queryset
 
         id = self.request.query_params.get('id') # Endpoint
-        foodcategory_id = self.request.query_params.get('foodcategory_id')
+        foodcategory = self.request.query_params.get('foodcategory_id')
 
         if id is not None:
             # Filter records based on the menu_id parameter
-            return queryset.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu_id'
+            return queryset.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu'
         
-        if foodcategory_id is not None:
-            queryset = queryset.filter(foodcategory_id=foodcategory_id)  # Apply the filter
+        if foodcategory is not None:
+            queryset = queryset.filter(foodcategory=foodcategory)  # Apply the filter
         return queryset  # Return the filtered or unfiltered queryset
 
     def create(self, request, *args, **kwargs):
@@ -74,18 +75,7 @@ class FoodItemsView(viewsets.ModelViewSet):
             if "tag" in request.data and request.data.getlist("tag") == []:
                 food_item.tag.clear()
 
-
-            # serializer = FoodItemsSerializer(data={
-            #     'image': image,
-            #     'name': request.data['name'],
-            #     'price': request.data['price'],
-            #     'tag': request.data.getlist('tag'),
-            #     'description': request.data['description'],
-            #     'published': request.data['published'],
-            #     'foodcategory_id': request.data['foodcategory_id'],  # Use the converted integer value
-            # })
-
-            print("request.data:", request.data)      
+            print("Before:", request.data)      
 
             if serializer.is_valid():
                 # Save the new instance
@@ -98,87 +88,31 @@ class FoodItemsView(viewsets.ModelViewSet):
                 # Return an error response with validation errors
                 print("Request data fail:", request.data)
                 print("Request serializer:", serializer.data)
-                print("Request serializer:", serializer.data['tag'])
+                print("Request tag serializer:", serializer.data['tag'])
                 
                 return Response(serializer.errors, status=400)  # HTTP 400 Bad Request
 
-            # Method 2 =========================================
-            # name = request.data['name']
-            # price_str = request.data['price']
-            # description = request.data['description']
-            # tag_names = request.data.getlist("tag") 
-            # image = request.data['image']
-            # published = request.data['published']
-            # foodcategory_id = request.data['foodcategory_id']
-            
-            # errors = {}
-            # print("tag_names:", tag_names)
-            # print("Requested data: ", request.data)
-
-
-            # if published.lower() == 'true':
-            #     published = True
-            # elif published.lower() == 'false':
-            #     published = False
-
-            # if not name:
-            #     errors["name"] = ["Name field must not be empty."]
-
-            # if price_str is None or price_str == "":
-            #     errors["price"] = ["Price field must not be empty."]
-            # else:
-            #     try:
-            #         price = Decimal(price_str)
-            #     except ValueError:
-            #         errors["price"] = ["Invalid price format."]
-
-            # if errors:
-            #     # If there are errors, return them in a single response
-            #     return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-
-            # tags = FoodTags.objects.filter(id__in=tag_names)
-
-            # if image is None or image == "":
-            #     image = None  # Set it to 'null' in the database
-
-
-            # item = FoodItems.objects.create(
-            #     name=name, 
-            #     price=price,
-            #     description=description, 
-            #     image=image, 
-            #     published=published, 
-            #     foodcategory_id = foodcategory_id,
-            #     )
-
-            # item.tag.set(tags)
-
-            # print("tag_names:", tags)
-            
-            # serializer = FoodItemsSerializer(item)
-            # return Response(serializer.data, status=status.HTTP_201_CREATED)
-
     def update(self, request, *args, **kwargs):
-            instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            print("request.data:", request.data)
+        print("request.data:", request.data)
 
-            if len(request.data) == 1 and 'published' in request.data:
+        if len(request.data) == 1 and 'published' in request.data:
+            serializer.save()
+
+        else:
+            if 'tag' not in request.data:
+                instance.tag.clear()
+                serializer.save()
+                print("Instance tag:", instance.tag)
+            else:
                 serializer.save()
 
-            else:
-                if 'tag' not in request.data:
-                    instance.tag.clear()
-                    serializer.save()
-                    print("Instance tag:", instance.tag)
-                else:
-                    serializer.save()
-
-            return Response(serializer.data)
+        return Response(serializer.data)
 
 class OrderTablesView(viewsets.ModelViewSet):
     serializer_class = OrderTablesSerializer
@@ -191,7 +125,7 @@ class OrderTablesView(viewsets.ModelViewSet):
 
         if id is not None:
             # Filter records based on the menu_id parameter
-            return queryset.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu_id'
+            return queryset.filter(id=id) # Only filter instances inside FoodCategories with 'foodmenu'
         return queryset  # Return the filtered or unfiltered queryset
 
     def create(self, request, *args, **kwargs):
@@ -247,21 +181,80 @@ class VariantValuesView(viewsets.ModelViewSet):
             queryset = queryset.filter(title=title)  # Apply the filter
         return queryset  # Return the filtered or unfiltered queryset
 
+class VariantPricesView(viewsets.ModelViewSet):
+    serializer_class = VariantPricesSerializer
+    queryset = VariantPrices.objects.all()           
+
+    def create(self, request, *args, **kwargs):
+            serializer = self.get_serializer(data=request.data, many=True) # Many for list of dictionaries instead of single
+
+            if serializer.is_valid():
+                # Save the new instance
+                serializer.save()
+                print("Request data success:", request.data)
+
+                # Return a success response with the serialized instance
+                return Response(serializer.data, status=201)  # HTTP 201 Created
+            else:
+                # Return an error response with validation errors
+                print("Request data fail:", request.data)
+                # print("Request serializer:", serializer.data)
+                
+                return Response(serializer.errors, status=400)
 
 class LocalView(View):
-    def get_local_ip(self):
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
+    def get_local_ip(self, request):
         try:
-            # Get the hostname
-            hostname = socket.gethostname()
-            # Get the local IP address using the hostname
-            local_ip = socket.gethostbyname(hostname)
-            return local_ip
-        except Exception as e:
-            return str(e)
+            # Run the ipconfig command and capture the output
+            result = subprocess.check_output(['ipconfig'], universal_newlines=True)
+
+            # Split the output into lines
+            lines = result.split('\n')
+
+            # Find the index of the line containing "Wireless LAN adapter Wi-Fi"
+            start_index = next((i for i, line in enumerate(lines) if 'Wireless LAN adapter Wi-Fi' in line), None)
+
+            if start_index is not None:
+                # Find the index of the line containing "Subnet Mask"
+                end_index = next((i for i, line in enumerate(lines[start_index:], start=start_index) if '   Subnet Mask' in line), None)
+
+                if end_index is not None:
+                    # Extract and print the lines between the specified indices
+                    for line in lines[start_index + 1:end_index]:
+                        print(line)
+                    
+                    # Display the line containing the IPv4 Address
+                    ipv4_address_line = next((line for line in lines[start_index + 1:end_index] if 'IPv4 Address' in line), None)
+                    if ipv4_address_line:
+                        return ipv4_address_line.split(':')[-1].strip()
+                    else:
+                        print("IPv4 Address not found in the specified range.")
+                else:
+                    print("Subnet Mask not found after 'Wireless LAN adapter Wi-Fi'")
+            else:
+                print("'Wireless LAN adapter Wi-Fi' not found in the output")
+
+        except subprocess.CalledProcessError as e:
+            return f"Error running ipconfig: {e}"
+
+    def get_ip(self, request):
+        # This will give you the local IP address of the server, not the client
+        local_ip = request.META.get('SERVER_ADDR')
+        return local_ip
 
     def get(self, request, *args, **kwargs):
-        local_ip = self.get_local_ip()
-        return JsonResponse({'local_ip': local_ip}) 
+        client_ip = self.get_client_ip(request)
+        local_ip = self.get_local_ip(request)
+        test = self.get_ip(request)
+        return JsonResponse({'client_ip': client_ip, 'local_ip': local_ip, 'get_ip':test})
 
 
     # # Call the function and print the local IP
