@@ -29,8 +29,6 @@ import Testing from "./pages/testing";
 import QRModal from "./components/qr_modal";
 import { useEffect, useState } from "react";
 import Table from "./pages/table";
-import React from "react";
-import axios from "axios";
 // import getLocalIpAddresses from "local-ip-addresses-and-hostnames";
 // import { UserContext, OrderList } from './pages/context';
 
@@ -48,11 +46,11 @@ interface Pathname {
 }
 
 function App() {
-  const changeip = "192.168.1.18"; // Zhen Xun
+  // const changeip = "192.168.1.18"; // Zhen Xun
   // const changeip = "192.168.0.12"; //Zhen Xun Home
   // const changeip = "192.168.0.207"; //Zhen Xun Kenny
 
-  // const changeip = "192.168.1.24"; // DomDom
+  const changeip = "192.168.1.16"; // DomDom
   // `const yourModuleName = require('local-ip-addresses-and-hostnames');`
   // getLocalIpAddresses() = ['127.0.0.1', '192.168.1.101', '10.0.0.101']
 

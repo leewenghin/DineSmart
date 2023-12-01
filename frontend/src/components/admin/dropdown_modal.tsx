@@ -1,15 +1,5 @@
 import { useEffect, useState } from "react";
-
-const Badge = ({ item, index }: { item: string; index: number }) => {
-  return (
-    <span
-      key={index}
-      className="bg-orange-100 text-orange-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-orange-400 border border-orange-400"
-    >
-      {item} {index}
-    </span>
-  );
-};
+import Badge from "./badge";
 
 const Dropdown_modal = ({
   variantgroupID,
@@ -18,15 +8,14 @@ const Dropdown_modal = ({
   label,
   matchVariant,
   selectedOption,
-  handleVariantChange,
+  handleMatchVariant,
   handleRadioChange,
-  children,
 }: any) => {
   const [isDropdown, setIsDropdown] = useState(false);
 
   const toggleDropdown = () => {
     setIsDropdown(!isDropdown);
-    handleVariantChange(variantgroupID);
+    handleMatchVariant(variantgroupID);
   };
 
   useEffect(() => {
@@ -89,7 +78,7 @@ const Dropdown_modal = ({
       {/* <!-- Dropdown menu --> */}{" "}
       {selectedOption[variantgroupIndex] &&
         selectedOption[variantgroupIndex].map((item: any, index: number) => (
-          <Badge key={index} item={item} index={variantgroupID}></Badge>
+          <Badge key={index} item={item.name} index={variantgroupID}></Badge>
         ))}
       {isDropdown && (
         <div
@@ -131,7 +120,7 @@ const Dropdown_modal = ({
             aria-labelledby="dropdownSearchButton"
           >
             {matchVariant.length ? (
-              matchVariant.map(({ title, name }: any, index: number) => (
+              matchVariant.map(({ id, title, name }: any, index: number) => (
                 <li key={index}>
                   <div className="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                     <input
@@ -140,7 +129,7 @@ const Dropdown_modal = ({
                       value={name}
                       // checked={}
                       onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                        handleRadioChange(event, variantgroupIndex)
+                        handleRadioChange(event, variantgroupIndex, id, title)
                       }
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                     />

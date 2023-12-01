@@ -25,8 +25,6 @@ const tabs = [
   { id: 2, label: "Variant", className: "cursor-not-allowed" },
 ];
 
-const lists = [["hello"], ["hello"], ["hello"], ["hello"]];
-
 const ErrorMessage = ({ message }: any) => {
   return (
     <p className="mt-2 text-xs text-red-600 dark:text-red-400">
@@ -39,39 +37,39 @@ const CU_Modal = ({
   page,
   name,
   list = "",
+  variantList = "",
   variantGroupList = "",
   variantGroup = "",
   matchVariant = "",
   selectedOption = "",
   fileInputRef,
   handleInputChange,
+  handleVariantInputChange = () => {},
   handleTagChange = () => {},
   handleSelectChange = () => {},
-  handleVariantChange = () => {},
+  handleMatchVariant = () => {},
   handleRadioChange = () => {},
   handleCancel,
   handleSubmit,
   handleSave = () => {},
   nameAlert = false,
   priceAlert = false,
+  variantAlert = false,
+  variantPriceAlert = false,
+  variantSkuAlert = false,
+  isValidateSuccess = "",
+  setValidateSuccess = () => {},
+  allCombinations = "",
+  setAllCombinations = () => {},
 }: any) => {
   console.log("List: ", list ?? 0);
-  console.log(variantGroupList);
+  console.log("Variant List: ", variantList ?? 0);
+  console.log("Variant Group List:", variantGroupList);
   console.log("Variant Group", variantGroup);
 
   const [toggleTab, setToggleTab] = useState(1);
   const [toggleSave, setToggleSave] = useState(1);
-  const [isValidateSuccess, setValidateSuccess] = useState(false);
-  // Create a mapping from variantGroup id to index
-  // const variantGroupIndexMap: Record<number, number> = {};
-  // variantGroup.forEach((group, index) => {
-  //   variantGroupIndexMap[group.id] = index;
-  // });
 
-  // // Map allCombinations to match the order of variantGroup
-  // const reorderedCombinations = allCombinations.map((item) =>
-  //   variantGroup.map((group) => item[variantGroupIndexMap[group.id]])
-  // );
   function generateCombinations(
     arrays: any,
     index: any,
@@ -89,7 +87,7 @@ const CU_Modal = ({
     // Add a check here
     if (arrays[index] && arrays[index].length > 0) {
       for (let i = 0; i < arrays[index].length; i++) {
-        currentCombination.push(arrays[index][i]);
+        currentCombination.push(arrays[index][i]); // Extract only the 'name' property
         generateCombinations(arrays, index + 1, currentCombination, result);
         currentCombination.pop();
       }
@@ -105,10 +103,10 @@ const CU_Modal = ({
     return result;
   }
 
-  const allCombinations = getAllCombinations(selectedOption);
+  // const allCombinations = getAllCombinations(selectedOption);
+
   console.log("Selected option: ", selectedOption);
   console.log("All combination: ", allCombinations);
-  console.log("length: ", allCombinations);
 
   const handleToggleTab = (id: number) => {
     if (isValidateSuccess) {
@@ -136,6 +134,17 @@ const CU_Modal = ({
       setToggleTab(1);
     }
   }, [nameAlert, priceAlert, toggleSave]);
+
+  if (page == "Item") {
+    useEffect(() => {
+      const calculateCombinations = () => {
+        const combinations: any[] = getAllCombinations(selectedOption);
+        setAllCombinations(combinations);
+      };
+
+      calculateCombinations();
+    }, [selectedOption]);
+  }
 
   return (
     <div
@@ -753,12 +762,9 @@ const CU_Modal = ({
                     <form action="#" onSubmit={handleSubmit}>
                       <div className="grid gap-4 sm:grid-cols-2 mb-5">
                         <div className="col-span-2">
-                          <label
-                            htmlFor="name"
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none"
-                          >
+                          <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none">
                             Variant Group
-                          </label>
+                          </p>
                           <Select
                             primaryColor={"orange"}
                             value={variantGroup}
@@ -772,12 +778,9 @@ const CU_Modal = ({
                         {variantGroup && (
                           <div className="col-span-2">
                             {" "}
-                            <label
-                              htmlFor="name"
-                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none"
-                            >
+                            <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none">
                               Variant
-                            </label>
+                            </p>
                             {variantGroup &&
                               variantGroup.map(
                                 ({ id, label }: any, index: number) => (
@@ -789,11 +792,17 @@ const CU_Modal = ({
                                     label={label}
                                     matchVariant={matchVariant}
                                     selectedOption={selectedOption}
-                                    handleVariantChange={handleVariantChange}
+                                    handleMatchVariant={handleMatchVariant}
                                     handleRadioChange={handleRadioChange}
                                   ></Dropdown_modal>
                                 )
                               )}
+                            {variantAlert && (
+                              <ErrorMessage
+                                message={`Please select at least one value for each
+                                variant *`}
+                              ></ErrorMessage>
+                            )}
                           </div>
                         )}
                         {allCombinations.length > 0 &&
@@ -809,16 +818,13 @@ const CU_Modal = ({
                                       <tr>
                                         {variantGroup &&
                                           variantGroup.map(
-                                            (
-                                              { id, label }: any,
-                                              index: number
-                                            ) =>
+                                            ({ label }: any, index: number) =>
                                               Array.isArray(
                                                 selectedOption[index]
                                               ) &&
                                               selectedOption[index].length >
                                                 0 ? (
-                                                <th key={id}>{label}</th>
+                                                <th key={index}>{label}</th>
                                               ) : null
                                           )}
                                         <th>Price</th>
@@ -827,53 +833,70 @@ const CU_Modal = ({
                                     </thead>
                                     <tbody>
                                       <tr>
-                                        {/* {variantGroup &&
-                                        variantGroup.map(
-                                          ({ id, label }: any, index: number) =>
-                                            Array.isArray(selectedOption[id]) &&
-                                            selectedOption[id].length > 0 ? (
-                                              <td>
-                                                <input
-                                                  type="text"
-                                                  // value="iPad Air Gen 5th Wi-Fi"f
-                                                  className={`mb-6 bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-48 p-2.5 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
-                                                  placeholder={`${item[0][0]}`}
-                                                  disabled
-                                                />
-                                                {combinationIndex} And {index}
-                                              </td>
-                                            ) : null
-                                        )} */}
-
                                         {item.map(
                                           (value: any, innerIndex: number) => (
-                                            <td key={innerIndex}>
+                                            <td
+                                              key={innerIndex}
+                                              className="pe-2"
+                                            >
                                               <input
                                                 type="text"
-                                                // value="iPad Air Gen 5th Wi-Fi"f
-                                                className={`mb-6 bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-48 p-2.5 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
-                                                placeholder={`${value}`}
+                                                name="testing"
+                                                value={value.name}
+                                                className={`mb-6 bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-44 p-2.5 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
                                                 disabled
+                                                required
                                               />
-                                              {/* {combinationIndex} And {index} */}
                                             </td>
                                           )
                                         )}
-                                        <td>
+
+                                        <td className="pe-2">
                                           <input
-                                            type="text"
-                                            // value="iPad Air Gen 5th Wi-Fi"f
-                                            className={`mb-6 bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-48 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
+                                            type="number"
+                                            id={`price${combinationIndex}`}
+                                            name="price"
+                                            step="0.01"
+                                            value={
+                                              variantList[combinationIndex]
+                                                ?.price ?? ""
+                                            }
+                                            onChange={(event) =>
+                                              handleVariantInputChange(
+                                                combinationIndex,
+                                                event,
+                                                item.map((item: any) => item.id)
+                                              )
+                                            }
+                                            className={`mb-6 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-32 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
                                             placeholder="Ex. RM 100"
                                           />
+                                          <ErrorMessage
+                                            message={variantPriceAlert}
+                                          ></ErrorMessage>
                                         </td>
                                         <td>
                                           <input
-                                            type="text"
-                                            // value="iPad Air Gen 5th Wi-Fi"f
-                                            className={`mb-6 bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-48 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
+                                            type="number"
+                                            id={`sku${combinationIndex}`}
+                                            name="sku"
+                                            value={
+                                              variantList[combinationIndex]
+                                                ?.sku ?? ""
+                                            }
+                                            onChange={(event) =>
+                                              handleVariantInputChange(
+                                                combinationIndex,
+                                                event
+                                              )
+                                            }
+                                            className={`mb-6 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-32 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
                                             placeholder="Ex. 10"
+                                            required
                                           />
+                                          <ErrorMessage
+                                            message={variantSkuAlert}
+                                          ></ErrorMessage>
                                         </td>
                                       </tr>
                                     </tbody>
