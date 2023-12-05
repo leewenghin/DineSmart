@@ -540,126 +540,114 @@ const CU_Modal = ({
                         {nameAlert && <ErrorMessage message={nameAlert} />}
                       </div>
 
-                      {page == "Item" && (
-                        <div className="col-span-1">
-                          <label
-                            htmlFor="price"
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                          >
-                            Price <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            id="price"
-                            name="price"
-                            step="0.01"
-                            value={
-                              list.price || list.price == 0 ? list.price : ""
-                            }
-                            onChange={handleInputChange}
-                            className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
-                              priceAlert ? "border-red-500" : "border-gray-300"
-                            }`}
-                            placeholder="RM299"
-                            required
-                          />
-                          {priceAlert && <ErrorMessage message={priceAlert} />}
-                        </div>
-                      )}
+                      <div className="col-span-1">
+                        <label
+                          htmlFor="price"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Price <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          id="price"
+                          name="price"
+                          step="0.01"
+                          value={
+                            list.price || list.price == 0 ? list.price : ""
+                          }
+                          onChange={handleInputChange}
+                          className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${
+                            priceAlert ? "border-red-500" : "border-gray-300"
+                          }`}
+                          placeholder="RM299"
+                          required
+                        />
+                        {priceAlert && <ErrorMessage message={priceAlert} />}
+                      </div>
 
-                      {page == "Menu" ||
-                        page == "Categories" ||
-                        (page == "Item" && (
-                          <div className="col-span-2">
-                            <label
-                              htmlFor="description"
-                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none"
-                            >
-                              Description
-                            </label>
-                            <textarea
-                              id="description"
-                              name="description"
-                              value={
-                                list.description !== null
-                                  ? list.description
-                                  : ""
-                              }
-                              onChange={handleInputChange}
-                              rows={5}
-                              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              placeholder="Write a description..."
-                            ></textarea>
-                          </div>
-                        ))}
+                      <div className="col-span-2">
+                        <label
+                          htmlFor="description"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none"
+                        >
+                          Description
+                        </label>
+                        <textarea
+                          id="description"
+                          name="description"
+                          value={
+                            list.description !== null ? list.description : ""
+                          }
+                          onChange={handleInputChange}
+                          rows={5}
+                          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Write a description..."
+                        ></textarea>
+                      </div>
 
-                      {page == "Item" && (
-                        <div className="col-span-2">
-                          <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Tags
-                          </p>
+                      <div className="col-span-2">
+                        <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                          Tags
+                        </p>
 
-                          <ul className="grid w-full gap-2 md:grid-cols-5">
-                            {tags.map((item, index) => (
-                              <li key={index}>
-                                <input
-                                  id={item.label}
-                                  type="checkbox"
-                                  value={list.tag}
-                                  checked={
-                                    name == "Create"
-                                      ? list.tag.toString().includes(item.id)
-                                      : list.tag.toString().includes(item.id)
-                                  } // checks if item.label inside newItem.tag, if not then uncheck
-                                  onChange={() => handleTagChange(item.id)}
-                                  className="hidden peer"
-                                />
-                                <label
-                                  htmlFor={item.label}
-                                  className="inline-flex justify-center items-center w-full p-3 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-orange-500 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
-                                >
-                                  <div className="flex flex-col items-center text-center capitalize">
-                                    <img
-                                      className="mb-2 w-7 h-7 text-sky-500 select-none"
-                                      src={item.icon}
-                                      alt="Chili"
-                                    />
-                                    <div className="w-full text-sm font-semibold select-none">
-                                      {item.label}
-                                    </div>
+                        <ul className="grid w-full gap-2 md:grid-cols-5">
+                          {tags.map((item, index) => (
+                            <li key={index}>
+                              <input
+                                id={item.label}
+                                type="checkbox"
+                                value={list.tag}
+                                checked={
+                                  name == "Create"
+                                    ? list.tag.toString().includes(item.id)
+                                    : list.tag.toString().includes(item.id)
+                                } // checks if item.label inside newItem.tag, if not then uncheck
+                                onChange={() => handleTagChange(item.id)}
+                                className="hidden peer"
+                              />
+                              <label
+                                htmlFor={item.label}
+                                className="inline-flex justify-center items-center w-full p-3 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 peer-checked:border-orange-500 hover:text-gray-600 dark:peer-checked:text-gray-300 peer-checked:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+                              >
+                                <div className="flex flex-col items-center text-center capitalize">
+                                  <img
+                                    className="mb-2 w-7 h-7 text-sky-500 select-none"
+                                    src={item.icon}
+                                    alt="Chili"
+                                  />
+                                  <div className="w-full text-sm font-semibold select-none">
+                                    {item.label}
                                   </div>
-                                </label>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                                </div>
+                              </label>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
 
-                      {(page == "Category" || page == "Item") && (
-                        <div className="relative col-span-2 sm:col-span-1">
-                          <label
-                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                            htmlFor="small_size"
-                          >
-                            Upload Image
-                          </label>
-                          <input
-                            name="image"
-                            accept=".jpg, .jpeg, .png"
-                            ref={fileInputRef}
-                            onChange={handleInputChange}
-                            className="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                            id="small_size"
-                            type="file"
-                          />
-                          <p
-                            className="block sm:absolute sm:bottom-0 mt-1 sm:mt-0 text-sm text-gray-500 dark:text-gray-300"
-                            id="file_input_help"
-                          >
-                            SVG, PNG, JPG or GIF (MAX. 800x400px).
-                          </p>
-                        </div>
-                      )}
+                      <div className="relative col-span-2 sm:col-span-1">
+                        <label
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          htmlFor="small_size"
+                        >
+                          Upload Image
+                        </label>
+                        <input
+                          name="image"
+                          accept=".jpg, .jpeg, .png"
+                          ref={fileInputRef}
+                          onChange={handleInputChange}
+                          className="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                          id="small_size"
+                          type="file"
+                        />
+                        <p
+                          className="block sm:absolute sm:bottom-0 mt-1 sm:mt-0 text-sm text-gray-500 dark:text-gray-300"
+                          id="file_input_help"
+                        >
+                          SVG, PNG, JPG or GIF (MAX. 800x400px).
+                        </p>
+                      </div>
 
                       <div
                         className={`${
@@ -706,43 +694,12 @@ const CU_Modal = ({
                     </div>
 
                     <div className="flex items-center space-x-4">
-                      {page !== "Item" && (
-                        <button
-                          type="submit"
-                          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        >
-                          {page == "Menu" || name == "Edit" ? (
-                            <>
-                              {name} {page}
-                            </>
-                          ) : (
-                            "Save and add another"
-                          )}
-                        </button>
-                      )}
-
-                      {page !== "Menu" && page !== "Item" && name !== "Edit" ? (
-                        <>
-                          <button
-                            onClick={handleSave}
-                            type="submit"
-                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                          >
-                            Save
-                          </button>
-                        </>
-                      ) : page == "Item" ? (
-                        <>
-                          <button
-                            type="submit"
-                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                          >
-                            Continue
-                          </button>
-                        </>
-                      ) : (
-                        ""
-                      )}
+                      <button
+                        type="submit"
+                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      >
+                        Continue
+                      </button>
 
                       <button
                         data-modal-hide="updateProductModal"
@@ -845,7 +802,6 @@ const CU_Modal = ({
                                                 value={value.name}
                                                 className={`mb-6 bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-44 p-2.5 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
                                                 disabled
-                                                required
                                               />
                                             </td>
                                           )
@@ -870,6 +826,7 @@ const CU_Modal = ({
                                             }
                                             className={`mb-6 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-32 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
                                             placeholder="Ex. RM 100"
+                                            required
                                           />
                                           <ErrorMessage
                                             message={variantPriceAlert}
@@ -912,7 +869,7 @@ const CU_Modal = ({
                           type="submit"
                           className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         >
-                          {page == "Menu" || name == "Edit" ? (
+                          {name == "Edit" ? (
                             <>
                               {name} {page}
                             </>
@@ -921,7 +878,7 @@ const CU_Modal = ({
                           )}
                         </button>
 
-                        {page !== "Menu" && name !== "Edit" && (
+                        {name !== "Edit" && (
                           <>
                             <button
                               onClick={saveExit}

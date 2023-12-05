@@ -899,6 +899,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   // Submit form logic
 
   const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     try {
       if (variantGroup) {
         // If variant group has been selected
@@ -1212,6 +1214,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           page="Item"
           name="Edit"
           list={updateItem[itemIndex ?? 0]}
+          variantGroup={variantGroup}
+          variantGroupList={newVariantGroupList}
           fileInputRef={fileInputRef}
           handleCancel={() =>
             handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)
@@ -1221,6 +1225,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
             handleInputChangeEdit(event, itemIndex ?? 0)
           }
           handleTagChange={handleTagChangeWithParameterEdit}
+          // handleSelectChange={handleSelectChange}
           isChecked={isChecked}
           nameAlert={nameAlert}
           priceAlert={priceAlert}
