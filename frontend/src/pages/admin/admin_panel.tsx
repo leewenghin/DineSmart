@@ -22,13 +22,13 @@ const links = [
   {
     label: "Variant Group",
     url: "/admin_panel/variant_group",
-    icon: "home",
+    icon: "forms_add_on",
     status: "",
   },
   {
-    label: "Variant Value",
+    label: "Variant",
     url: "/admin_panel/variant_value",
-    icon: "home",
+    icon: "add_circle",
     status: "",
   },
   { label: "Dashboard", url: "#", icon: "home", status: "" },

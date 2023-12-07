@@ -49,11 +49,10 @@ interface Pathname {
 function App() {
   const [ipaddress, setIpAddress] = useState("localhost");
   const [qrtable, setQrTable] = useState<any>(0);
-  // const changeip = "192.168.1.5"; //Zhen Xun Home
-  // const changeip = "192.168.0.207"; //Zhen Xun Kenny
-
-  // const changeip = "192.168.1.24"; // DomDom
   const changeip = `${ipaddress}`; // Zhen Xun
+  // const changeip = "192.168.1.102"; // DomDom
+  // `const yourModuleName = require('local-ip-addresses-and-hostnames');`
+  // getLocalIpAddresses() = ['127.0.0.1', '192.168.1.101', '10.0.0.101']
 
   const [pathname, setPathname] = useState(
     window.location.pathname.split("-")[0]

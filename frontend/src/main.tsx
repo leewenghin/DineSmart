@@ -6,11 +6,7 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import { OrderProvider } from "./pages/context";
 
-
-
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-
   // Remove after react
   <BrowserRouter>
     <OrderProvider>

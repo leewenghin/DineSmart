@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
 import CU_Modal from "../../components/admin/cu_modal";
 import DeleteModal from "../../components/admin/delete_modal";
+import variant from "./admin_variant_value";
 
 type TField = {
   id: number;
@@ -12,23 +13,32 @@ type TField = {
   price: number | null;
   tag: number[];
   published: boolean;
-  foodcategory_id: number;
+  foodcategory: number;
 };
 
 // Define the Item type
 type TCategory = Pick<TField, "id" | "name">;
 type TItem = TField;
 type TSubmitItem = Omit<TField, "id">;
+
 type TVariantGroup = {
   id: number;
   name: string;
   published: boolean;
 };
+
 type TVariantValue = {
   id: number;
   title: number;
   name: string;
   published: boolean;
+};
+
+type TSubmitVariant = {
+  variants: number | null;
+  fooditems: number | null;
+  price: number | null;
+  sku: number | null;
 };
 
 const Card = ({
@@ -183,6 +193,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const setItemLink = `http://${changeIP}:8000/api/fooditems/`;
   const getVariantGroupLink = `http://${changeIP}:8000/api/variantgroup/`;
   const getVariantValueLink = `http://${changeIP}:8000/api/variantvalue/`;
+  const setVariantPriceLink = `http://${changeIP}:8000/api/variantprices/`;
 
   const [menuList, setMenuList] = useState<TCategory[]>([]);
   const [categoryList, setCategoryList] = useState<TCategory[]>([]);
@@ -190,35 +201,55 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const [variantValueList, setVariantValueList] = useState<TVariantValue[]>([]);
   const [itemList, setItemList] = useState<TItem[]>([]); // Provide type annotation htmlFor taskList
   const [newItem, setNewItem] = useState<TSubmitItem>({
-    // htmlFor reset the field
+    // For reset the field
     name: "",
     description: "",
     image: null,
     price: null,
     tag: [],
     published: false,
-    foodcategory_id: FoodCategoryId,
+    foodcategory: FoodCategoryId,
   });
   const [updateItem, setUpdateItem] = useState<TSubmitItem[]>([]);
+  const [newVariant, setNewVariant] = useState<TSubmitVariant[]>([
+    {
+      // For reset the field
+      variants: null,
+      fooditems: null,
+      price: null,
+      sku: null,
+    },
+  ]);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // htmlFor toggle create modal purpose
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // htmlFor toggle update modal purpose
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // htmlFor toggle delete modal purpose
 
+  const [isVariantUpdated, setIsVariantUpdated] = useState(false);
+  const [isItemUpdated, setIsItemUpdated] = useState(false);
   const [itemID, setItemID] = useState<number | null>(null); // Keep the itemID when press edit button
   const [itemIndex, setItemIndex] = useState<number | null>(null); // Keep the itemIndex when press edit button
+  const [variantIndex, setVariantIndex] = useState<number | null>(null); // Keep the itemIndex when press edit button
   const [isChecked, setIsChecked] = useState(false); // htmlFor modal published checkbox purpose
   const fileInputRef = useRef<HTMLInputElement | null>(null); // Specify the type as HTMLInputElement | null and initialize it with null
 
   const [image, setImage] = useState<File | null>(null); // htmlFor modal image purpose
   const [nameAlert, setNameAlert] = useState<string | null>(null); // htmlFor form warning message
   const [priceAlert, setPriceAlert] = useState<string | null>(null); // htmlFor form warning message
+  const [variantPriceAlert, setVariantPriceAlert] = useState<string | null>(
+    null
+  ); // htmlFor form warning message
+  const [variantSkuAlert, setVariantSkuAlert] = useState<string | null>(null); // htmlFor form warning message
+  const [variantAlert, setVariantAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null); // htmlFor success alert message
   const [isSave, setSave] = useState(false); // To detect whether press save button
   const [variantGroup, setVariantGroup] = useState(null);
   const [variantGroupID, setVariantGroupID] = useState(0);
   const [matchVariant, setMatchVariant] = useState<any[]>([]);
   const [selectedOption, setSelectedOption] = useState<any[]>([]);
+
+  const [isValidateSuccess, setValidateSuccess] = useState(false);
+  const [allCombinations, setAllCombinations] = useState<any[]>([]);
 
   // // Add value and label field htmlFor react-tailwind-select library purpose
   // const newVariantGroupList = variantGroupList
@@ -296,30 +327,21 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
       newItem.tag.forEach((tag) => {
         formData.append("tag", tag.toString());
-        console.log("Tags: ", tag);
       });
 
-      console.log("This is price: ", newItem.price);
-      console.log("This is tags : ", newItem.tag);
-      console.log("This is published: ", newItem.published);
       formData.append("description", newItem.description);
       formData.append("published", newItem.published.toString());
-      formData.append("foodcategory_id", newItem.foodcategory_id.toString());
+      formData.append("foodcategory", newItem.foodcategory.toString());
 
       fetch(setItemLink, {
         method: "POST",
-        // headers: {
-        //   "Content-Type": "application/json",
-        // },
         body: formData,
       })
-        .then((response) => {
+        .then(async (response) => {
           if (response.ok) {
-            // return response.json(); // Parse the JSON data if the response is valid
-            const data = response.json();
+            const data = await response.json();
             resolve(data); // Resolve the Promise with the fetched data
           } else {
-            // console.log("This is image: ", image);
             return response.json().then((errorData) => {
               if (errorData.name) {
                 const errorMessage = errorData.name[0];
@@ -349,7 +371,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
             price: null,
             tag: [],
             published: false,
-            foodcategory_id: FoodCategoryId,
+            foodcategory: FoodCategoryId,
           }); // Clear the input fields
         })
         .catch((error) => {
@@ -378,6 +400,50 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         fetchList(getItemLink, setItemList, setUpdateItem);
       })
       .catch((error) => console.error("Error updating status: ", error));
+  };
+
+  const fetchSetVariantList = async () => {
+    console.log("Submitted Variant: ", newVariant);
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(setVariantPriceLink, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newVariant),
+        });
+        if (response.ok) {
+          resolve(response);
+        } else {
+          return response.json().then((errorDataArray) => {
+            console.log("ERROR --------------------------", errorDataArray);
+            if (Array.isArray(errorDataArray) && errorDataArray.length > 0) {
+              errorDataArray.forEach((errorData) => {
+                if (errorData.price) {
+                  const errorMessage = errorData.price[0];
+                  console.error("Error (price):", errorMessage);
+                  // Show an alert message
+                  setVariantPriceAlert(errorMessage);
+                  console.log("inside priceeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+                }
+                if (errorData.sku) {
+                  const errorMessage = errorData.sku[0];
+                  console.error("Error (sku):", errorMessage);
+                  // Show an alert message
+                  setVariantSkuAlert(errorMessage);
+                }
+                // Add more conditions for other error fields as needed
+              });
+            }
+            throw new Error(`Response not OK. Status: ${response.status}`);
+          });
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        reject(error); // Reject the Promise with the error
+      }
+    });
   };
 
   const fetchUpdateItemIDList = (event: FormEvent) => {
@@ -420,19 +486,13 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       console.log("Test3", formData);
 
       formData.append("published", updateItemList.published.toString());
-      formData.append(
-        "foodcategory_id",
-        updateItemList.foodcategory_id.toString()
-      );
+      formData.append("foodcategory", updateItemList.foodcategory.toString());
 
       console.log("Name: ", updateItemList.name);
       console.log("description: ", updateItemList.description);
       console.log("Price: ", updateItem?.[itemIndex ?? 0]?.price?.toString());
       console.log("published: ", updateItemList.published.toString());
-      console.log(
-        "foodcategory_id: ",
-        updateItemList.foodcategory_id.toString()
-      );
+      console.log("foodcategory: ", updateItemList.foodcategory.toString());
 
       fetch(`${setItemLink}${itemID}/`, {
         method: "PUT",
@@ -569,6 +629,58 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     setUpdateItem(updatedArray);
   };
 
+  const handleVariantInputChange = (
+    index: number,
+    event: React.ChangeEvent<HTMLInputElement>,
+    variants_id?: number
+  ) => {
+    const { name, value } = event.target;
+
+    const updatedInputValues = [...newVariant];
+
+    const assignInput = (valueType: number) => {
+      updatedInputValues[index] = {
+        ...updatedInputValues[index],
+        [name]: valueType,
+      };
+    };
+
+    if (name == "price" && value !== null) {
+      const numericValue = parseFloat(value);
+      console.log("Index -------------", index);
+      if (!isNaN(numericValue)) {
+        assignInput(numericValue);
+        hideFormAlert(setPriceAlert);
+        hideFormAlert(setVariantPriceAlert);
+      } else {
+        assignInput(numericValue);
+        console.error("Invalid numeric value:", value);
+      }
+    }
+
+    if (name == "sku" && value !== null) {
+      const numericValue = parseFloat(value);
+      console.log("Index -------------", index);
+      if (!isNaN(numericValue)) {
+        assignInput(numericValue);
+        hideFormAlert(setPriceAlert);
+        hideFormAlert(setVariantSkuAlert);
+      } else {
+        assignInput(numericValue);
+        console.error("Invalid numeric value:", value);
+      }
+    }
+
+    if (variants_id) {
+      updatedInputValues[index] = {
+        ...updatedInputValues[index],
+        variants: variants_id, // Update variants_id directly
+      };
+    }
+    console.log("Variants ID ----------------------- ", variants_id);
+    setNewVariant(updatedInputValues);
+  };
+
   const handleInputChangeCreate = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -580,10 +692,16 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       setNewItem({ ...newItem, [name]: value });
       hideFormAlert(setNameAlert); // Remove alert when there's a value
       console.log("name: ", value);
+
+      if (value == "") {
+        setValidateSuccess(false);
+      }
     }
+
     if (name == "description") {
       setNewItem({ ...newItem, [name]: value });
     }
+
     if (name == "price" && value !== null) {
       try {
         const numericValue = parseFloat(value);
@@ -592,6 +710,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           hideFormAlert(setPriceAlert);
           console.log("price: ", value);
         } else {
+          setValidateSuccess(false);
           setNewItem({ ...newItem, [name]: null });
           console.error("Invalid numeric value:", value);
         }
@@ -622,6 +741,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
     setIsChecked(event.target.checked);
 
+    const updatedInputValues = [...updateItem];
+
     const assignInput = (valueType: string | number | boolean | File) => {
       updatedInputValues[index] = {
         ...updatedInputValues[index],
@@ -629,7 +750,6 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       };
     };
 
-    const updatedInputValues = [...updateItem];
     if (name === "name" || name === "description") {
       if (value !== null || value !== "") {
         assignInput(value);
@@ -663,10 +783,11 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     setVariantGroup(value);
   };
 
-  const handleVariantChange = (variantGroupID: number) => {
+  const handleMatchVariant = (variantGroupID: number) => {
     const variantValueTitle = variantValueList
       .filter(({ published }) => published !== false)
-      .map(({ title, name }) => ({
+      .map(({ id, title, name }) => ({
+        id: id,
         title: title,
         name: name,
       }));
@@ -682,7 +803,9 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
   const handleRadioChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    index: number
+    index: number,
+    id: number,
+    title: number
   ) => {
     console.log("Index ", index);
     const value = event.target.value;
@@ -697,21 +820,43 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     }
 
     // Check if the option is already selected in the current index
-    const isSelected = updatedOptions[index].includes(value);
+    const isSelected = updatedOptions[index].some(
+      (option: any) => option.id === id && option.title === title
+    );
 
     // Update the state based on whether the checkbox is checked or unchecked
     if (isSelected) {
       // If already selected, remove from the array
       updatedOptions[index] = updatedOptions[index].filter(
-        (option: any) => option !== value
+        (option: any) => !(option.id === id && option.title === title)
       );
+
+      // Check if the sub-array becomes empty after removing the option
+      if (updatedOptions[index].length === 0) {
+        // If empty, remove the sub-array from the main array
+        updatedOptions.splice(index, 1);
+      }
     } else {
       // If not selected, add to the array
-      updatedOptions[index] = [...updatedOptions[index], value];
+      updatedOptions[index] = [
+        ...updatedOptions[index],
+        { id, title, name: value },
+      ];
     }
+
+    // Now updatedOptions contains the modified array without empty sub-arrays
 
     // Update the state with the new array of arrays
     setSelectedOption(updatedOptions);
+    setNewVariant([
+      {
+        // For reset the field
+        variants: null,
+        fooditems: null,
+        price: null,
+        sku: null,
+      },
+    ]);
 
     console.log("Selected ", selectedOption);
   };
@@ -731,7 +876,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
         price: null,
         tag: [],
         published: false,
-        foodcategory_id: FoodCategoryId,
+        foodcategory: FoodCategoryId,
       });
     }
     if (resetUpdateItem) {
@@ -743,17 +888,46 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     hideFormAlert(setPriceAlert);
   };
 
+  // useEffect(() => {
+  //   if (variantGroup && selectedOption.length == 0) {
+  //     setVariantAlert(true);
+  //   } else {
+  //     setVariantAlert(false);
+  //   }
+  // }, [variantGroup, selectedOption]);
+
   // Submit form logic
+
   const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     try {
-      await fetchSetItemList(event); // Wait htmlFor fetchSetCategoryList to complete
-      if (!nameAlert) {
-        if (isSave) {
-          handleCancel(isCreateModalOpen, setIsCreateModalOpen, true); // Reset the field list and exit modal
-          setSave(false);
+      if (variantGroup) {
+        // If variant group has been selected
+        if (selectedOption.length == 0) {
+          // If no variant value has been selected
+          setVariantAlert(true);
+        } else {
+          // If variant value has been selected
+          if (allCombinations.length > 0) {
+            const data: any = await fetchSetItemList(event); // Wait for fetchSetCategoryList to complete
+            const fooditemsID = newVariant.map((item) => ({
+              ...item,
+              fooditems: data.id /* your desired value for fooditems */,
+            }));
+            setNewVariant(fooditemsID);
+            setIsVariantUpdated(true);
+            setIsItemUpdated(true);
+            console.log("Submitted Variant: ", fooditemsID, newVariant);
+          }
         }
-        console.log(alertMessage);
-        setAlertMessage("Successful Created"); // Make sure this code is executed
+      } else {
+        // If no variant group has been selected
+        const data: any = await fetchSetItemList(event); // Wait for fetchSetCategoryList to complete
+      }
+
+      if (!nameAlert && !priceAlert && !variantAlert) {
+        setIsItemUpdated(true);
       }
     } catch (error) {
       // Handle any errors that occur during the fetchSetCategoryList operation
@@ -764,7 +938,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const handleUpdate = async (event: React.FormEvent) => {
     try {
       await fetchUpdateItemIDList(event); // Wait htmlFor fetchSetMenuList to complete
-      if (!nameAlert || !priceAlert) {
+      if (!nameAlert && !priceAlert) {
         handleCancel(isUpdateModalOpen, setIsUpdateModalOpen); // Reset the field list and exit modal
         console.log(alertMessage);
         setAlertMessage("Successful Updated"); // Make sure this code is executed
@@ -778,12 +952,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const handleDelete = async (itemID: number) => {
     try {
       await fetchDeleteItemIDList(itemID); // Wait htmlFor fetchSetMenuList to complete
-      if (!nameAlert && !priceAlert) {
-        handleCancel(isDeleteModalOpen, setIsDeleteModalOpen);
-        // Exit modal
-        console.log(alertMessage);
-        setAlertMessage("Successful Deleted"); // Make sure this code is executed
-      }
+      handleCancel(isDeleteModalOpen, setIsDeleteModalOpen);
+      // Exit modal
+      console.log(alertMessage);
+      setAlertMessage("Successful Deleted"); // Make sure this code is executed
     } catch (error) {
       // Handle any errors that occur during the fetchSetMenuList operation
       console.error("Error:", error);
@@ -832,8 +1004,50 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   }, [alertMessage]);
 
   useEffect(() => {
+    console.log("Useeffect -----------------", newVariant);
+
+    if (isVariantUpdated) {
+      console.log("RUN ======================================");
+      fetchSetVariantList();
+      setIsVariantUpdated(false);
+    }
+  }, [newVariant, isVariantUpdated]);
+
+  useEffect(() => {
     handleOverflow();
   }, [isCreateModalOpen, isUpdateModalOpen, isDeleteModalOpen]);
+
+  useEffect(() => {
+    if (isItemUpdated && !variantAlert) {
+      if (isSave) {
+        handleCancel(isCreateModalOpen, setIsCreateModalOpen, true); // Reset the field list and exit modal
+        setSave(false);
+      }
+      console.log(alertMessage);
+      setAlertMessage("Successful Created"); // Make sure this code is executed
+    }
+  }, [isItemUpdated]);
+
+  useEffect(() => {
+    if (allCombinations) {
+      setVariantAlert(false);
+      console.log("Run");
+    }
+  }, [allCombinations]);
+
+  useEffect(() => {
+    if (!variantGroup) {
+      // if variantgroup is empty
+      setVariantAlert(false); // Reset variant alert
+      setSelectedOption([]); // Reset selected value
+      setAllCombinations([]); // Reset combinations
+    }
+  }, [variantGroup]);
+
+  useEffect(() => {
+    console.log("Variant price alert:", variantPriceAlert);
+    console.log("Variant sku alert:", variantSkuAlert);
+  }, [variantPriceAlert, variantSkuAlert]);
 
   return (
     <div className="content px-10">
@@ -963,6 +1177,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           page="Item"
           name="Create"
           list={newItem}
+          variantList={newVariant}
           variantGroup={variantGroup}
           variantGroupList={newVariantGroupList}
           matchVariant={matchVariant}
@@ -971,9 +1186,10 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
             handleInputChangeCreate(event)
           }
+          handleVariantInputChange={handleVariantInputChange}
           handleTagChange={handleTagChangeWithParameter}
           handleSelectChange={handleSelectChange}
-          handleVariantChange={handleVariantChange}
+          handleMatchVariant={handleMatchVariant}
           handleRadioChange={handleRadioChange}
           isChecked={isChecked}
           handleCancel={() =>
@@ -983,6 +1199,13 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           handleSave={handleSave}
           nameAlert={nameAlert}
           priceAlert={priceAlert}
+          variantAlert={variantAlert}
+          variantPriceAlert={variantPriceAlert}
+          variantSkuAlert={variantSkuAlert}
+          isValidateSuccess={isValidateSuccess}
+          setValidateSuccess={setValidateSuccess}
+          allCombinations={allCombinations}
+          setAllCombinations={setAllCombinations}
         ></CU_Modal>
       )}
 
@@ -991,6 +1214,8 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           page="Item"
           name="Edit"
           list={updateItem[itemIndex ?? 0]}
+          variantGroup={variantGroup}
+          variantGroupList={newVariantGroupList}
           fileInputRef={fileInputRef}
           handleCancel={() =>
             handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)
@@ -1000,6 +1225,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
             handleInputChangeEdit(event, itemIndex ?? 0)
           }
           handleTagChange={handleTagChangeWithParameterEdit}
+          // handleSelectChange={handleSelectChange}
           isChecked={isChecked}
           nameAlert={nameAlert}
           priceAlert={priceAlert}

@@ -32,6 +32,7 @@ router.register(r'foodtag', views.FoodTagsView, 'foodtag')
 router.register(r'ordertables', views.OrderTablesView, 'ordertable')
 router.register(r'variantgroup', views.VariantGroupsView, 'variantgroup')
 router.register(r'variantvalue', views.VariantValuesView, 'variantvalue')
+router.register(r'variantprices', views.VariantPricesView, 'variantprices')
 # router.register(r'local', views.local, 'local')
 
 

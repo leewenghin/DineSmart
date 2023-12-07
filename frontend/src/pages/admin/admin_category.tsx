@@ -12,7 +12,7 @@ type TField = {
   description: string;
   image: File | null;
   published: boolean;
-  foodmenu_id: number;
+  foodmenus: number;
 };
 
 // Remove properties from type
@@ -193,7 +193,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
     description: "",
     image: null,
     published: false,
-    foodmenu_id: FoodMenuId,
+    foodmenus: FoodMenuId,
   });
   const [updateCategory, setUpdateCategory] = useState<TSubmitCategory[]>([]);
   const [categoryID, setCategoryID] = useState<number | null>(null); // Keep the menuID when press edit button
@@ -255,7 +255,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
       formData.append("name", newCategory.name);
       formData.append("description", newCategory.description);
       formData.append("published", newCategory.published.toString());
-      formData.append("foodmenu_id", newCategory.foodmenu_id.toString());
+      formData.append("foodmenus", newCategory.foodmenus.toString());
 
       fetch(setCategoryLink, {
         method: "POST",
@@ -287,7 +287,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
             description: "",
             image: null,
             published: false,
-            foodmenu_id: FoodMenuId,
+            foodmenus: FoodMenuId,
           }); // Clear the input fields
           if (fileInputRef.current) {
             fileInputRef.current.value = ""; // Clear the file input
@@ -354,8 +354,8 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         updateCategory[categoryIndex ?? 0].published.toString()
       );
       formData.append(
-        "foodmenu_id",
-        updateCategory[categoryIndex ?? 0].foodmenu_id.toString()
+        "foodmenus",
+        updateCategory[categoryIndex ?? 0].foodmenus.toString()
       );
 
       fetch(`${setCategoryLink}${categoryID}/`, {
@@ -511,7 +511,7 @@ const admin_category = ({ changeIP }: { changeIP: string }) => {
         description: "",
         image: null,
         published: false,
-        foodmenu_id: FoodMenuId,
+        foodmenus: FoodMenuId,
       });
     }
 

@@ -1,7 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import CU_Modal from "../../components/admin/cu_modal";
 import DeleteModal from "@/components/admin/delete_modal";
-import { title } from "process";
 
 const Table = ({
   page,
@@ -224,7 +223,11 @@ const Table = ({
     }
 
     if (name == "published") {
-      assignInput(checked);
+      if (action == "Create") {
+        setNewVariantGroup({ ...newVariantGroup, [name]: checked });
+      } else {
+        assignInput(checked);
+      }
     }
 
     setUpdateVariantGroup(updatedInputValues);

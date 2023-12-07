@@ -1,5 +1,7 @@
 import { faEllipsisVertical, faPrint } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Tooltip } from "react-tooltip";
+
 import {
   ChangeEvent,
   FormEvent,
@@ -488,14 +490,23 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                     }`}
                   >
                     <button
+                      data-tooltip-id="demo"
+                      data-tooltip-place="bottom"
+                      data-tooltip-content="Demo"
                       onClick={() => towebsite(items.name)}
-                      className="flex items-center"
+                      className="flex items-center relative" // Added relative positioning
                     >
                       <span className="material-symbols-outlined text-primaryColor">
                         captive_portal
                       </span>
                     </button>
+
+                    <Tooltip id="demo" />
+
                     <button
+                      data-tooltip-id="print"
+                      data-tooltip-place="bottom"
+                      data-tooltip-content="Print"
                       onClick={() => image(items)}
                       className="flex items-center"
                     >
@@ -503,7 +514,12 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                         print
                       </span>
                     </button>
+                    <Tooltip id="print" />
+
                     <button
+                      data-tooltip-id="refresh"
+                      data-tooltip-place="bottom"
+                      data-tooltip-content="Refresh"
                       onClick={() => handleRefresh(items.id)}
                       className="flex items-center"
                     >
@@ -511,6 +527,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                         refresh
                       </span>
                     </button>
+                    <Tooltip id="refresh" />
                   </div>
                 </div>
               </div>

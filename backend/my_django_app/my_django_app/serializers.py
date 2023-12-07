@@ -10,13 +10,13 @@ class FoodMenusSerializer(serializers.ModelSerializer):
 class FoodCategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = FoodCategories
-        fields = ['id', 'name', 'description', 'image', 'published', 'foodmenu_id']
+        fields = ['id', 'name', 'description', 'image', 'published', 'foodmenus']
         image = serializers.FileField()  # Use FileField for file uploads
 
 class FoodItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FoodItems
-        fields = ['id', 'name', 'description', "price", "image", "published", "tag", 'foodcategory_id']
+        fields = ['id', 'name', 'description', "price", "image", "published", "tag", 'foodcategory']
 
 
 class OrderTablesSerializer(serializers.ModelSerializer):
@@ -38,3 +38,8 @@ class VariantValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariantValues
         fields = ['id', 'title', 'name', 'published']
+
+class VariantPricesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VariantPrices
+        fields = ['id', 'variants', 'fooditems', 'price', 'sku']

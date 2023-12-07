@@ -43,7 +43,7 @@ class FoodCategories(models.Model):
     description = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(upload_to=upload_to, null=True, blank=True)    
     published = models.BooleanField(default=False)
-    foodmenu_id = models.ForeignKey(FoodMenus, on_delete=models.CASCADE)
+    foodmenus = models.ForeignKey(FoodMenus, on_delete=models.CASCADE)
     
     def clean(self):
         if not self.name:
@@ -64,7 +64,7 @@ class FoodItems(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
     tag = models.ManyToManyField('FoodTags', blank=True)
     published = models.BooleanField(default=True)
-    foodcategory_id = models.ForeignKey(FoodCategories, on_delete=models.CASCADE)
+    foodcategory = models.ForeignKey(FoodCategories, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ('id',)
@@ -171,4 +171,17 @@ class VariantValues(models.Model):
         verbose_name_plural = 'Variant Value'
 
     def __str__(self):
-        return self.name
+        return f"{self.id}, {self.title}, {self.name}"
+
+    # def __str__(self):
+    #     return str(self.pk)
+
+class VariantPrices(models.Model):
+    variants = models.ManyToManyField('VariantValues', blank=True)
+    fooditems = models.ForeignKey(FoodItems, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null = False, blank=False)
+    sku = models.IntegerField(null=False, blank=False)
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name_plural = 'Variant Prices'
