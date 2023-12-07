@@ -9,9 +9,12 @@ from rest_framework import viewsets, permissions
 from rest_framework import status
 from decimal import Decimal
 from my_django_app.models import FoodTags
-import socket   
 from django.views import View
-
+import socket   
+import subprocess
+import re
+import os
+from django.conf import settings
 
 class FoodMenusView(viewsets.ModelViewSet):
     serializer_class = FoodMenusSerializer
@@ -221,6 +224,11 @@ class OrderTablesView(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
 
+        if instance.image:
+            image_path = os.path.join(settings.MEDIA_ROOT, str(instance.image))
+            if os.path.exists(image_path):
+                os.remove(image_path)
+
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else: 
@@ -249,19 +257,53 @@ class VariantValuesView(viewsets.ModelViewSet):
 
 
 class LocalView(View):
-    def get_local_ip(self):
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
+    def get_local_ip(self, request):
         try:
-            # Get the hostname
-            hostname = socket.gethostname()
-            # Get the local IP address using the hostname
-            local_ip = socket.gethostbyname(hostname)
-            return local_ip
-        except Exception as e:
-            return str(e)
+            # Run the ipconfig command and capture the output
+            result = subprocess.check_output(['ipconfig'], universal_newlines=True)
+
+            # Split the output into lines
+            lines = result.split('\n')
+
+            # Find the index of the line containing "Wireless LAN adapter Wi-Fi"
+            start_index = next((i for i, line in enumerate(lines) if 'Wireless LAN adapter Wi-Fi' in line), None)
+
+            if start_index is not None:
+                # Find the index of the line containing "Subnet Mask"
+                end_index = next((i for i, line in enumerate(lines[start_index:], start=start_index) if '   Subnet Mask' in line), None)
+
+                if end_index is not None:
+                    # Extract and print the lines between the specified indices
+                    for line in lines[start_index + 1:end_index]:
+                        print(line)
+                    
+                    # Display the line containing the IPv4 Address
+                    ipv4_address_line = next((line for line in lines[start_index + 1:end_index] if 'IPv4 Address' in line), None)
+                    if ipv4_address_line:
+                        return ipv4_address_line.split(':')[-1].strip()
+                    else:
+                        print("IPv4 Address not found in the specified range.")
+                else:
+                    print("Subnet Mask not found after 'Wireless LAN adapter Wi-Fi'")
+            else:
+                print("'Wireless LAN adapter Wi-Fi' not found in the output")
+
+        except subprocess.CalledProcessError as e:
+            return f"Error running ipconfig: {e}"
+
 
     def get(self, request, *args, **kwargs):
-        local_ip = self.get_local_ip()
-        return JsonResponse({'local_ip': local_ip}) 
+        local_ip = self.get_local_ip(request)
+        client_ip = self.get_client_ip(request)
+        return JsonResponse({'client_ip':client_ip,'local_ip': local_ip})
 
 
     # # Call the function and print the local IP

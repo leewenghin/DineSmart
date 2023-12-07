@@ -9,6 +9,7 @@ from io import BytesIO
 from django.core.files import File 
 from datetime import datetime, timedelta
 from urllib.parse import quote
+import requests
 # instance represent the file is attached to
 # filename is the original name of the uploaded file
 def upload_to(instance, filename): 
@@ -90,13 +91,27 @@ class OrderTables(models.Model):
         # if other_table_data:
         # Remove existing QR code before saving the new one
 
+
+        api_url = 'http://127.0.0.1:8000/local/'
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            data = response.json()
+            # Process the data from the API
+            if 'local_ip' in data:
+                local_ip = data['local_ip']
+                print (f"Ip address:{local_ip}") 
+            else:
+                print("Error: 'local_ip' key not found in the response data")
+        else:
+            print(f"Error: {response.status_code}")
         # Generate a unique identifier for the QR code (UUID)
         unique_identifier = str(uuid.uuid4())
         # Calculate expiration time (e.g., 1 day from now)
         expiration_time = datetime.now() + timedelta(minutes=1)
 
         # Create QR code with expiration time encoded in the URL
-        url = f'http://127.0.0.1:5173/table/{quote(self.name)}-{unique_identifier}?expires={expiration_time.isoformat()}'
+        url = f'http://{local_ip}:5173/table/{quote(self.name)}-{unique_identifier}?expires={expiration_time.isoformat()}'
         qrcode_img = qrcode.make(url)
 
         qr_width, qr_height = qrcode_img.size

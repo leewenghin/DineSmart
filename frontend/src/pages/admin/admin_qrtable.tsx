@@ -34,6 +34,86 @@ interface submitMenu {
   published: boolean;
 }
 
+const ButtonQRCode = ({ items, index, ImageResponsive }: any) => {
+  const [isOptionModalOpen, setIsOptionModalOpen] = useState(false); // For toggle modal purpose
+
+  const toggleModal = () => {
+    setIsOptionModalOpen(!isOptionModalOpen);
+  };
+
+  useEffect(() => {
+    const handleDocumentClick = (event: React.MouseEvent | MouseEvent) => {
+      if (isOptionModalOpen) {
+        const targetElement = event.target as HTMLElement;
+        if (
+          !targetElement ||
+          !targetElement.closest(`#dropdownBottomButton${index}`)
+        ) {
+          setIsOptionModalOpen(false);
+        }
+      }
+    };
+
+    if (isOptionModalOpen) {
+      // Add a click event listener to the document
+      document.addEventListener("click", handleDocumentClick);
+    }
+
+    return () => {
+      // Clean up the event listener when the component unmounts or the modal closes
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [isOptionModalOpen]);
+
+  return (
+    <>
+      <button
+        onClick={toggleModal}
+        id={`dropdownBottomButton${index}`}
+        className="text-gray-500 hover:text-gray-700 focus:outline-none"
+        type="button"
+      >
+        <FontAwesomeIcon
+          icon={faEllipsisVertical}
+          className={`px-2 text-primaryColor fa-lg ${
+            ImageResponsive == items.id ? "md:hidden block" : "block"
+          }`}
+        />
+      </button>
+      {isOptionModalOpen && (
+        <div className="absolute top-4 right-0 mt-4 bg-white border rounded shadow-md z-10 ">
+          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+            <li>
+              <a
+                href="#"
+                className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                Edit Table Number
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                Earnings
+              </a>
+            </li>
+          </ul>
+          <div className="py-2">
+            <a
+              href="#"
+              className="block px-4 py-2 text-sm text-gray-700 border-t hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+            >
+              Delete
+            </a>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 const qrtable = ({ changeIP }: { changeIP: string }) => {
   const getMenuLink = `http://${changeIP}:8000/api/ordertables/`;
 
@@ -230,16 +310,6 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
   // Assuming menuList is an array of objects with 'id' property
   const sortedMenuList = menuList.sort((a, b) => a.id - b.id);
 
-  const ShowQRModal = () => {
-    return (
-      // ... (your modal JSX code)
-      <form action="#" onSubmit={handleSubmit} encType="multipart/form-data">
-        {selectedItemId}
-        {/* Other form elements go here */}
-      </form>
-    );
-  };
-
   const delay = (ms: any) => new Promise((res) => setTimeout(res, ms));
   const elementRef = useRef<any>([]);
   // console.log(elementRef.current[index]);
@@ -333,7 +403,6 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
     // Navigate to the URL
     window.location.href = url;
   };
-
   return (
     <div className="content px-10">
       <div className="flex justify-between items-center">
@@ -366,6 +435,8 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                 ref={(el) => (elementRef.current[items.id] = el)}
                 className="float-right"
               ></form>
+
+              
               {/* <div className={`${ImageResponsive == true ? "block" : "hidden"}`} >
                 test
               </div> */}
@@ -388,7 +459,7 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                     ImageResponsive == items.id ? "w-full h-4/6" : "w-5/6"
                   }`}
                 >
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center relative">
                     <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                       Table
                     </h5>
@@ -404,13 +475,11 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
                         />
                         <div className="w-11 h-6 bg-gray-200 rounded-full dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
                       </label> */}
-                    <FontAwesomeIcon
-                      icon={faEllipsisVertical}
-                      className={`pe-3 text-primaryColor fa-lg ${
-                        ImageResponsive == items.id
-                          ? "md:hidden block"
-                          : "block"
-                      }`}
+
+                    <ButtonQRCode
+                      index={index}
+                      items={items}
+                      ImageResponsive={ImageResponsive}
                     />
                   </div>
                   <div
@@ -447,8 +516,10 @@ const qrtable = ({ changeIP }: { changeIP: string }) => {
               </div>
             </div>
           ))}
+
         </div>
       </div>
+
 
       {/* <!-- Main modal --> */}
       {isModalOpen && (

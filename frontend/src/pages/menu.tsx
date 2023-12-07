@@ -12,12 +12,24 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import Order_modal from "../components/order_modal";
 import "./menu.css";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import qrtable from "./admin/admin_qrtable";
-import {OrderProvider, useOrderContext, OrderContextProps, OrderList} from "./context";
+import {
+  OrderProvider,
+  useOrderContext,
+  OrderContextProps,
+  OrderList,
+} from "./context";
+import { RadioGroup, Radio } from "../components/radio_button";
 // import { OrderList } from "./context";
 const categories = [
   "Appetizers",
@@ -161,31 +173,298 @@ interface MenuProps {
   changeIP: string;
 }
 
+const RadioButton = ({ label, value, onChange }: any) => {
+  return (
+    <label>
+      <input type="radio" checked={value} onChange={onChange} />
+      {label}
+    </label>
+  );
+};
+
+const ButtonItemOption = ({ items, index }: any) => {
+  const [isOptionModalOpen, setIsOptionModalOpen] = useState(true); // For toggle modal purpose
+
+  const toggleModal = () => {
+    setIsOptionModalOpen(!isOptionModalOpen);
+    console.log(items.id);
+  };
+
+  // useEffect(() => {
+  //   const handleDocumentClick = (event: React.MouseEvent | MouseEvent) => {
+  //     if (isOptionModalOpen) {
+  //       const targetElement = event.target as HTMLElement;
+  //       if (
+  //         !targetElement ||
+  //         !targetElement.closest(`#dropdownBottomButton${index}`)
+  //       ) {
+  //         setIsOptionModalOpen(false);
+  //       }
+  //     }
+  //   };
+
+  //   if (isOptionModalOpen) {
+  //     // Add a click event listener to the document
+  //     document.addEventListener("click", handleDocumentClick);
+  //   }
+
+  //   return () => {
+  //     // Clean up the event listener when the component unmounts or the modal closes
+  //     document.removeEventListener("click", handleDocumentClick);
+  //   };
+  // }, [isOptionModalOpen]);
+  const handleSubmit = (event: any) => {
+    // Preventing the default form submission behaviour
+    // event.preventDefault();
+
+    // Logging the selected option
+    console.log("selectedOption");
+
+    // Alerting the user with the selected option
+    // alert("Your gender is " + selectedOption)
+  };
+
+  // State to track the selected radio button option
+  const [selectedOption, setSelectedOption] = useState("");
+
+  // Function to handle radio button selection
+  const handleRadioChange = (event: any) => {
+    setSelectedOption(event.target.value);
+  };
+
+  const [catPerson, setCatPerson] = useState(false);
+  const [dogPerson, setDogPerson] = useState(false);
+
+  const handleCatChange = () => {
+    setCatPerson(!catPerson);
+  };
+
+  const handleDogChange = () => {
+    setDogPerson(!dogPerson);
+  };
+
+  
+
+  const data = [
+    {
+      id: 3,
+      variants: "1,2",
+      fooditems: "Rabbit",
+      price:"1.00",
+      SKU:"1000",
+    },
+    {
+      id: 4,
+      variants: "2",
+      fooditems: "Rabbit",
+      price:"2.00",
+      SKU:"1000",
+    },
+    {
+      id: 5,
+      variants: "3",
+      fooditems: "Rabbit",
+      price:"3.00",
+      SKU:"1000",
+    },
+  ];
+  const itemsPerRow = Math.max(Math.ceil(data.length / 2), 3);
+  const renderTableRows = () => {
+    const rows = [];
+    for (let i = 0; i < data.length; i += itemsPerRow) {
+      const rowItems = data.slice(i, i + itemsPerRow);
+      const rowCells = rowItems.map((item) => (
+        <td key={item.id} className="flex items-center ms-2">
+          <input
+            type="radio"
+            id={item.fooditems}
+            name="option"
+            value={item.fooditems}
+            className="!opacity-100 !relative "
+          />
+          <label htmlFor={item.fooditems} className="ms-2">
+            {item.fooditems}
+          </label>
+        </td>
+      ));
+      rows.push(<tr key={i}>{rowCells}</tr>);
+    }
+    return <tbody className="flex">{rows}</tbody>;
+  };
+
+  return (
+    <>
+      <button
+        className="bg-primaryColor rounded "
+        data-modal-target="default-modal"
+        data-modal-toggle="default-modal"
+        // onClick={() => handleOrderClick(item)}
+        id={`itemsOption${index}`}
+        onClick={toggleModal}
+        type="button"
+        // onClick={()=> openmodel(item.foodcategory_id)}
+      >
+        <p className="text-white sm:!text-base xs:text-sm text-xs font-bold hover:bg-black/[.10] py-1 xs:!px-4 px-2 rounded">
+          Order
+        </p>
+      </button>
+      {isOptionModalOpen && (
+        <div
+          id="updateProductModal"
+          data-modal-backdrop="static"
+          tabIndex={-1}
+          aria-hidden="true"
+          className="flex flex-col overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full bg-black bg-opacity-50"
+        >
+          <div className="relative p-4 w-full max-w-2xl h-full md:h-auto">
+            {/* <!-- Modal content --> */}
+            <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+              {/* <!-- Modal header --> */}
+              <div className="flex justify-between items-center pb-2 mb-1 rounded-t border-b sm:mb-1 dark:border-gray-600">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Burger
+                </h3>
+                <button
+                  type="button"
+                  onClick={toggleModal}
+                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                  data-modal-toggle="updateProductModal"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+              </div>
+
+              <div className="flex p-3 md:p-3 algin-center justify-between ">
+                <div className="">
+                  <img src="/src/assets/img/potato.png" alt="" />
+                  <div className=" flex items-center mt-2 gap-5">
+                    <div className="quantity flex flex-1 items-center ">
+                      <FontAwesomeIcon
+                        icon={faMinus}
+                        className="cursor-pointer"
+                        // onClick={() => {
+                        //   if (menuItem.quantity > 1) {
+                        //     handleMinusClick(menuItem);
+                        //   } else {
+                        //     handleCancelClick(menuItem);
+                        //   }
+                        // }}
+                      />
+                      <div className="border-solid flex justify-center items-center border-2 rounded-full sm:!w-9 sm:!h-9 w-6 h-6 sm:!mx-3 sm:!px-3 mx-2 px-2 m-auto">
+                        <p className="sm:text-base text-sm">
+                          {/* {menuItem.quantity} */}
+                        </p>
+                      </div>
+                      <FontAwesomeIcon
+                        icon={faPlus}
+                        style={{ color: "#eda345" }}
+                        className="cursor-pointer"
+                        // onClick={() => {
+                        //   handleOrderClick(menuItem);
+                        // }}
+                      />
+                    </div>
+                    <div className="bg-primaryColor rounded ">
+                      <p className="text-white sm:!text-base xs:text-sm text-xs font-semibold hover:bg-black/[.10] py-3 xs:!px-4 px-2 rounded">
+                        RM 13.00
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full ps-3">
+                  <div className="border-b-2 border-gray-300 mb-2">Option</div>
+                  <div>
+                    <form
+                      action="#"
+                      onSubmit={handleSubmit}
+                      encType="multipart/form-data"
+                    >
+                      <div className="flex border-b-2 border-gray-300 mb-2 pb-2">
+                        <p>Spicy :</p>
+                        <div className="">
+                          <table>
+                            {data.length <= itemsPerRow ? (
+                              <tbody>{renderTableRows()}</tbody>
+                            ) : (
+                              renderTableRows() 
+                            )}
+                          </table>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end gap-3">
+                        <button className="btn btn-default bg-primaryColor rounded px-2 py-1 text-white font-medium border-2 border-primaryColor" type="submit">
+                        Add to Chart
+                        </button>
+                        <button className="btn btn-default bg-white border-red-500 border-2 hover:bg-red-500 hover:border-red-500 rounded px-2 py-1 text-red-500 hover:text-white font-medium" type="submit">
+                        Cancel
+                      </button>
+                      </div>
+                    </form>
+                    {/* <div>
+      <RadioButton
+        label="Cat"
+        value={catPerson}
+        onChange={handleCatChange}
+      />
+      <RadioButton
+        label="Dog"
+        value={dogPerson}
+        onChange={handleDogChange}
+      />
+    </div> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        // </form>
+      )}
+    </>
+  );
+};
+
 const menu: React.FC<MenuProps> = ({ changeIP }) => {
+  console.log(changeIP);
   const { tableqrid } = useParams();
   // Button and Scroll Down Category List
   const [activeCategory, setActiveCategory] = useState<number>(0);
   const categories = Object.keys(dataArray[0]);
   const categoryRefs: React.RefObject<HTMLDivElement>[] = categories.map(() =>
-  useRef(null)
+    useRef(null)
   );
   const { orderList, setOrderList } = useOrderContext();
   console.log(orderList);
   const [foodItems, setFoodItems] = useState([]);
   const [foodCategory, setFoodCategory] = useState([]);
   const [orderData, setOrderData] = useState(() => {
-    const storedOrderData = localStorage.getItem('orderData');
-    const parsedOrderData =  storedOrderData ? JSON.parse(storedOrderData) : null;
-    if(orderList){
+    const storedOrderData = localStorage.getItem("orderData");
+    const parsedOrderData = storedOrderData
+      ? JSON.parse(storedOrderData)
+      : null;
+    if (orderList) {
       return orderList?.items;
-    }else{
-      return parsedOrderData?.items
+    } else {
+      return parsedOrderData?.items;
     }
   });
   // Count Order Items
   const [orderedItems, setOrderedItems] = useState<any[]>([]);
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     const orderlistWithTimestamp = orderedItems.map((item) => ({
       id: item.id,
       quantity: item.quantity,
@@ -199,17 +478,16 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
     };
     console.log(currentorderlist);
     const handleBeforeUnload = () => {
-      localStorage.setItem('orderData', JSON.stringify(currentorderlist));
+      localStorage.setItem("orderData", JSON.stringify(currentorderlist));
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     // Detach the event listener when the component unmounts
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-    
-  },[orderedItems])
+  }, [orderedItems]);
 
   const handleCategoryItemClick = (index: any) => {
     setActiveCategory(index);
@@ -254,7 +532,6 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
     }
   };
 
-  
   const handleCategoryClick = (index: number) => {
     setActiveCategory(index);
     categoryRefs[index].current?.scrollIntoView({
@@ -301,8 +578,8 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
     const combineOrderAndItemData = () => {
       if (orderData && orderData.length > 0) {
         const combinedItems: any[] = [];
-        orderData.forEach((orderItem: { id: any; quantity: any; }) => {
-          const matchingItem:any = foodItems.find(
+        orderData.forEach((orderItem: { id: any; quantity: any }) => {
+          const matchingItem: any = foodItems.find(
             (item: { id: any }) => item.id === orderItem.id
           );
           if (matchingItem) {
@@ -388,14 +665,12 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
     // updateData(orderlist);
     console.log(tableqrid);
     setOrderList(currentorderlist);
-    if(demo){
+    if (demo) {
       navigate(`/table/${tableqrid}/order_detail?demo=true`);
-    }else{
+    } else {
       navigate(`/table/${tableqrid}/order_detail`);
     }
   };
-
-
 
   const listRef = useRef<HTMLUListElement | null>(null);
   const [showLeftIcon, setShowLeftIcon] = useState(false);
@@ -468,9 +743,14 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   // }, []);
 
   // const sortedFoodCategory = foodCategory.sort((a, b) => a.id - b.id);
-
+  const [testing, setesting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
+  const openmodel = (fooditems: any) => {
+    setIsModalOpen(!isModalOpen);
+  };
   return (
     <>
+      {changeIP}
       <div className=" mx-1440 relative">
         <div className="bg-white sticky top-0 z-10 border-b-2 mb-5">
           <div className="flex justify-between items-center lg:max-w-screen-lg md:max-w-screen-md max-w-none md:mx-auto mx-3 py-3 ">
@@ -493,6 +773,7 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
             </div>
           </div>
         </div>
+
         <div className=" max-w-screen-lg mx-auto mb-16 ">
           <div className="flex mx-auto md:container ">
             <div className=" md:w-2/3 w-full relative">
@@ -622,16 +903,14 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
                                     <p className=" sm:!text-base xs:text-sm text-xs font-bold sm:!pe-0 pe-2 ">
                                       RM {item.price}
                                     </p>
-                                    <button
-                                      className="bg-primaryColor rounded "
-                                      onClick={() => handleOrderClick(item)}
-                                    >
-                                      <p className="text-white sm:!text-base xs:text-sm text-xs font-bold hover:bg-black/[.10] py-1 xs:!px-4 px-2 rounded">
-                                        Order
-                                      </p>
-                                    </button>
+                                    <ButtonItemOption
+                                      index={itemIndex}
+                                      items={item}
+                                    />
                                   </div>
                                 </div>
+                                {/* <!-- Main modal --> */}
+                                {isModalOpen && <div>haisd</div>}
                               </div>
                             );
                           }
