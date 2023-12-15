@@ -143,7 +143,7 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
           const data_items = await response_items.json();
           const data_category = await response_category.json();
           setFoodItems(data_items);
-          setFoodCategory(data_category);
+          setFoodCategory(data_category); 
         } else {
           console.error("Failed to fetch data");
         }
@@ -168,7 +168,9 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
           if (matchingItem) {
             combinedItems.push({
               ...matchingItem,
+              option: orderItem.option,
               quantity: orderItem.quantity,
+              totalprice: orderItem.totalprice,
             });
           }
         });
@@ -185,7 +187,8 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
   // When click one of the items then add new label (quantity) and output to order list
   const handleOrderClick = (filteredData: any) => {
     const existingItemIndex = orderedItems.findIndex(
-      (orderedItem) => orderedItem.id === filteredData.id
+      (orderedItem) => orderedItem.id === filteredData.id &&
+      orderedItem.option.toString() === filteredData.option.toString()
     );
     if (existingItemIndex !== -1) {
       // If the item exists, update its quantity by adding 1
@@ -202,7 +205,9 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
   // Minus quantity
   const handleMinusClick = (filteredData: any) => {
     const existingItemIndex = orderedItems.findIndex(
-      (orderedItem) => orderedItem.id === filteredData.id
+      (orderedItem) => orderedItem.id === filteredData.id &&
+      orderedItem.option.toString() === filteredData.option.toString()
+
     );
 
     if (existingItemIndex !== -1) {
@@ -224,7 +229,8 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
   const handleCancelClick = (filteredData: any) => {
     // Remove the item from the orderedItems array
     const updatedItems = orderedItems.filter(
-      (orderedItem) => orderedItem.id !== filteredData.id
+      (orderedItem) => orderedItem.id !== filteredData.id ||
+      orderedItem.option.toString() !== filteredData.option.toString()
     );
     setOrderedItems(updatedItems);
     setOrderData(updatedItems);
@@ -239,7 +245,9 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
     const timestamp = new Date().toISOString();
     const transformedData = orderData.map(item => ({
       id: item.id,
+      option: item.option,
       quantity: item.quantity,
+      totalprice: item.totalprice,
     }));
   // console.log()
     const dataWithTimestamp:OrderList= {
@@ -399,7 +407,7 @@ const OrderDetailPage = ({ changeIP }: { changeIP: string }) => {
                   <div className="border-b-2 pb-2" key={itemIndex}>
                     <div className="flex items-center justify-between">
                       <p>{item.name}</p>
-                      <p className="whitespace-nowrap">{`RM ${item.price}`}</p>
+                      <p className="whitespace-nowrap">{`RM ${item.totalprice}`}</p>
                     </div>
                     <div className="flex items-center justify-between">
                       <p>{}</p>

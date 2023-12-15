@@ -13,6 +13,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  JSXElementConstructor,
+  Key,
+  ReactElement,
+  ReactNode,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -30,6 +34,7 @@ import {
   OrderList,
 } from "./context";
 import { RadioGroup, Radio } from "../components/radio_button";
+import variant from "./admin/admin_variant_value";
 // import { OrderList } from "./context";
 const categories = [
   "Appetizers",
@@ -47,6 +52,31 @@ const menuItems = [
     quantity: "1",
   },
 ];
+
+interface FoodItem {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  image: string | null;
+  published: boolean;
+  tag: string[];
+  foodcategory: number;
+}
+
+interface VariantPrice {
+  id: number;
+  variants: number[];
+  fooditems: number;
+  price: string;
+  sku: number;
+}
+
+type OptionOrderType = {
+  id: any;
+  value: string;
+  // items: FoodItem[];
+};
 
 const dataArray: any[] = [
   {
@@ -182,116 +212,205 @@ const RadioButton = ({ label, value, onChange }: any) => {
   );
 };
 
-const ButtonItemOption = ({ items, index }: any) => {
-  const [isOptionModalOpen, setIsOptionModalOpen] = useState(true); // For toggle modal purpose
+const useApiData = (url: any) => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
 
-  const toggleModal = () => {
-    setIsOptionModalOpen(!isOptionModalOpen);
-    console.log(items.id);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(url);
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // useEffect(() => {
-  //   const handleDocumentClick = (event: React.MouseEvent | MouseEvent) => {
-  //     if (isOptionModalOpen) {
-  //       const targetElement = event.target as HTMLElement;
-  //       if (
-  //         !targetElement ||
-  //         !targetElement.closest(`#dropdownBottomButton${index}`)
-  //       ) {
-  //         setIsOptionModalOpen(false);
-  //       }
-  //     }
-  //   };
+    fetchData();
+  }, [url]);
 
-  //   if (isOptionModalOpen) {
-  //     // Add a click event listener to the document
-  //     document.addEventListener("click", handleDocumentClick);
-  //   }
+  return { data, loading, error };
+};
 
-  //   return () => {
-  //     // Clean up the event listener when the component unmounts or the modal closes
-  //     document.removeEventListener("click", handleDocumentClick);
-  //   };
-  // }, [isOptionModalOpen]);
+interface ButtonItemOptionProps {
+  variantGroup: [];
+  variantValue: [];
+  variantPrices: [];
+  items: FoodItem[];
+  index: number;
+  cart: (selectedValues: any) => void;
+}
+
+const ButtonItemOption: React.FC<ButtonItemOptionProps> = ({
+  variantGroup,
+  variantValue,
+  variantPrices,
+  items,
+  index,
+  cart,
+}: any) => {
+  const [isOptionModalOpen, setIsOptionModalOpen] = useState(false); // For toggle modal purpose
+  const [selectedValues, setSelectedValues] = useState<any>([]);
+  const [totalprice, setTotalPrice] = useState<any>();
+
   const handleSubmit = (event: any) => {
     // Preventing the default form submission behaviour
-    // event.preventDefault();
-
-    // Logging the selected option
-    console.log("selectedOption");
-
-    // Alerting the user with the selected option
-    // alert("Your gender is " + selectedOption)
+    event.preventDefault();
+    cart(selectedValues);
+    setIsOptionModalOpen(!isOptionModalOpen);
   };
 
   // State to track the selected radio button option
-  const [selectedOption, setSelectedOption] = useState("");
 
-  // Function to handle radio button selection
-  const handleRadioChange = (event: any) => {
-    setSelectedOption(event.target.value);
-  };
-
-  const [catPerson, setCatPerson] = useState(false);
-  const [dogPerson, setDogPerson] = useState(false);
-
-  const handleCatChange = () => {
-    setCatPerson(!catPerson);
-  };
-
-  const handleDogChange = () => {
-    setDogPerson(!dogPerson);
-  };
-
-  
-
-  const data = [
-    {
-      id: 3,
-      variants: "1,2",
-      fooditems: "Rabbit",
-      price:"1.00",
-      SKU:"1000",
-    },
-    {
-      id: 4,
-      variants: "2",
-      fooditems: "Rabbit",
-      price:"2.00",
-      SKU:"1000",
-    },
-    {
-      id: 5,
-      variants: "3",
-      fooditems: "Rabbit",
-      price:"3.00",
-      SKU:"1000",
-    },
+  const matchFoodItemOption = variantPrices.filter(
+    // Filter food items get the variant and prices
+    (item: { fooditems: string | any[] }) =>
+      item.fooditems === items.id ? item : null
+  );
+  const uniqueVariants = [
+    ...new Set(
+      matchFoodItemOption.flatMap((item: { variants: any }) => item.variants) // Get variant values
+    ),
   ];
-  const itemsPerRow = Math.max(Math.ceil(data.length / 2), 3);
-  const renderTableRows = () => {
+  const getItemVariantValue = variantValue.filter((item: { id: any }) =>
+    uniqueVariants.includes(item.id)
+  );
+  const uniqueTitles = [
+    ...new Set(getItemVariantValue.map((item: { title: any }) => item.title)),
+  ]; //Get Variant value with group title
+
+  const getVariantGroup = variantGroup.filter(
+    // get variant group info
+    (item: { id: any }) => uniqueTitles.includes(item.id)
+  );
+
+  const lowestIndexByTitleData = getItemVariantValue.reduce(
+    (acc: any, item: any) => {
+      const { title } = item;
+      if (!(title in acc) || item.id < acc[title].id) {
+        acc[title] = item;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  function arraysEqual(arr1: number[], arr2: number[]): boolean {
+    if (arr1.length !== arr2.length) {
+      return false;
+    }
+    for (let i = 0; i < arr1.length; i++) {
+      if (arr1[i] !== arr2[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  const [check,setcheck] = useState<Boolean>() ;
+  
+  useEffect(() => {
+    const functiontotalprice = (data:any) => {
+      try {
+        const arraydata = selectedValues.length === 0 ? data : selectedValues; // Handle the case when selectedValues is undefined
+        console.log(arraydata);
+  
+        const optionid = Object.entries(arraydata)
+          .filter(
+            ([key, item]: [string, any]) => !isNaN(Number(key)) && item && item.id
+          )
+          .map(([key, item]: [string, any]) => item.id);
+       
+        const optionprice = variantPrices.find((item: any) =>
+          arraysEqual(item.variants, optionid)
+        );
+        if (!optionprice) {
+          // console.warn('Option price not found for selected values:', arraydata);
+          return;
+        }
+        console.log(optionid);
+  
+        const sumtotalprice = (
+          parseFloat(items.price) + parseFloat(optionprice.price)
+        ).toFixed(2);
+  
+        console.log(items.price);
+        console.log(sumtotalprice);
+
+        setSelectedValues({...selectedValues , totalprice: sumtotalprice})
+
+        setTotalPrice(sumtotalprice);
+      } catch (error) {
+        console.error('An error occurred in functiontotalprice:', error);
+      }
+    };
+    
+    functiontotalprice({ ...lowestIndexByTitleData});
+  }, [check]);
+
+
+  // Open Model Default
+  const toggleModal = () => {
+    const checkvariant = variantPrices.filter((variantprice:any) => variantprice.fooditems === items.id);
+    console.log(checkvariant);
+    if(checkvariant.length == 0){
+      cart(items)
+    }else{
+      setIsOptionModalOpen(!isOptionModalOpen);
+      setSelectedValues({ ...lowestIndexByTitleData, items });
+      setcheck(!check);
+    }
+  };
+
+  // Change Variant Setup
+  const handleRadioChange = (groupID: any, name: any, variantID: any) => {
+    setSelectedValues((prevValues: any) =>
+      // console.log(typeof prevValues),
+      ({
+        ...prevValues,
+        [groupID]: { name, id: variantID },
+        items: {
+          ...items,
+        },
+      })
+    );
+    setcheck(!check);
+  };
+
+  const renderTableRows = (groupID: any) => {
+    const filteredVariants = getItemVariantValue.filter(
+      (item: any) => item.title === groupID
+    );
     const rows = [];
-    for (let i = 0; i < data.length; i += itemsPerRow) {
-      const rowItems = data.slice(i, i + itemsPerRow);
-      const rowCells = rowItems.map((item) => (
+
+    // Filter variant values based on the current group name
+    const itemsPerRow = Math.max(Math.ceil(filteredVariants.length / 2), 3);
+    for (let i = 0; i < filteredVariants.length; i += itemsPerRow) {
+      const rowItems = filteredVariants.slice(i, i + itemsPerRow);
+      const rowCells = rowItems.map((item: any, index: any) => (
         <td key={item.id} className="flex items-center ms-2">
           <input
             type="radio"
-            id={item.fooditems}
-            name="option"
-            value={item.fooditems}
+            id={item.id}
+            // name={item.name + groupID}
+            value={item.name}
+            checked={selectedValues[groupID]?.name === item.name}
+            onChange={() => handleRadioChange(groupID, item.name, item.id)}
             className="!opacity-100 !relative "
           />
-          <label htmlFor={item.fooditems} className="ms-2">
-            {item.fooditems}
+          <label htmlFor={item.id} className="ms-2">
+            {item.name}
           </label>
         </td>
       ));
       rows.push(<tr key={i}>{rowCells}</tr>);
     }
+
     return <tbody className="flex">{rows}</tbody>;
   };
-
   return (
     <>
       <button
@@ -322,7 +441,7 @@ const ButtonItemOption = ({ items, index }: any) => {
               {/* <!-- Modal header --> */}
               <div className="flex justify-between items-center pb-2 mb-1 rounded-t border-b sm:mb-1 dark:border-gray-600">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Burger
+                  {items.name}
                 </h3>
                 <button
                   type="button"
@@ -379,59 +498,54 @@ const ButtonItemOption = ({ items, index }: any) => {
                     </div>
                     <div className="bg-primaryColor rounded ">
                       <p className="text-white sm:!text-base xs:text-sm text-xs font-semibold hover:bg-black/[.10] py-3 xs:!px-4 px-2 rounded">
-                        RM 13.00
+                        RM {totalprice}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="w-full ps-3">
                   <div className="border-b-2 border-gray-300 mb-2">Option</div>
-                  <div>
-                    <form
-                      action="#"
-                      onSubmit={handleSubmit}
-                      encType="multipart/form-data"
-                    >
-                      <div className="flex border-b-2 border-gray-300 mb-2 pb-2">
-                        <p>Spicy :</p>
-                        <div className="">
-                          <table>
-                            {data.length <= itemsPerRow ? (
-                              <tbody>{renderTableRows()}</tbody>
-                            ) : (
-                              renderTableRows() 
-                            )}
-                          </table>
+                  <form
+                    action="#"
+                    onSubmit={handleSubmit}
+                    encType="multipart/form-data"
+                  >
+                    {getVariantGroup.map(
+                      (group: any, index: Key | null | undefined) => (
+                        <div key={index}>
+                          <div className="flex border-b-2 border-gray-300 mb-2 pb-2">
+                            <p>{group.name} :</p>
+                            <div className="">
+                              <table>{renderTableRows(group.id)}</table>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-end gap-3">
-                        <button className="btn btn-default bg-primaryColor rounded px-2 py-1 text-white font-medium border-2 border-primaryColor" type="submit">
-                        Add to Chart
-                        </button>
-                        <button className="btn btn-default bg-white border-red-500 border-2 hover:bg-red-500 hover:border-red-500 rounded px-2 py-1 text-red-500 hover:text-white font-medium" type="submit">
+                      )
+                    )}
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        className="btn btn-default bg-primaryColor rounded px-2 py-1 text-white font-medium border-2 border-primaryColor"
+                        type="submit"
+                      >
+                        Add to Cart
+                      </button>
+                      <button
+                        className="btn btn-default bg-white border-red-500 border-2 hover:bg-red-500 hover:border-red-500 rounded px-2 py-1 text-red-500 hover:text-white font-medium"
+                        // onClick
+                        type="button"
+                        onClick={() => {
+                          setIsOptionModalOpen(!isOptionModalOpen);
+                        }}
+                      >
                         Cancel
                       </button>
-                      </div>
-                    </form>
-                    {/* <div>
-      <RadioButton
-        label="Cat"
-        value={catPerson}
-        onChange={handleCatChange}
-      />
-      <RadioButton
-        label="Dog"
-        value={dogPerson}
-        onChange={handleDogChange}
-      />
-    </div> */}
-                  </div>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        // </form>
       )}
     </>
   );
@@ -447,7 +561,7 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
     useRef(null)
   );
   const { orderList, setOrderList } = useOrderContext();
-  console.log(orderList);
+  // console.log(orderList);
   const [foodItems, setFoodItems] = useState([]);
   const [foodCategory, setFoodCategory] = useState([]);
   const [orderData, setOrderData] = useState(() => {
@@ -463,11 +577,13 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   });
   // Count Order Items
   const [orderedItems, setOrderedItems] = useState<any[]>([]);
-
+  console.log(orderedItems);
   useEffect(() => {
     const orderlistWithTimestamp = orderedItems.map((item) => ({
       id: item.id,
+      option: item.option,
       quantity: item.quantity,
+      totalprice: item.totalprice,
     }));
 
     const timestamp = new Date().toISOString();
@@ -476,7 +592,7 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
       timestamp,
       items: orderlistWithTimestamp,
     };
-    console.log(currentorderlist);
+    // console.log(currentorderlist);
     const handleBeforeUnload = () => {
       localStorage.setItem("orderData", JSON.stringify(currentorderlist));
     };
@@ -496,23 +612,23 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
       behavior: "smooth",
       block: "center",
     });
-
-    console.log(index);
+    
+    // console.log(index);
     const listElement = listRef.current;
     if (listElement) {
       const listItem = listElement.children[index];
       const listItemRect = listItem.getBoundingClientRect();
       const listRect = listElement.getBoundingClientRect();
       const scrollLeft = listElement.scrollLeft;
-      console.log("1:" + listItemRect.right);
-      console.log("2:" + listRect.right);
-      console.log("3:" + listItemRect.left);
-      console.log("4:" + listRect.left);
-      console.log("5:" + scrollLeft);
-      console.log(listItemRect);
-      console.log(listElement.children[index]);
-      console.log(listRect);
-      console.log(index);
+      // console.log("1:" + listItemRect.right);
+      // console.log("2:" + listRect.right);
+      // console.log("3:" + listItemRect.left);
+      // console.log("4:" + listRect.left);
+      // console.log("5:" + scrollLeft);
+      // console.log(listItemRect);
+      // console.log(listElement.children[index]);
+      // console.log(listRect);
+      // console.log(index);
 
       // Check if the item is partially or fully hidden on the right side
       if (listItemRect.right > listRect.right) {
@@ -571,24 +687,54 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
     fetchData();
   }, []);
 
+  const variantGroupUrl = "http://127.0.0.1:8000/api/variantgroup/";
+  const variantValueUrl = "http://127.0.0.1:8000/api/variantvalue/";
+  const variantPricesUrl = "http://127.0.0.1:8000/api/variantprices/";
+
+  const {
+    data: variantGroup,
+    loading: variantGroupLoading,
+    error: variantGroupError,
+  }: any = useApiData(variantGroupUrl);
+  const {
+    data: variantValue,
+    loading: variantValueLoading,
+    error: variantValueError,
+  }: any = useApiData(variantValueUrl);
+  const {
+    data: variantPrices,
+    loading: variantPricesLoading,
+    error: variantPricesError,
+  }: any = useApiData(variantPricesUrl);
+
   useEffect(() => {
-    // console.log("foodItems:", foodItems);
-    // console.log("orderData:", orderData);
+    console.log("foodItems:", foodItems);
+    console.log("orderData:", orderData);
     // Function to combine orderData with itemData based on matching IDs
     const combineOrderAndItemData = () => {
       if (orderData && orderData.length > 0) {
         const combinedItems: any[] = [];
-        orderData.forEach((orderItem: { id: any; quantity: any }) => {
-          const matchingItem: any = foodItems.find(
-            (item: { id: any }) => item.id === orderItem.id
-          );
-          if (matchingItem) {
-            combinedItems.push({
-              ...matchingItem,
-              quantity: orderItem.quantity,
-            });
+        orderData.forEach(
+          (orderItem: {
+            totalprice: any;
+            option: any;
+            id: any;
+            quantity: any;
+          }) => {
+            const matchingItem: any = foodItems.find(
+              (item: { id: any }) => item.id === orderItem.id
+            );
+            // console.log(matchingItem);
+            if (matchingItem) {
+              combinedItems.push({
+                ...matchingItem,
+                option: orderItem.option,
+                quantity: orderItem.quantity,
+                totalprice: orderItem.totalprice,
+              });
+            }
           }
-        });
+        );
         setOrderedItems(combinedItems);
       }
     };
@@ -598,12 +744,15 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
       combineOrderAndItemData();
     }
   }, [foodItems, orderData]);
-
+  // console.log(orderedItems);
   // When click one of the items then add new label (quantity) and output to order list
   const handleOrderClick = (item: any) => {
     const existingItemIndex = orderedItems.findIndex(
-      (orderedItem) => orderedItem.id === item.id
+      (orderedItem) =>
+        orderedItem.id === item.id &&
+        orderedItem.option.toString() === item.option.toString()
     );
+
     if (existingItemIndex !== -1) {
       // If the item exists, update its quantity by adding 1
       const updatedItems = [...orderedItems];
@@ -617,12 +766,15 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   // Minus quantity
   const handleMinusClick = (item: any) => {
     const existingItemIndex = orderedItems.findIndex(
-      (orderedItem) => orderedItem.id === item.id
+      (orderedItem) =>
+        orderedItem.id === item.id &&
+        orderedItem.option.toString() === item.option.toString()
     );
 
     if (existingItemIndex !== -1) {
       // If the item exists, update its quantity by subtracting 1
       const updatedItems = [...orderedItems];
+      // console.log(updatedItems);
       updatedItems[existingItemIndex].quantity = Math.max(
         0,
         updatedItems[existingItemIndex].quantity - 1
@@ -635,14 +787,17 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   const handleCancelClick = (item: any) => {
     // Remove the item from the orderedItems array
     const updatedItems = orderedItems.filter(
-      (orderedItem) => orderedItem.id !== item.id
+      (orderedItem) =>
+        orderedItem.id !== item.id ||
+        orderedItem.option.toString() !== item.option.toString()
     );
+    // console.log(updatedItems);
     setOrderedItems(updatedItems);
   };
 
   // Count all order items
   const totalPrice = orderedItems.reduce((acc, currentItem) => {
-    return acc + currentItem.price * currentItem.quantity;
+    return acc + currentItem.totalprice * currentItem.quantity;
   }, 0);
 
   // Pass data to other page
@@ -652,9 +807,11 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   const handleCheckOut = () => {
     const orderlistWithTimestamp = orderedItems.map((item) => ({
       id: item.id,
+      option: item.option,
       quantity: item.quantity,
+      totalprice: item.totalprice,
     }));
-
+    console.log(orderlistWithTimestamp);
     const timestamp = new Date().toISOString();
 
     const currentorderlist = {
@@ -743,11 +900,29 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
   // }, []);
 
   // const sortedFoodCategory = foodCategory.sort((a, b) => a.id - b.id);
-  const [testing, setesting] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // For toggle modal purpose
-  const openmodel = (fooditems: any) => {
-    setIsModalOpen(!isModalOpen);
+  // const [testing, setOrderData] = useState(false);
+
+  const orderOption = (value: any) => {
+    console.log(value);
+
+    const isOptionOrderType = (item: any): item is OptionOrderType => {
+      return (
+        typeof item === "object" && "id" in item && typeof item.id === "number"
+      );
+    };
+    const optionOrder = Object.values(value)
+      .filter(isOptionOrderType)
+      .map((item) => item.id);
+    console.log(optionOrder);
+    const optionprice = variantPrices.find((item: any) => item);
+    console.log(optionprice);
+    const sum = (
+      parseFloat(value.items.price) + parseFloat(optionprice.price)
+    ).toFixed(2);
+    console.log(sum+ value.totalprice);
+    handleOrderClick({ ...value.items, option: optionOrder, totalprice: sum });
   };
+
   return (
     <>
       {changeIP}
@@ -876,7 +1051,7 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
                       <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:!mx-0 m-2">
                         {foodItems.map((item: any, itemIndex) => {
                           if (
-                            item.foodcategory_id === category.id &&
+                            item.foodcategory == category.id &&
                             category.published == true
                           ) {
                             return (
@@ -904,13 +1079,16 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
                                       RM {item.price}
                                     </p>
                                     <ButtonItemOption
+                                      variantGroup={variantGroup}
+                                      variantValue={variantValue}
+                                      variantPrices={variantPrices}
                                       index={itemIndex}
                                       items={item}
+                                      cart={orderOption}
                                     />
                                   </div>
                                 </div>
                                 {/* <!-- Main modal --> */}
-                                {isModalOpen && <div>haisd</div>}
                               </div>
                             );
                           }
@@ -979,8 +1157,12 @@ const menu: React.FC<MenuProps> = ({ changeIP }) => {
                     <div className="flex items-center justify-between">
                       <p>{menuItem.name}</p>
                       <p className="whitespace-nowrap">RM {menuItem.price}</p>
+                      {}
                     </div>
                     <div className="flex items-center justify-between">
+                      <div className="bg-orange-100 text-sm px-2">
+                        {menuItem.option}
+                      </div>
                       <div className="quantity flex flex-1 items-center justify-end">
                         <FontAwesomeIcon
                           icon={faMinus}
