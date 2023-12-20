@@ -9,6 +9,7 @@
     "react-image-crop": "^10.1.8",
     "react-public-ip": "^1.0.0",
     "react-tailwindcss-select": "^1.8.5",
-    "react-tooltip": "^5.24.0"
+    "react-tooltip": "^5.24.0",
+    "requests": "^0.3.0"
   }
 }

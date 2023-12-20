@@ -9,10 +9,12 @@ from rest_framework import viewsets, permissions
 from rest_framework import status
 from decimal import Decimal
 from my_django_app.models import FoodTags
-import socket   
 from django.views import View
-import os
+import socket   
 import subprocess
+import re
+import os
+from django.conf import settings
 
 class FoodMenusView(viewsets.ModelViewSet):
     serializer_class = FoodMenusSerializer
@@ -155,6 +157,11 @@ class OrderTablesView(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
 
+        if instance.image:
+            image_path = os.path.join(settings.MEDIA_ROOT, str(instance.image))
+            if os.path.exists(image_path):
+                os.remove(image_path)
+
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else: 
@@ -245,16 +252,11 @@ class LocalView(View):
         except subprocess.CalledProcessError as e:
             return f"Error running ipconfig: {e}"
 
-    def get_ip(self, request):
-        # This will give you the local IP address of the server, not the client
-        local_ip = request.META.get('SERVER_ADDR')
-        return local_ip
 
     def get(self, request, *args, **kwargs):
-        client_ip = self.get_client_ip(request)
         local_ip = self.get_local_ip(request)
-        test = self.get_ip(request)
-        return JsonResponse({'client_ip': client_ip, 'local_ip': local_ip, 'get_ip':test})
+        client_ip = self.get_client_ip(request)
+        return JsonResponse({'client_ip':client_ip,'local_ip': local_ip})
 
 
     # # Call the function and print the local IP
