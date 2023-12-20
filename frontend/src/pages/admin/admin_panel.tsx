@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import "../../assets/css/admin/admin_panel.css";
+// import "../../assets/css/admin/admin_panel.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const links = [

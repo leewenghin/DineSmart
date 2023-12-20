@@ -40,6 +40,10 @@ const CU_Modal = ({
   variantList = "",
   variantGroupList = "",
   variantGroup = "",
+  updateVariantPrice = "",
+  displayedValues = "",
+  // updateVariant = "",
+  // setUpdateVariant = () => {},
   matchVariant = "",
   selectedOption = "",
   fileInputRef,
@@ -49,6 +53,8 @@ const CU_Modal = ({
   handleSelectChange = () => {},
   handleMatchVariant = () => {},
   handleRadioChange = () => {},
+  handlePriceChange = () => {},
+  handleSkuChange = () => {},
   handleCancel,
   handleSubmit,
   handleSave = () => {},
@@ -102,8 +108,6 @@ const CU_Modal = ({
     generateCombinations(arrays, 0, [], result);
     return result;
   }
-
-  // const allCombinations = getAllCombinations(selectedOption);
 
   console.log("Selected option: ", selectedOption);
   console.log("All combination: ", allCombinations);
@@ -814,20 +818,34 @@ const CU_Modal = ({
                                             name="price"
                                             step="0.01"
                                             value={
-                                              variantList[combinationIndex]
-                                                ?.price ?? ""
+                                              name == "Create"
+                                                ? variantList[combinationIndex]
+                                                    ?.price ?? ""
+                                                : displayedValues[
+                                                    combinationIndex
+                                                  ]?.price ?? ""
                                             }
-                                            onChange={(event) =>
-                                              handleVariantInputChange(
-                                                combinationIndex,
-                                                event,
-                                                item.map((item: any) => item.id)
-                                              )
+                                            onChange={
+                                              page == "Item" && name == "Create"
+                                                ? (event) =>
+                                                    handleVariantInputChange(
+                                                      combinationIndex,
+                                                      event,
+                                                      item.map(
+                                                        (item: any) => item.id
+                                                      )
+                                                    )
+                                                : (event) =>
+                                                    handlePriceChange(
+                                                      combinationIndex,
+                                                      event
+                                                    )
                                             }
                                             className={`mb-6 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-32 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
                                             placeholder="Ex. RM 100"
                                             required
                                           />
+
                                           <ErrorMessage
                                             message={variantPriceAlert}
                                           ></ErrorMessage>
@@ -838,14 +856,28 @@ const CU_Modal = ({
                                             id={`sku${combinationIndex}`}
                                             name="sku"
                                             value={
-                                              variantList[combinationIndex]
-                                                ?.sku ?? ""
+                                              name == "Create"
+                                                ? variantList[combinationIndex]
+                                                    ?.sku ?? ""
+                                                : displayedValues[
+                                                    combinationIndex
+                                                  ]?.sku ?? ""
                                             }
-                                            onChange={(event) =>
-                                              handleVariantInputChange(
-                                                combinationIndex,
-                                                event
-                                              )
+                                            onChange={
+                                              page == "Item" && name == "Create"
+                                                ? (event) =>
+                                                    handleVariantInputChange(
+                                                      combinationIndex,
+                                                      event,
+                                                      item.map(
+                                                        (item: any) => item.id
+                                                      )
+                                                    )
+                                                : (event) =>
+                                                    handleSkuChange(
+                                                      combinationIndex,
+                                                      event
+                                                    )
                                             }
                                             className={`mb-6 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-32 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
                                             placeholder="Ex. 10"

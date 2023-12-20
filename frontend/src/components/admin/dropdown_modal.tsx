@@ -127,7 +127,11 @@ const Dropdown_modal = ({
                       id={`checkbox-item${index}`}
                       type="checkbox"
                       value={name}
-                      // checked={}
+                      checked={
+                        selectedOption[variantgroupIndex]?.some(
+                          (option: any) => option.name === name
+                        ) || false
+                      }
                       onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                         handleRadioChange(event, variantgroupIndex, id, title)
                       }

@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import AlertModal from "../../components/admin/alert_modal";
 import CU_Modal from "../../components/admin/cu_modal";
 import DeleteModal from "../../components/admin/delete_modal";
-import variant from "./admin_variant_value";
 
 type TField = {
   id: number;
@@ -32,6 +31,14 @@ type TVariantValue = {
   title: number;
   name: string;
   published: boolean;
+};
+
+type TVariantPrice = {
+  id: number;
+  variants: number;
+  fooditems: number;
+  price: number | null;
+  sku: number;
 };
 
 type TSubmitVariant = {
@@ -199,6 +206,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
   const [categoryList, setCategoryList] = useState<TCategory[]>([]);
   const [variantGroupList, setVariantGroupList] = useState<TVariantGroup[]>([]);
   const [variantValueList, setVariantValueList] = useState<TVariantValue[]>([]);
+  const [variantPriceList, setVariantPriceList] = useState<TVariantPrice[]>([]);
   const [itemList, setItemList] = useState<TItem[]>([]); // Provide type annotation htmlFor taskList
   const [newItem, setNewItem] = useState<TSubmitItem>({
     // For reset the field
@@ -220,6 +228,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       sku: null,
     },
   ]);
+  const [updateVariant, setUpdateVariant] = useState<TVariantPrice[]>([]);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // htmlFor toggle create modal purpose
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // htmlFor toggle update modal purpose
@@ -250,6 +259,63 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
   const [isValidateSuccess, setValidateSuccess] = useState(false);
   const [allCombinations, setAllCombinations] = useState<any[]>([]);
+  const [displayedValues, setDisplayedValues] = useState<TVariantPrice[]>([
+    {
+      // For reset the field
+      id: 0,
+      variants: 0,
+      fooditems: 0,
+      price: null,
+      sku: 0,
+    },
+  ]);
+
+  useEffect(() => {
+    // Initialize displayed values when component mounts
+    const initialDisplayedValues = allCombinations.map((_: any, index: any) => {
+      const variantData = getVariantPrices(index);
+      return variantData.length > 0
+        ? variantData[0]
+        : { id: 0, variants: "", fooditems: null, price: null, sku: null };
+    });
+    setDisplayedValues(initialDisplayedValues);
+    console.log("InitialDisplayedValues:", initialDisplayedValues);
+  }, [allCombinations]);
+
+  function getVariantPrices(i: number) {
+    const combinationToCheck = allCombinations[i].map((item: any) => item.id);
+    // const filteredPrices = updateVariantPrice.filter((variant: any) =>
+    //   combinationToCheck.every((value: any) => variant.variants.includes(value))
+    // );
+    const filteredPrices = updateVariantPrice.filter((variant: any) => {
+      const variantArray = Array.isArray(variant.variants)
+        ? variant.variants
+        : [variant.variants];
+      const combinationArray = Array.isArray(combinationToCheck)
+        ? combinationToCheck
+        : [combinationToCheck];
+
+      return (
+        combinationArray.length === variantArray.length &&
+        combinationArray.every((value) => variantArray.includes(value))
+      );
+    });
+
+    const variantData = filteredPrices.map((matchingVariant: any) => ({
+      id: matchingVariant.id,
+      variants: matchingVariant.variants,
+      fooditems: matchingVariant.fooditems,
+      price: matchingVariant.price,
+      sku: matchingVariant.sku,
+    }));
+
+    console.log(`Combination ${i + 1}:`, combinationToCheck);
+    console.log("Matching Variant:", filteredPrices);
+    console.log("Matching Variant Prices:", variantData);
+    console.log("---");
+
+    return variantData;
+  }
 
   // // Add value and label field htmlFor react-tailwind-select library purpose
   // const newVariantGroupList = variantGroupList
@@ -535,6 +601,57 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     });
   };
 
+  const fetchUpdateVariantPrice = async (data: any) => {
+    try {
+      const { id } = data; // Assuming there is an 'id' property in your data
+
+      // Construct the URL based on the id
+      const apiUrl = `http://${changeIP}:8000/api/variantprices/${id}/`;
+
+      // Send a PUT or PATCH request to update the data
+      const response = await fetch(apiUrl, {
+        method: "PUT", // or 'PATCH' depending on your API
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        console.log(`Data for id ${id} submitted successfully`);
+        fetchList(setVariantPriceLink, setVariantPriceList);
+      } else {
+        console.error(`Failed to submit data for id ${id}`);
+      }
+    } catch (error) {
+      console.error("Error submitting data:", error);
+    }
+  };
+
+  const fetchSetVariantPrice = async (data: any) => {
+    try {
+      const apiUrl = `http://${changeIP}:8000/api/variantprices/`;
+
+      // Send a PUT or PATCH request to update the data
+      const response = await fetch(apiUrl, {
+        method: "POST", // or 'PATCH' depending on your API
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        console.log(`New data submitted successfully`);
+        fetchList(setVariantPriceLink, setVariantPriceList);
+      } else {
+        console.error(`Failed to submit new data`);
+      }
+    } catch (error) {
+      console.error("Error submitting data:", error);
+    }
+  };
+
   const fetchDeleteItemIDList = (itemID: number) => {
     return new Promise((resolve, reject) => {
       fetch(`${setItemLink}${itemID}/`, { method: "DELETE" })
@@ -556,6 +673,26 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           reject(error); // Reject the Promise with the error
         });
     });
+  };
+
+  const fetchDeleteVariantPrice = async (data: any) => {
+    try {
+      const { id } = data;
+      const apiUrl = `http://${changeIP}:8000/api/variantprices/${id}/`;
+
+      const response = await fetch(apiUrl, {
+        method: "DELETE", // or 'PATCH' depending on your API
+      });
+
+      if (response.ok) {
+        console.log(`Data for id ${id} removed successfully`);
+        fetchList(setVariantPriceLink, setVariantPriceList);
+      } else {
+        console.error(`Failed to remove data for id ${id}`);
+      }
+    } catch (error) {
+      console.error("Error removing data:", error);
+    }
   };
 
   // ==================== Fetch Method ====================
@@ -830,12 +967,6 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
       updatedOptions[index] = updatedOptions[index].filter(
         (option: any) => !(option.id === id && option.title === title)
       );
-
-      // Check if the sub-array becomes empty after removing the option
-      if (updatedOptions[index].length === 0) {
-        // If empty, remove the sub-array from the main array
-        updatedOptions.splice(index, 1);
-      }
     } else {
       // If not selected, add to the array
       updatedOptions[index] = [
@@ -859,6 +990,34 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     ]);
 
     console.log("Selected ", selectedOption);
+  };
+
+  const handlePriceChange = (combinationIndex: any, event: any) => {
+    const updatedDisplayedValues = [...displayedValues];
+    const variantData = getVariantPrices(combinationIndex);
+    // if (variantData.length > 0) {
+    // Update only the price field
+    updatedDisplayedValues[combinationIndex] = {
+      ...updatedDisplayedValues[combinationIndex],
+      price: event.target.value,
+    };
+    setDisplayedValues(updatedDisplayedValues);
+    console.log("DISPLAYED VALUE:", displayedValues);
+    // }
+  };
+
+  const handleSkuChange = (combinationIndex: any, event: any) => {
+    const updatedDisplayedValues = [...displayedValues];
+    const variantData = getVariantPrices(combinationIndex);
+
+    // if (variantData.length > 0) {
+    // Update only the sku field
+    updatedDisplayedValues[combinationIndex] = {
+      ...updatedDisplayedValues[combinationIndex],
+      sku: event.target.value,
+    };
+    setDisplayedValues(updatedDisplayedValues);
+    console.log("DISPLAYED VALUE:", displayedValues);
   };
 
   const handleCancel = (
@@ -887,16 +1046,6 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     hideFormAlert(setNameAlert);
     hideFormAlert(setPriceAlert);
   };
-
-  // useEffect(() => {
-  //   if (variantGroup && selectedOption.length == 0) {
-  //     setVariantAlert(true);
-  //   } else {
-  //     setVariantAlert(false);
-  //   }
-  // }, [variantGroup, selectedOption]);
-
-  // Submit form logic
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -937,7 +1086,71 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
 
   const handleUpdate = async (event: React.FormEvent) => {
     try {
-      await fetchUpdateItemIDList(event); // Wait htmlFor fetchSetMenuList to complete
+      if (variantGroup) {
+        // If variant group has been selected
+        if (selectedOption.length == 0) {
+          // If no variant value has been selected
+          setVariantAlert(true);
+        } else {
+          // If variant value has been selected
+          if (allCombinations.length > 0) {
+            const data: any = await fetchUpdateItemIDList(event); // Wait for fetchSetCategoryList to complete
+            const fooditemsID = displayedValues.map((item) => ({
+              ...item,
+              fooditems: data.id /* your desired value for fooditems */,
+            }));
+
+            setDisplayedValues(fooditemsID);
+
+            // Edit the existed variant
+            const arraysWithId = fooditemsID.filter((value) => value.id !== 0);
+            arraysWithId.forEach((value) => fetchUpdateVariantPrice(value));
+
+            // Add new variant that has no id
+            // Filter arrays with empty id and call fetchSetVariantPrice
+            const arrayWithoutId = fooditemsID.filter((value) => value.id == 0);
+
+            arrayWithoutId.forEach((value) => {
+              // Create a new object without the 'id' field
+              const valueWithoutId = Object.fromEntries(
+                Object.entries(value).filter(([key]) => key !== "id")
+              );
+
+              // Call fetchSetVariantPrice with the modified object
+              fetchSetVariantPrice([valueWithoutId]);
+            });
+
+            // Delete the variant that doesn't exist
+            // Extract IDs from fooditemsID
+            const idsFromFooditemsID = fooditemsID.map((item) => item.id);
+
+            // Filter variantPriceList based on the condition
+            const filteredVariantPriceList = variantPriceList.filter((item) => {
+              return (
+                item.fooditems === fooditemsID[0].fooditems &&
+                !idsFromFooditemsID.includes(item.id)
+              );
+            });
+
+            filteredVariantPriceList.forEach((value) => {
+              fetchDeleteVariantPrice(value);
+            });
+
+            console.log(filteredVariantPriceList);
+            console.log(fooditemsID);
+            // setIsVariantUpdated(true);
+            // setIsItemUpdated(true);
+            console.log("arraysWithId Checking -----: ", arraysWithId);
+            console.log("arrayWithoutId Checking -----: ", arrayWithoutId);
+            console.log("FooditemsID Checking -----: ", fooditemsID);
+            console.log("Submitted Variant: ", fooditemsID, displayedValues);
+          }
+        }
+      } else {
+        // If no variant group has been selected
+        const data: any = await fetchUpdateItemIDList(event); // Wait htmlFor fetchSetMenuList to complete
+      }
+
       if (!nameAlert && !priceAlert) {
         handleCancel(isUpdateModalOpen, setIsUpdateModalOpen); // Reset the field list and exit modal
         console.log(alertMessage);
@@ -990,6 +1203,68 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     }
   };
 
+  const updateVariantPrice = variantPriceList.filter(
+    (variant) => variant.fooditems == itemID
+  );
+
+  const updateVariantID = updateVariantPrice.map((variant) => variant.variants);
+
+  const updateVariantValue = variantValueList.filter((variantValue) =>
+    updateVariantID.toString().includes(variantValue.id.toString())
+  );
+
+  const updateVariantValueTitle = updateVariantValue.map(
+    (variantValue) => variantValue.title
+  );
+
+  const updateVariantGroup = variantGroupList.filter((variantGroup) =>
+    updateVariantValueTitle.includes(variantGroup.id)
+  );
+
+  const updateVariantGrouplist = updateVariantGroup.map(
+    ({ id, name, published }) => ({
+      id: id,
+      value: name,
+      label: name,
+      disabled: !published,
+    })
+  );
+
+  const finalUpdateVariant =
+    updateVariantGrouplist.length > 0 ? updateVariantGrouplist : null;
+
+  useEffect(() => {
+    const selectedOptions = updateVariantGroup.map((group) => {
+      const groupItems = updateVariantValue
+        .filter((item) => item.title === group.id)
+        .map((item) => ({ id: item.id, title: item.title, name: item.name }));
+
+      return groupItems;
+    });
+
+    setSelectedOption(selectedOptions);
+
+    console.log(
+      "Selected Options ---------------------------",
+      selectedOptions
+    );
+  }, [isUpdateModalOpen]);
+
+  useEffect(() => {
+    // const value = updateVariantGrouplist.map((item) => item);
+    handleSelectChange(finalUpdateVariant);
+    // console.log(value);
+  }, [itemID]);
+
+  useEffect(() => {
+    console.log("Update Variant Group: ", updateVariantPrice);
+    console.log("Update Variant Group: ", updateVariantID);
+    console.log("Update Variant Group: ", updateVariantValue);
+    console.log("Update Variant Group: ", updateVariantValueTitle);
+    console.log("Update Variant Group: ", updateVariantGroup);
+    console.log("Update Variant Group: ", updateVariantGrouplist);
+  }, [updateVariantPrice]);
+
   // Use useEffect to trigger modal open when the component is mounted
   useEffect(() => {
     fetchList(getMenuLink, setMenuList);
@@ -997,6 +1272,7 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     fetchList(getCategoryLink, setCategoryList);
     fetchList(getVariantGroupLink, setVariantGroupList);
     fetchList(getVariantValueLink, setVariantValueList);
+    fetchList(setVariantPriceLink, setVariantPriceList);
   }, []);
 
   useEffect(() => {
@@ -1048,6 +1324,25 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
     console.log("Variant price alert:", variantPriceAlert);
     console.log("Variant sku alert:", variantSkuAlert);
   }, [variantPriceAlert, variantSkuAlert]);
+
+  useEffect(() => {
+    // This will run whenever allCombinations changes
+    setDisplayedValues((prevDisplayedValues) => {
+      return prevDisplayedValues.map((prevValue, combinationIndex) => {
+        const variants_id = allCombinations[combinationIndex].map(
+          (variant: any) => variant.id
+        );
+
+        // Update only the variants field
+        return {
+          ...prevValue,
+          variants: variants_id,
+        };
+      });
+    });
+
+    // Any other logic you want to perform when allCombinations changes
+  }, [allCombinations]);
 
   return (
     <div className="content px-10">
@@ -1216,6 +1511,14 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           list={updateItem[itemIndex ?? 0]}
           variantGroup={variantGroup}
           variantGroupList={newVariantGroupList}
+          updateVariantPrice={updateVariantPrice}
+          displayedValues={displayedValues}
+          handlePriceChange={handlePriceChange}
+          handleSkuChange={handleSkuChange}
+          // updateVariant={updateVariant}
+          // setUpdateVariant={setUpdateVariant}
+          matchVariant={matchVariant}
+          selectedOption={selectedOption}
           fileInputRef={fileInputRef}
           handleCancel={() =>
             handleCancel(isUpdateModalOpen, setIsUpdateModalOpen, false, true)
@@ -1224,11 +1527,16 @@ const admin_item = ({ changeIP }: { changeIP: string }) => {
           handleInputChange={(event: React.ChangeEvent<HTMLInputElement>) =>
             handleInputChangeEdit(event, itemIndex ?? 0)
           }
+          handleVariantInputChange={handleVariantInputChange}
           handleTagChange={handleTagChangeWithParameterEdit}
-          // handleSelectChange={handleSelectChange}
+          handleSelectChange={handleSelectChange}
+          handleMatchVariant={handleMatchVariant}
+          handleRadioChange={handleRadioChange}
           isChecked={isChecked}
           nameAlert={nameAlert}
           priceAlert={priceAlert}
+          allCombinations={allCombinations}
+          setAllCombinations={setAllCombinations}
         ></CU_Modal>
       )}
 

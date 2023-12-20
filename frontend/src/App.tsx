@@ -50,7 +50,7 @@ function App() {
   // const changeip = "192.168.0.12"; //Zhen Xun Home
   // const changeip = "192.168.0.207"; //Zhen Xun Kenny
 
-  const changeip = "192.168.1.102"; // DomDom
+  const changeip = "192.168.1.31"; // DomDom
   // `const yourModuleName = require('local-ip-addresses-and-hostnames');`
   // getLocalIpAddresses() = ['127.0.0.1', '192.168.1.101', '10.0.0.101']
 
